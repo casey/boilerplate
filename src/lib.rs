@@ -1,26 +1,18 @@
 use {
   self::{block::Block, filename_from_ident::filename_from_ident},
-  darling::FromDeriveInput,
   proc_macro2::TokenStream,
   std::path::Path,
-  syn::Ident,
+  syn::{DeriveInput, Ident},
 };
 
 mod block;
 mod filename_from_ident;
 
-#[derive(FromDeriveInput)]
-struct Item {
-  ident: Ident,
-}
-
 #[proc_macro_derive(Display)]
 pub fn display(item: proc_macro::TokenStream) -> proc_macro::TokenStream {
-  let derive_input =
-    syn::parse2(TokenStream::from(item)).expect("Failed to parse token stream into derive input");
-
-  let Item { ident } =
-    Item::from_derive_input(&derive_input).expect("Failed to parse derive input");
+  let ident = syn::parse2::<DeriveInput>(TokenStream::from(item))
+    .expect("Failed to parse token stream into derive input")
+    .ident;
 
   let manifest_dir = std::env::var("CARGO_MANIFEST_DIR")
     .expect("Failed to get `CARGO_MANIFEST_DIR` environment variable");

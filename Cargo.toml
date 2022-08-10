@@ -13,7 +13,6 @@ categories = ["template-engine", "no-std"]
 proc-macro = true
 
 [dependencies]
-darling = "0.14.0"
 proc-macro2 = "1.0.0"
 syn = { version = "1.0.0", features = ["derive"] }
 new_mime_guess = { version = "4.0.0", optional = true }
