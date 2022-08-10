@@ -12,14 +12,14 @@ impl Block {
   }
 
   fn from_rest(rest: &str) -> Option<Self> {
-    for kind in [
+    for variant in [
       Self::Code,
       Self::CodeLine,
       Self::Interpolation,
       Self::InterpolationLine,
     ] {
-      if rest.starts_with(kind.open_delimiter()) {
-        return Some(kind);
+      if rest.starts_with(variant.open_delimiter()) {
+        return Some(variant);
       }
     }
 
