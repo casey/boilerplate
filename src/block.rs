@@ -8,7 +8,7 @@ pub(super) enum Block {
 
 impl Block {
   pub(super) fn starting_at(rest: &str) -> Option<(usize, String)> {
-    Self::from_rest(rest).map(|delimiter| delimiter.implementation(rest))
+    Some(Self::from_rest(rest)?.implementation(rest))
   }
 
   fn from_rest(rest: &str) -> Option<Self> {
