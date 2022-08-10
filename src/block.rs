@@ -40,16 +40,10 @@ impl Block {
     let rust = match self {
       Self::Code | Self::CodeLine => format!("    {}", contents.trim()),
       Self::Interpolation => {
-        format!(
-          "    f.write_fmt(format_args!(\"{{}}\", {{ {} }}))?;",
-          contents.trim()
-        )
+        format!("    write!(f, \"{{}}\", {})?;", contents.trim())
       }
       Self::InterpolationLine => {
-        format!(
-          "    f.write_fmt(format_args!(\"{{}}\\n\", {{ {} }}))?;",
-          contents.trim()
-        )
+        format!("    write!(f, \"{{}}\\n\", {})?;", contents.trim())
       }
     };
 

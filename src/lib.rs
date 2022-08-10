@@ -158,7 +158,7 @@ mod tests {
       r#"impl core::fmt::Display for Foo {
            fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
              let text = include_str!("templates/foo.html");
-             f.write_fmt(format_args!("{}", { true }))?;
+             write!(f, "{}", true)?;
              Ok(())
            }
          }"#
