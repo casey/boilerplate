@@ -55,11 +55,11 @@ fn impls(ident: &Ident, path: &str, template: &str) -> String {
 
     let block = Block::starting_at(rest);
 
-    if i != j && block.is_some() {
+    if i < j && block.is_some() {
       lines.push(format!("    f.write_str(&text[{}..{}])?;", i, j));
     }
 
-    if i != j && j == template.len() {
+    if i < j && j == template.len() {
       lines.push(format!("    f.write_str(&text[{}..])?;", i));
     }
 
