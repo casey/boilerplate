@@ -55,8 +55,12 @@ fn impls(ident: &Ident, path: &str, template: &str) -> String {
 
     let block = Block::starting_at(rest);
 
-    if i != j && (block.is_some() || j == template.len()) {
+    if i != j && block.is_some() {
       lines.push(format!("    f.write_str(&text[{}..{}])?;", i, j));
+    }
+
+    if i != j && j == template.len() {
+      lines.push(format!("    f.write_str(&text[{}..])?;", i));
     }
 
     if j == template.len() {
@@ -172,7 +176,7 @@ mod tests {
       r#"impl core::fmt::Display for Foo {
   fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
     let text = include_str!("templates/foo.html");
-    f.write_str(&text[0..3])?;
+    f.write_str(&text[0..])?;
     Ok(())
   }
 }"#
