@@ -1,6 +1,11 @@
 watch +args='test':
   cargo watch --clear --exec '{{args}}'
 
+ci:
+  cargo test --all --all-targets
+  cargo clippy --all --all-targets
+  cargo fmt --all -- --check
+
 # publish current GitHub master branch
 publish:
   #!/usr/bin/env bash

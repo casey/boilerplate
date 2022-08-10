@@ -40,7 +40,7 @@ pub fn display(item: proc_macro::TokenStream) -> proc_macro::TokenStream {
   });
 
   proc_macro::TokenStream::from(
-    impls(&ident, &path_unicode, &template)
+    impls(&ident, path_unicode, &template)
       .parse::<TokenStream>()
       .expect("Failed to parse display impl"),
   )
