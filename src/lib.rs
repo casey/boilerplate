@@ -2,6 +2,7 @@ use {
   self::{block::Block, filename_from_ident::filename_from_ident},
   darling::FromDeriveInput,
   proc_macro2::TokenStream,
+  std::path::Path,
   syn::Ident,
 };
 
@@ -21,18 +22,25 @@ pub fn display(item: proc_macro::TokenStream) -> proc_macro::TokenStream {
   let Display { ident } =
     Display::from_derive_input(&derive_input).expect("Failed to parse derive input");
 
-  let path = format!(
-    "{}/templates/{}",
-    std::env::var("CARGO_MANIFEST_DIR")
-      .expect("Failed to get `CARGO_MANIFEST_DIR` environment variable"),
-    filename_from_ident(&ident.to_string())
-  );
+  let manifest_dir = std::env::var("CARGO_MANIFEST_DIR")
+    .expect("Failed to get `CARGO_MANIFEST_DIR` environment variable");
+
+  let path = Path::new(&manifest_dir)
+    .join("templates")
+    .join(filename_from_ident(&ident.to_string()));
 
   let template = std::fs::read_to_string(&path)
-    .unwrap_or_else(|err| panic!("Failed to read template `{path}`: {err}"));
+    .unwrap_or_else(|err| panic!("Failed to read template `{}`: {err}", path.display()));
+
+  let path_unicode = path.to_str().unwrap_or_else(|| {
+    panic!(
+      "Path to template `{}` was not valid unicode",
+      path.display()
+    )
+  });
 
   proc_macro::TokenStream::from(
-    impls(&ident, &path, &template)
+    impls(&ident, &path_unicode, &template)
       .parse::<TokenStream>()
       .expect("Failed to parse display impl"),
   )
@@ -42,7 +50,10 @@ fn impls(ident: &Ident, path: &str, template: &str) -> String {
   let mut lines = vec![
     format!("impl core::fmt::Display for {ident} {{"),
     "  fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {".to_string(),
-    format!("    let template = include_str!(\"{path}\");"),
+    format!(
+      "    let template = include_str!(\"{}\");",
+      path.escape_default()
+    ),
   ];
 
   let mut i = 0;
