@@ -8,7 +8,7 @@ pub(super) enum Block {
 
 impl Block {
   pub(super) fn parse(rest: &str) -> Option<(usize, String)> {
-    Self::from_rest(rest).map(|delimiter| delimiter.output(rest))
+    Self::from_rest(rest).map(|delimiter| delimiter.implementation(rest))
   }
 
   fn from_rest(rest: &str) -> Option<Self> {
@@ -18,7 +18,7 @@ impl Block {
       Self::Interpolation,
       Self::InterpolationLine,
     ] {
-      if rest.starts_with(kind.open()) {
+      if rest.starts_with(kind.open_delimiter()) {
         return Some(kind);
       }
     }
@@ -26,20 +26,17 @@ impl Block {
     None
   }
 
-  fn output(self, rest: &str) -> (usize, String) {
+  fn implementation(self, rest: &str) -> (usize, String) {
     let before_open = 0;
-    let after_open = before_open + self.open().len();
-    let before_close = match rest.find(self.close()) {
+    let after_open = before_open + self.open_delimiter().len();
+    let before_close = match rest.find(self.close_delimiter()) {
       Some(before_close) => before_close,
-      None => panic!("Unmatched `{}`", self.open()),
+      None => panic!("Unmatched `{}`", self.open_delimiter()),
     };
-    let after_close = before_close + self.close().len();
+    let after_close = before_close + self.close_delimiter().len();
     let content = &rest[after_open..before_close];
-    (after_close, self.rust(content))
-  }
 
-  fn rust(self, content: &str) -> String {
-    match self {
+    let rust = match self {
       Self::Code | Self::CodeLine => format!("    {}", content.trim()),
       Self::Interpolation => {
         format!(
@@ -53,10 +50,12 @@ impl Block {
           content.trim()
         )
       }
-    }
+    };
+
+    (after_close, rust)
   }
 
-  fn open(self) -> &'static str {
+  fn open_delimiter(self) -> &'static str {
     match self {
       Self::Code => "{%",
       Self::CodeLine => "%%",
@@ -65,7 +64,7 @@ impl Block {
     }
   }
 
-  fn close(self) -> &'static str {
+  fn close_delimiter(self) -> &'static str {
     match self {
       Self::Code => "%}",
       Self::CodeLine => "\n",
