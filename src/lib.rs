@@ -68,9 +68,9 @@ fn impls(ident: &Ident, path: &str, template: &str) -> String {
     }
 
     match block {
-      Some((end, line)) => {
+      Some((length, line)) => {
         lines.push(line);
-        j += end;
+        j += length;
         i = j;
       }
       None => j += rest.chars().next().unwrap().len_utf8(),
