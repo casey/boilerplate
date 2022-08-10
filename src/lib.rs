@@ -105,8 +105,7 @@ fn impls(ident: &Ident, path: &str, template: &str) -> String {
 
 #[cfg(test)]
 mod tests {
-  use pretty_assertions::assert_eq;
-  use {super::*, proc_macro2::Span};
+  use {super::*, pretty_assertions::assert_eq, proc_macro2::Span, unindent::Unindent};
 
   #[test]
   #[cfg(not(feature = "axum"))]
@@ -118,11 +117,12 @@ mod tests {
         ""
       ),
       r#"impl core::fmt::Display for Foo {
-  fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
-    let text = include_str!("templates/foo.html");
-    Ok(())
-  }
-}"#
+           fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
+             let text = include_str!("templates/foo.html");
+             Ok(())
+           }
+         }"#
+        .unindent()
     );
   }
 
@@ -136,12 +136,13 @@ mod tests {
         "{% () %}"
       ),
       r#"impl core::fmt::Display for Foo {
-  fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
-    let text = include_str!("templates/foo.html");
-    ()
-    Ok(())
-  }
-}"#
+          fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
+            let text = include_str!("templates/foo.html");
+            ()
+            Ok(())
+          }
+        }"#
+        .unindent()
     );
   }
 
@@ -155,12 +156,13 @@ mod tests {
         "{{ true }}"
       ),
       r#"impl core::fmt::Display for Foo {
-  fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
-    let text = include_str!("templates/foo.html");
-    f.write_fmt(format_args!("{}", { true }))?;
-    Ok(())
-  }
-}"#
+           fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
+             let text = include_str!("templates/foo.html");
+             f.write_fmt(format_args!("{}", { true }))?;
+             Ok(())
+           }
+         }"#
+        .unindent()
     );
   }
 
@@ -174,12 +176,13 @@ mod tests {
         "foo"
       ),
       r#"impl core::fmt::Display for Foo {
-  fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
-    let text = include_str!("templates/foo.html");
-    f.write_str(&text[0..])?;
-    Ok(())
-  }
-}"#
+           fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
+             let text = include_str!("templates/foo.html");
+             f.write_str(&text[0..])?;
+             Ok(())
+           }
+         }"#
+        .unindent()
     );
   }
 
@@ -193,21 +196,22 @@ mod tests {
         ""
       ),
       r#"impl core::fmt::Display for Foo {
-  fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
-    let text = include_str!("templates/foo.html");
-    Ok(())
-  }
-}
-
-impl axum::response::IntoResponse for Foo {
-  fn into_response(self) -> axum::response::Response<axum::body::BoxBody> {
-    axum::response::Response::builder()
-      .header(axum::http::header::CONTENT_TYPE, "text/html")
-      .body(axum::body::Full::from(self.to_string()))
-      .unwrap()
-      .into_response()
-  }
-}"#
+           fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
+             let text = include_str!("templates/foo.html");
+             Ok(())
+           }
+         }
+         
+         impl axum::response::IntoResponse for Foo {
+           fn into_response(self) -> axum::response::Response<axum::body::BoxBody> {
+             axum::response::Response::builder()
+               .header(axum::http::header::CONTENT_TYPE, "text/html")
+               .body(axum::body::Full::from(self.to_string()))
+               .unwrap()
+               .into_response()
+           }
+         }"#
+        .unindent()
     );
   }
 
@@ -217,21 +221,22 @@ impl axum::response::IntoResponse for Foo {
     assert_eq!(
       impls(&Ident::new("Foo", Span::call_site()), "templates/foo", ""),
       r#"impl core::fmt::Display for Foo {
-  fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
-    let text = include_str!("templates/foo.html");
-    Ok(())
-  }
-}
-
-impl axum::response::IntoResponse for Foo {
-  fn into_response(self) -> axum::response::Response<axum::body::BoxBody> {
-    axum::response::Response::builder()
-      .header(axum::http::header::CONTENT_TYPE, "text/html")
-      .body(axum::body::Full::from(self.to_string()))
-      .unwrap()
-      .into_response()
-  }
-}"#
+           fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
+             let text = include_str!("templates/foo");
+             Ok(())
+           }
+         }
+         
+         impl axum::response::IntoResponse for Foo {
+           fn into_response(self) -> axum::response::Response<axum::body::BoxBody> {
+             axum::response::Response::builder()
+               .header(axum::http::header::CONTENT_TYPE, "text/plain")
+               .body(axum::body::Full::from(self.to_string()))
+               .unwrap()
+               .into_response()
+           }
+         }"#
+        .unindent()
     );
   }
 }

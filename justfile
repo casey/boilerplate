@@ -3,6 +3,7 @@ watch +args='test':
 
 ci:
   cargo test --all --all-targets
+  cargo test --all --all-targets --features axum
   cargo clippy --all --all-targets
   cargo fmt --all -- --check
 

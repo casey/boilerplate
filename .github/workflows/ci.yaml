@@ -41,7 +41,9 @@ jobs:
 
     - run: cargo update --locked --package boilerplate
 
-    - run: cargo test --all --all-targets
+    - run: |
+        cargo test --all --all-targets
+        cargo test --all --all-targets --features axum
 
     - run: cargo clippy --all --all-targets
 
