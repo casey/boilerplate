@@ -34,20 +34,20 @@ impl Block {
       None => panic!("Unmatched `{}`", self.open_delimiter()),
     };
     let after_close = before_close + self.close_delimiter().len();
-    let content = &rest[after_open..before_close];
+    let contents = &rest[after_open..before_close];
 
     let rust = match self {
-      Self::Code | Self::CodeLine => format!("    {}", content.trim()),
+      Self::Code | Self::CodeLine => format!("    {}", contents.trim()),
       Self::Interpolation => {
         format!(
           "    f.write_fmt(format_args!(\"{{}}\", {{ {} }}))?;",
-          content.trim()
+          contents.trim()
         )
       }
       Self::InterpolationLine => {
         format!(
           "    f.write_fmt(format_args!(\"{{}}\\n\", {{ {} }}))?;",
-          content.trim()
+          contents.trim()
         )
       }
     };
