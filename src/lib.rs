@@ -185,13 +185,37 @@ mod tests {
 
   #[test]
   #[cfg(feature = "axum")]
-  fn axum() {
+  fn axum_guess_html() {
     assert_eq!(
       impls(
         &Ident::new("Foo", Span::call_site()),
         "templates/foo.html",
         ""
       ),
+      r#"impl core::fmt::Display for Foo {
+  fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
+    let text = include_str!("templates/foo.html");
+    Ok(())
+  }
+}
+
+impl axum::response::IntoResponse for Foo {
+  fn into_response(self) -> axum::response::Response<axum::body::BoxBody> {
+    axum::response::Response::builder()
+      .header(axum::http::header::CONTENT_TYPE, "text/html")
+      .body(axum::body::Full::from(self.to_string()))
+      .unwrap()
+      .into_response()
+  }
+}"#
+    );
+  }
+
+  #[test]
+  #[cfg(feature = "axum")]
+  fn axum_guess_default() {
+    assert_eq!(
+      impls(&Ident::new("Foo", Span::call_site()), "templates/foo", ""),
       r#"impl core::fmt::Display for Foo {
   fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
     let text = include_str!("templates/foo.html");
