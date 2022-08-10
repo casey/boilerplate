@@ -1,18 +1,28 @@
 pub(crate) fn filename_from_ident(ident: &str) -> String {
-  let mut filename = String::new();
+  let mut words = Vec::new();
 
   for c in ident.chars() {
-    if c.is_uppercase() && !filename.is_empty() {
-      filename.push('-');
+    if words.is_empty() || c.is_uppercase() {
+      words.push(String::new());
     }
-    filename.push_str(&c.to_lowercase().to_string());
+
+    words.last_mut().unwrap().push(c);
   }
 
-  if let Some(last_dash) = filename.rfind('-') {
-    filename = format!("{}.{}", &filename[..last_dash], &filename[last_dash + 1..]);
+  let mut filename = String::new();
+
+  for (i, word) in words.iter().enumerate() {
+    if i > 0 {
+      if i == words.len() - 1 {
+        filename.push('.');
+      } else {
+        filename.push('-');
+      }
+    }
+    filename.push_str(word);
   }
 
-  filename
+  filename.to_lowercase()
 }
 
 #[cfg(test)]
