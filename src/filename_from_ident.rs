@@ -48,4 +48,14 @@ mod tests {
   fn single_letter_words() {
     assert_eq!(filename_from_ident("ABCHtml"), "a-b-c.html");
   }
+
+  #[test]
+  fn all_lowercase() {
+    assert_eq!(filename_from_ident("foo"), "foo");
+  }
+
+  #[test]
+  fn camel_case() {
+    assert_eq!(filename_from_ident("fooHtml"), "foo.html");
+  }
 }
