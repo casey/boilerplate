@@ -34,6 +34,7 @@ impl Block {
       None => panic!("Unmatched `{}`", self.open_delimiter()),
     };
     let after_close = before_close + self.close_delimiter().len();
+
     let contents = &rest[after_open..before_close];
 
     let rust = match self {
