@@ -10,7 +10,7 @@ mod block;
 mod filename_from_ident;
 
 #[derive(FromDeriveInput)]
-struct Display {
+struct Item {
   ident: Ident,
 }
 
@@ -19,8 +19,8 @@ pub fn display(item: proc_macro::TokenStream) -> proc_macro::TokenStream {
   let derive_input =
     syn::parse2(TokenStream::from(item)).expect("Failed to parse token stream into derive input");
 
-  let Display { ident } =
-    Display::from_derive_input(&derive_input).expect("Failed to parse derive input");
+  let Item { ident } =
+    Item::from_derive_input(&derive_input).expect("Failed to parse derive input");
 
   let manifest_dir = std::env::var("CARGO_MANIFEST_DIR")
     .expect("Failed to get `CARGO_MANIFEST_DIR` environment variable");
