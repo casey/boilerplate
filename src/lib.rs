@@ -43,7 +43,7 @@ fn impls(ident: &Ident, path: &str, template: &str) -> String {
     format!("impl core::fmt::Display for {ident} {{"),
     "  fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {".to_string(),
     format!(
-      "    let template = include_str!(\"{}\");",
+      "    let text = include_str!(\"{}\");",
       path.escape_default()
     ),
   ];
@@ -56,7 +56,7 @@ fn impls(ident: &Ident, path: &str, template: &str) -> String {
     let block = Block::parse(rest);
 
     if i != j && (block.is_some() || j == template.len()) {
-      lines.push(format!("    f.write_str(&template[{}..{}])?;", i, j));
+      lines.push(format!("    f.write_str(&text[{}..{}])?;", i, j));
     }
 
     if j == template.len() {
@@ -115,7 +115,7 @@ mod tests {
       ),
       r#"impl core::fmt::Display for Foo {
   fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
-    let template = include_str!("templates/foo.html");
+    let text = include_str!("templates/foo.html");
     Ok(())
   }
 }"#
@@ -133,7 +133,7 @@ mod tests {
       ),
       r#"impl core::fmt::Display for Foo {
   fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
-    let template = include_str!("templates/foo.html");
+    let text = include_str!("templates/foo.html");
     ()
     Ok(())
   }
@@ -152,7 +152,7 @@ mod tests {
       ),
       r#"impl core::fmt::Display for Foo {
   fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
-    let template = include_str!("templates/foo.html");
+    let text = include_str!("templates/foo.html");
     f.write_fmt(format_args!("{}", { true }))?;
     Ok(())
   }
@@ -171,8 +171,8 @@ mod tests {
       ),
       r#"impl core::fmt::Display for Foo {
   fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
-    let template = include_str!("templates/foo.html");
-    f.write_str(&template[0..3])?;
+    let text = include_str!("templates/foo.html");
+    f.write_str(&text[0..3])?;
     Ok(())
   }
 }"#
@@ -190,7 +190,7 @@ mod tests {
       ),
       r#"impl core::fmt::Display for Foo {
   fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
-    let template = include_str!("templates/foo.html");
+    let text = include_str!("templates/foo.html");
     Ok(())
   }
 }
