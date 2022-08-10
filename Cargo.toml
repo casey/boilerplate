@@ -1,0 +1,26 @@
+[package]
+name = "boilerplate"
+version = "0.0.0"
+license = "CC0-1.0"
+edition = "2021"
+description = "Minimal compile-time Rust template engine"
+authors = ["Casey Rodarmor <casey@rodarmor.com>"]
+homepage = "https://github.com/casey/boilerplate"
+repository = "https://github.com/casey/boilerplate"
+categories = ["template-engine", "no-std"]
+
+[lib]
+proc-macro = true
+
+[dependencies]
+proc-macro2 = "1.0.0"
+syn = { version = "1.0.0", features = ["derive"] }
+new_mime_guess = { version = "4.0.0", optional = true }
+
+[features]
+axum = ["new_mime_guess"]
+
+[dev-dependencies]
+axum = "0.5.0"
+pretty_assertions = "1.0.0"
+unindent = "0.1.10"
