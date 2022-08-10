@@ -53,7 +53,7 @@ fn impls(ident: &Ident, path: &str, template: &str) -> String {
   loop {
     let rest = &template[j..];
 
-    let block = Block::parse(rest);
+    let block = Block::starting_at(rest);
 
     if i != j && (block.is_some() || j == template.len()) {
       lines.push(format!("    f.write_str(&text[{}..{}])?;", i, j));
