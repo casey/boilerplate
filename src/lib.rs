@@ -239,6 +239,14 @@
 //! assert_eq!(Context {}.to_string(), "");
 //! ```
 //!
+//! ### Escaping
+//!
+//! ```
+//! #[derive(boilerplate::Display)]
+//! struct EscapeHtml(String);
+//! assert_eq!(EscapeHtml("&".into()).to_string(), "&amp;");
+//! ```
+//!
 //! ### Axum Integration
 //!
 //! When the `axum` feature is enabled, templates will be provided with an
