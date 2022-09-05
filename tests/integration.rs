@@ -1,6 +1,14 @@
 use boilerplate::Display;
 
 #[test]
+fn inline_template() {
+  #[derive(Display)]
+  #[display(text = "foo")]
+  struct Inline {}
+  assert_eq!(Inline {}.to_string(), "foo");
+}
+
+#[test]
 fn code() {
   #[derive(Display)]
   struct CodeHtml {}
