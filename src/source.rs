@@ -27,7 +27,7 @@ impl ToTokens for Source {
     match self {
       Self::Literal(literal) => tokens.append(literal.token()),
       Self::Path(path) => {
-        let path = LitStr::new(&path, Span::call_site());
+        let path = LitStr::new(path, Span::call_site());
         tokens.append_all(quote!(include_str!(#path)));
       }
     }
