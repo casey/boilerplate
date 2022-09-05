@@ -1,6 +1,14 @@
 use boilerplate::Display;
 
 #[test]
+fn inline_template() {
+  #[derive(Display)]
+  #[display(text = "foo")]
+  struct Inline {}
+  assert_eq!(Inline {}.to_string(), "foo");
+}
+
+#[test]
 fn code() {
   #[derive(Display)]
   struct CodeHtml {}
@@ -74,4 +82,36 @@ fn trivial() {
   #[derive(Display)]
   struct TrivialHtml {}
   assert_eq!(TrivialHtml {}.to_string(), "foo\n");
+}
+
+#[test]
+#[cfg(feature = "axum")]
+fn axum_guess_html() {
+  use axum::response::IntoResponse;
+  #[derive(Display)]
+  struct GuessHtml {}
+  assert_eq!(
+    GuessHtml {}
+      .into_response()
+      .headers()
+      .get("content-type")
+      .unwrap(),
+    "text/html",
+  );
+}
+
+#[test]
+#[cfg(feature = "axum")]
+fn axum_guess_default() {
+  use axum::response::IntoResponse;
+  #[derive(Display)]
+  struct Guess {}
+  assert_eq!(
+    Guess {}
+      .into_response()
+      .headers()
+      .get("content-type")
+      .unwrap(),
+    "text/plain",
+  );
 }

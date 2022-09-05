@@ -38,13 +38,9 @@ impl Block {
     let contents = &rest[after_open..before_close];
 
     let rust = match self {
-      Self::Code | Self::CodeLine => format!("    {}", contents.trim()),
-      Self::Interpolation => {
-        format!("    write!(f, \"{{}}\", {})?;", contents.trim())
-      }
-      Self::InterpolationLine => {
-        format!("    write!(f, \"{{}}\\n\", {})?;", contents.trim())
-      }
+      Self::Code | Self::CodeLine => contents.into(),
+      Self::Interpolation => format!("write!(f, \"{{}}\", {})? ;", contents),
+      Self::InterpolationLine => format!("write!(f, \"{{}}\n\", {})? ;", contents),
     };
 
     (after_close, rust)
