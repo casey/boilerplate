@@ -1,9 +1,9 @@
-//! `boilerplate` is a template engine:
+//! `boilerplate` is a template engine.
 //!
 //! Templates are format agnostic, and can be used to generate HTML, Markdown,
 //! or any other text format.
 //!
-//! Template syntax is very simple, and interpolations and control flow are
+//! The template syntax is very simple, and interpolations and control flow are
 //! Rust code, so you don't have to learn a separate template language.
 //!
 //! Templates are checked at compile time, so any error that the Rust compiler
@@ -11,8 +11,7 @@
 //!
 //! Template contexts are simple Rust types.
 //!
-//! `boilerplate` is very simple, with the core implementation clocking in at
-//! less than 200 lines of code. It requires no runtime dependencies, and is
+//! `boilerplate` is very simple, requires no runtime dependencies, and is
 //! usable in a `no_std` environment.
 //!
 //! ## Quick Start
@@ -20,6 +19,7 @@
 //! Add `boilerplate` to your project's `Cargo.toml`:
 //!
 //! ```toml
+//! [dependencies]
 //! boilerplate = "*"
 //! ```
 //!
