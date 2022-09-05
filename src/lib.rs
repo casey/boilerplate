@@ -162,7 +162,25 @@
 //! assert_eq!(Context {}.to_string(), "Hi!Hi!Hi!Hi!Hi!");
 //! ```
 //!
-//! ### Iteration
+//! ```
+//! #[derive(boilerplate::Display)]
+//! #[display(text = "%% for i in 0..10 {
+//! {{ i }}
+//! %% }
+//! ")]
+//! struct Context {}
+//! assert_eq!(Context {}.to_string(), "0\n1\n2\n3\n4\n5\n6\n7\n8\n9\n");
+//! ```
+//!
+//! ```
+//! #[derive(boilerplate::Display)]
+//! #[display(text = "%% for i in 0..10 {
+//! $$ i
+//! %% }
+//! ")]
+//! struct Context {}
+//! assert_eq!(Context {}.to_string(), "0\n1\n2\n3\n4\n5\n6\n7\n8\n9\n");
+//! ```
 //!
 //! ```
 //! #[derive(boilerplate::Display)]
@@ -211,7 +229,55 @@
 //! struct Context {}
 //! assert_eq!(Context {}.to_string(), "true\n");
 //! ```
-
+//!
+//! ### The Empty Template
+//!
+//! ```
+//! #[derive(boilerplate::Display)]
+//! #[display(text = "")]
+//! struct Context {}
+//! assert_eq!(Context {}.to_string(), "");
+//! ```
+//!
+//! ### Axum Integration
+//!
+//! When the `axum` feature is enabled, templates will be provided with an
+//! `axum::response::IntoResponse` implementation. The MIME type is deduced
+//! from the template path defaulting to `text/plain`:
+//!
+//! ```
+//! #[cfg(feature = "axum")]
+//! {
+//!   use axum::response::IntoResponse;
+//!   #[derive(boilerplate::Display)]
+//!   struct GuessHtml {}
+//!   assert_eq!(
+//!     GuessHtml {}
+//!       .into_response()
+//!       .headers()
+//!       .get("content-type")
+//!       .unwrap(),
+//!     "text/html",
+//!   );
+//! }
+//! ```
+//!
+//! ```
+//! #[cfg(feature = "axum")]
+//! {
+//!   use axum::response::IntoResponse;
+//!   #[derive(boilerplate::Display)]
+//!   struct Guess {}
+//!   assert_eq!(
+//!     Guess {}
+//!       .into_response()
+//!       .headers()
+//!       .get("content-type")
+//!       .unwrap(),
+//!     "text/plain",
+//!   );
+//! }
+//! ```
 use {
   self::{block::Block, display::Display, source::Source, template::Template},
   darling::FromDeriveInput,

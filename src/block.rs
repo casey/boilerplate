@@ -40,7 +40,7 @@ impl Block {
     let rust = match self {
       Self::Code | Self::CodeLine => contents.into(),
       Self::Interpolation => format!("write!(f, \"{{}}\", {})? ;", contents),
-      Self::InterpolationLine => format!("write!(f, \"{{}}\n\", {})? ;", contents),
+      Self::InterpolationLine => format!("write!(f, \"{{}}\\n\", {})? ;", contents),
     };
 
     (after_close, rust)
