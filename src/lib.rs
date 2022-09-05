@@ -1,8 +1,5 @@
 use {
-  self::{
-    block::Block, display::Display, filename_from_ident::filename_from_ident, source::Source,
-    template::Template,
-  },
+  self::{block::Block, display::Display, source::Source, template::Template},
   darling::FromDeriveInput,
   new_mime_guess::Mime,
   proc_macro2::{Span, TokenStream},
@@ -13,7 +10,6 @@ use {
 
 mod block;
 mod display;
-mod filename_from_ident;
 mod source;
 mod template;
 
