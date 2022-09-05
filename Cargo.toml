@@ -13,12 +13,12 @@ categories = ["template-engine", "no-std"]
 proc-macro = true
 
 [dependencies]
-proc-macro2 = "1.0.0"
-syn = { version = "1.0.0", features = ["derive"] }
-new_mime_guess = "4.0.0"
 darling = "0.14.1"
-quote = "1.0.21"
 mime = "0.3.16"
+new_mime_guess = "4.0.0"
+proc-macro2 = "1.0.0"
+quote = "1.0.21"
+syn = { version = "1.0.0", features = ["derive"] }
 
 [features]
 axum = []
