@@ -8,9 +8,9 @@ pub(crate) struct Display {
 }
 
 impl Display {
-  pub(crate) fn foo(self) -> TokenStream {
-    let (text, source) = match self.text {
-      Some(text) => (text.value(), Source::Literal(text)),
+  pub(crate) fn impls(self) -> TokenStream {
+    let source = match self.text {
+      Some(text) => Source::Literal(text),
       None => {
         let manifest_dir = std::env::var("CARGO_MANIFEST_DIR")
           .expect("Failed to get `CARGO_MANIFEST_DIR` environment variable");
@@ -19,9 +19,6 @@ impl Display {
           .join("templates")
           .join(filename_from_ident(&self.ident.to_string()));
 
-        let template = std::fs::read_to_string(&path)
-          .unwrap_or_else(|err| panic!("Failed to read template `{}`: {err}", path.display()));
-
         let path = path.to_str().unwrap_or_else(|| {
           panic!(
             "Path to template `{}` was not valid unicode",
@@ -29,13 +26,12 @@ impl Display {
           )
         });
 
-        (template.into(), Source::Path(path.into()))
+        Source::Path(path.into())
       }
     };
 
     Template {
       ident: self.ident,
-      text,
       source,
     }
     .impls()

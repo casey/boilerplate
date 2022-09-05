@@ -17,6 +17,9 @@ mod filename_from_ident;
 mod source;
 mod template;
 
+// TODO:
+// - test axum mime type guessing
+
 #[proc_macro_derive(Display, attributes(display))]
 pub fn display(item: proc_macro::TokenStream) -> proc_macro::TokenStream {
   let derive_input = syn::parse2::<DeriveInput>(TokenStream::from(item))
@@ -24,6 +27,6 @@ pub fn display(item: proc_macro::TokenStream) -> proc_macro::TokenStream {
 
   Display::from_derive_input(&derive_input)
     .expect("Failed to parse derive input")
-    .foo()
+    .impls()
     .into()
 }
