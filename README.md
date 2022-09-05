@@ -15,3 +15,30 @@
 <br>
 
 `boilerplate` is a minimal compile-time Rust text template engine.
+
+## Quick Start
+
+Add `boilerplate` to your project's `Cargo.toml`:
+
+```toml
+[dependencies]
+boilerplate = "*"
+```
+
+Create a template in `templates/quick-start.txt`:
+
+```text
+Foo is {{self.n}}!
+```
+
+Define, instantiate, and render the template context:
+
+```
+#[derive(boilerplate::Display)]
+struct QuickStartTxt {
+  n: u32,
+}
+assert_eq!(QuickStartTxt { n: 10 }.to_string(), "Foo is 10!\n");
+```
+
+See [the docs](https://docs.rs/boilerplate/latest/boilerplate/) for more examples.
