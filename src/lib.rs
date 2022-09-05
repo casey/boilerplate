@@ -60,158 +60,157 @@
 //! ```
 //! #[derive(boilerplate::Display)]
 //! #[display(text = "Hello, world!")]
-//! struct Inline {}
-//! assert_eq!(Inline {}.to_string(), "Hello, world!");
+//! struct Context {}
+//! assert_eq!(Context {}.to_string(), "Hello, world!");
 //! ```
-//
-//  ## Guide
-//
-//  Deriving `boilerplate::Display` on a type generates an implementation of
-//  the`Display` trait, which can be rendered with `.to_string()` or printed
-//  using `{}` in a format macro.
-//
-//  Code in the template is inserted into the generated `Display::fmt`,
-//  function, which takes `&self` as an argument, so template code can refer to
-//  the template context using `self`.
-//
-//  For the following examples, please refer to the accompanying template files
-//  in the `templates` directory.
-//
-//  ### Text
-//
-//  Text is included in template output verbatim.
-//
-//  ```
-//  #[derive(boilerplate::Display)]
-//  struct Text {}
-//  assert_eq!(Text {}.to_string(), "Hello, world!\n");
-//  ```
-//
-//  ### Interpolation Blocks
-//
-//  Expressions inside `{{…}}` are interpolated into the template output:
-//
-//  ```
-//  #[derive(boilerplate::Display)]
-//  struct InterpolationBlockTxt {
-//    name: &'static str,
-//  }
-//  assert_eq!(InterpolationBlockTxt { name: "Bob" }.to_string(), "Hello, Bob!\n");
-//  ```
-//
-//  ### Interpolation Lines
-//
-//  Expressions between `%%` and the end of the line are interpolated into the
-//  template output:
-//
-//  ```
-//  #[derive(boilerplate::Display)]
-//  struct InterpolationLineTxt {
-//    byte: u8,
-//  }
-//  assert_eq!(InterpolationLineTxt { byte: 38 }.to_string(), "My favorite byte is 38\n");
-//  ```
-//
-//  ### Code Blocks
-//
-//  Code inside of {%…%} is included in the display function:
-//
-//  ```
-//  #[derive(boilerplate::Display)]
-//  struct CodeBlockTxt {
-//    alone: bool,
-//  }
-//  assert_eq!(CodeBlockTxt { alone: true }.to_string(), "Knock, knock!\n\n");
-//  assert_eq!(CodeBlockTxt { alone: false }.to_string(), "Knock, knock!\n\nWho's there?\n\n");
-//  ```
-//
-//  ### Code Lines
-//
-//  Code between `%%` and the end of the line is included in the display:
-//
-//  ```
-//  #[derive(boilerplate::Display)]
-//  struct CodeLineTxt {
-//    alone: bool,
-//  }
-//  assert_eq!(CodeLineTxt { alone: true }.to_string(), "Knock, knock!\n");
-//  assert_eq!(CodeLineTxt { alone: false }.to_string(), "Knock, knock!\nWho's there?\n");
-//  ```
-//
-//  Code lines are often more legible the code blocks. Additionally, becuase
-//  the `\n` at the end of a code line is stripped, the rendered templates may
-//  include fewer unwanted newlines.
-//
-//  ### Loops
-//
-//  Looping can be performed using code blocks:
-//
-//  ```
-//  #[derive(boilerplate::Display)]
-//  struct LoopTxt {}
-//  assert_eq!(LoopTxt {}.to_string(), "Hi!\nHi!\nHi!\nHi!\n");
-//  ```
-//
-//  ```
-//  #[derive(boilerplate::Display)]
-//  struct CodeLineHtml {}
-//  assert_eq!(
-//    CodeLineHtml {}.to_string(),
-//    "0\n1\n2\n3\n4\n5\n6\n7\n8\n9\n"
-//  );
-//  ```
-//
-//  ```
-//  #[derive(boilerplate::Display)]
-//  struct EmptyHtml {}
-//  assert_eq!(EmptyHtml {}.to_string(), "");
-//  ```
-//
-//  ```
-//  #[derive(boilerplate::Display)]
-//  struct InterpolationHtml {}
-//  assert_eq!(InterpolationHtml {}.to_string(), "true bar false\n");
-//  ```
-//
-//  ```
-//  #[derive(boilerplate::Display)]
-//  struct InterpolationLineHtml {}
-//  assert_eq!(InterpolationLineHtml {}.to_string(), "true\nbar\nfalse\n");
-//  ```
-//
-//  ```
-//  #[derive(boilerplate::Display)]
-//  struct InterpolationLineMultipleStatementsHtml {}
-//  assert_eq!(
-//    InterpolationLineMultipleStatementsHtml {}.to_string(),
-//    "true\n"
-//  );
-//  ```
-//
-//  ```
-//  #[derive(boilerplate::Display)]
-//  struct InterpolationMultipleStatementsHtml {}
-//  assert_eq!(InterpolationMultipleStatementsHtml {}.to_string(), "true\n");
-//  ```
-//
-//  ```
-//  #[derive(boilerplate::Display)]
-//  struct MatchHtml {
-//    item: Option<&'static str>,
-//  }
-//  assert_eq!(
-//    MatchHtml { item: Some("foo") }.to_string(),
-//    "Found literal foo\n"
-//  );
-//  assert_eq!(MatchHtml { item: Some("bar") }.to_string(), "Found bar\n");
-//  assert_eq!(MatchHtml { item: None }.to_string(), "");
-//  ```
-//
-//  ```
-//  #[derive(boilerplate::Display)]
-//  struct TrivialHtml {}
-//  assert_eq!(TrivialHtml {}.to_string(), "foo\n");
-//  ```
+//!
+//! ## Guide
+//!
+//! Deriving `boilerplate::Display` on a type generates an implementation of
+//! the`Display` trait, which can be printed or rendered to a string with
+//! `.to_string()`.
+//!
+//! Rust code in templates is inserted into the generated `Display::fmt`,
+//! function, which takes `&self` as an argument, so it can refer to the
+//! template context instance using `self`.
+//!
+//! ### Text
+//!
+//! Text is included in template output verbatim.
+//!
+//! ```
+//! #[derive(boilerplate::Display)]
+//! #[display(text = "Hello, world!")]
+//! struct Context {}
+//! assert_eq!(Context {}.to_string(), "Hello, world!");
+//! ```
+//!
+//! ### Interpolation Blocks
+//!
+//! Expressions inside `{{…}}` are interpolated into the template output:
+//!
+//! ```
+//! #[derive(boilerplate::Display)]
+//! #[display(text = "Hello, {{self.name}}!")]
+//! struct Context {
+//!   name: &'static str,
+//! }
+//! assert_eq!(Context { name: "Bob" }.to_string(), "Hello, Bob!");
+//! ```
+//!
+//! ### Interpolation Lines
+//!
+//! Expressions between `$$` and the next newline are interpolated into the
+//! template output:
+//!
+//! ```
+//! #[derive(boilerplate::Display)]
+//! #[display(text = "My favorite byte is $$ self.byte\n")]
+//! struct Context {
+//!   byte: u8,
+//! }
+//! assert_eq!(Context { byte: 38 }.to_string(), "My favorite byte is 38\n");
+//! ```
+//!
+//! ### Code Blocks
+//!
+//! Code inside of {%…%} is included in the display function body:
+//!
+//! ```
+//! #[derive(boilerplate::Display)]
+//! #[display(text = "Knock, knock!
+//! {% if !self.alone { %}
+//! Who's there?
+//! {% } %}
+//! ")]
+//! struct Context {
+//!   alone: bool,
+//! }
+//! assert_eq!(Context { alone: true }.to_string(), "Knock, knock!\n\n");
+//! assert_eq!(Context { alone: false }.to_string(), "Knock, knock!\n\nWho's there?\n\n");
+//! ```
+//!
+//! ### Code Lines
+//!
+//! Code between `%%` and the next newline is included in the display function
+//! body:
+//!
+//! ```
+//! #[derive(boilerplate::Display)]
+//! #[display(text = "Knock, knock!
+//! %% if !self.alone {
+//! Who's there?
+//! %% }
+//! ")]
+//! struct Context {
+//!   alone: bool,
+//! }
+//! assert_eq!(Context { alone: true }.to_string(), "Knock, knock!\n");
+//! assert_eq!(Context { alone: false }.to_string(), "Knock, knock!\nWho's there?\n");
+//! ```
+//!
+//! Code lines are often more legible than code blocks. Additionally, becuase
+//! the `\n` at the end of a code line is stripped, the rendered templates may
+//! include fewer unwanted newlines.
+//!
+//! ### Loops
+//!
+//! ```
+//! #[derive(boilerplate::Display)]
+//! #[display(text = "{% for i in 0..5 { %}Hi!{% } %}")]
+//! struct Context {}
+//! assert_eq!(Context {}.to_string(), "Hi!Hi!Hi!Hi!Hi!");
+//! ```
+//!
+//! ### Iteration
+//!
+//! ```
+//! #[derive(boilerplate::Display)]
+//! #[display(text = "%% for (i, value) in self.0.iter().enumerate() {
+//! Value {{i}} is {{value}}
+//! %% }
+//! ")]
+//! struct Context(&'static [&'static str]);
+//!
+//! assert_eq!(
+//!   Context(&["foo", "bar", "baz"]).to_string(),
+//!   "Value 0 is foo\nValue 1 is bar\nValue 2 is baz\n"
+//! );
+//! ```
+//!
+//! ### Match Statements
+//!
+//! ```
+//! #[derive(boilerplate::Display)]
+//! #[display(text = r#"%% match self.item {
+//! %%   Some("foo") => {
+//! Found literal foo
+//! %%   }
+//! %%   Some(val) => {
+//! Found {{ val }}
+//! %%   }
+//! %%   None => {}
+//! %% }
+//! "#)]
+//! struct Context {
+//!   item: Option<&'static str>,
+//! }
+//! assert_eq!(
+//!   Context { item: Some("foo") }.to_string(),
+//!   "Found literal foo\n"
+//! );
+//! assert_eq!(Context { item: Some("bar") }.to_string(), "Found bar\n");
+//! assert_eq!(Context { item: None }.to_string(), "");
+//! ```
+//!
+//! ### Multiple Statements in an Interpolation
+//!
+//! ```
+//! #[derive(boilerplate::Display)]
+//! #[display(text = "$$ { let x = !false; x }\n")]
+//! struct Context {}
+//! assert_eq!(Context {}.to_string(), "true\n");
+//! ```
 
 use {
   self::{block::Block, display::Display, source::Source, template::Template},
