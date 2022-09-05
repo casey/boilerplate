@@ -25,7 +25,7 @@ Add `boilerplate` to your project's `Cargo.toml`:
 boilerplate = "*"
 ```
 
-Create a template in `templates/quick-start.txt`:
+Create a template in `templates/my-template.txt`:
 
 ```text
 Foo is {{self.n}}!
@@ -35,10 +35,10 @@ Define, instantiate, and render the template context:
 
 ```
 #[derive(boilerplate::Display)]
-struct QuickStartTxt {
+struct MyTemplate {
   n: u32,
 }
-assert_eq!(QuickStartTxt { n: 10 }.to_string(), "Foo is 10!\n");
+assert_eq!(MyTemplate { n: 10 }.to_string(), "Foo is 10!\n");
 ```
 
 See [the docs](https://docs.rs/boilerplate/latest/boilerplate/) for more examples.
