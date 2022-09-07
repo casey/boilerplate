@@ -3,6 +3,7 @@ use super::*;
 pub(crate) struct Template {
   pub(crate) ident: Ident,
   pub(crate) source: Source,
+  pub(crate) mime: Mime,
 }
 
 impl Template {
@@ -73,7 +74,7 @@ impl Template {
 
   fn axum_into_response_impl(&self) -> TokenStream {
     let ident = &self.ident;
-    let content_type = LitStr::new(self.source.mime().as_ref(), Span::call_site());
+    let content_type = LitStr::new(self.mime.as_ref(), Span::call_site());
     quote!(
       impl axum::response::IntoResponse for #ident {
         fn into_response(self) -> axum::response::Response<axum::body::BoxBody> {
@@ -98,6 +99,7 @@ mod tests {
       Template {
         ident: Ident::new("Foo", Span::call_site()),
         source: Source::Literal(LitStr::new("", Span::call_site())),
+        mime: mime::TEXT_PLAIN,
       }
       .display_impl()
       .to_string(),
@@ -117,6 +119,7 @@ mod tests {
     let actual = Template {
       ident: Ident::new("Foo", Span::call_site()),
       source: Source::Literal(LitStr::new(template, Span::call_site())),
+      mime: mime::TEXT_PLAIN,
     }
     .body();
 
@@ -170,6 +173,7 @@ mod tests {
       Template {
         ident: Ident::new("Foo", Span::call_site()),
         source: Source::Literal(LitStr::new("", Span::call_site())),
+        mime: mime::TEXT_PLAIN,
       }
       .axum_into_response_impl()
       .to_string(),

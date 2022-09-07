@@ -9,15 +9,15 @@ pub(crate) struct Boilerplate {
 
 impl Boilerplate {
   pub(crate) fn impls(self) -> TokenStream {
+    let filename = Self::filename_from_ident(&self.ident.to_string());
+
     let source = match self.text {
       Some(text) => Source::Literal(text),
       None => {
         let manifest_dir = std::env::var("CARGO_MANIFEST_DIR")
           .expect("Failed to get `CARGO_MANIFEST_DIR` environment variable");
 
-        let path = Path::new(&manifest_dir)
-          .join("templates")
-          .join(Self::filename_from_ident(&self.ident.to_string()));
+        let path = Path::new(&manifest_dir).join("templates").join(&filename);
 
         let path = path.to_str().unwrap_or_else(|| {
           panic!(
@@ -32,6 +32,7 @@ impl Boilerplate {
 
     Template {
       ident: self.ident,
+      mime: new_mime_guess::from_path(&filename).first_or_text_plain(),
       source,
     }
     .impls()

@@ -6,13 +6,6 @@ pub(crate) enum Source {
 }
 
 impl Source {
-  pub(crate) fn mime(&self) -> Mime {
-    match self {
-      Self::Literal(_) => mime::TEXT_PLAIN,
-      Self::Path(path) => new_mime_guess::from_path(path).first_or_text_plain(),
-    }
-  }
-
   pub(crate) fn text(&self) -> String {
     match self {
       Self::Literal(literal) => literal.value(),

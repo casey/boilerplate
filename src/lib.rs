@@ -241,10 +241,20 @@
 //!
 //! ### Escaping
 //!
+//! If the template file path ends with `html`, `htm`, or `xml`, HTML escaping
+//! is enabled:
+//!
 //! ```
 //! #[derive(boilerplate::Display)]
 //! struct EscapeHtml(String);
 //! assert_eq!(EscapeHtml("&".into()).to_string(), "&amp;");
+//! ```
+//!
+//! ```
+//! #[derive(boilerplate::Display)]
+//! #[display(text = "$$ self.0\n")]
+//! struct ContextHtml(String);
+//! assert_eq!(ContextHtml("&".into()).to_string(), "&amp;");
 //! ```
 //!
 //! ### Axum Integration
@@ -286,6 +296,7 @@
 //!   );
 //! }
 //! ```
+
 use {
   self::{block::Block, boilerplate::Boilerplate, source::Source, template::Template},
   darling::FromDeriveInput,
