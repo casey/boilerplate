@@ -245,13 +245,13 @@
 //! is enabled:
 //!
 //! ```
-//! #[derive(boilerplate::Display)]
+//! #[derive(boilerplate::Boilerplate)]
 //! struct EscapeHtml(String);
 //! assert_eq!(EscapeHtml("&".into()).to_string(), "&amp;");
 //! ```
 //!
 //! ```
-//! #[derive(boilerplate::Display)]
+//! #[derive(boilerplate::Boilerplate)]
 //! #[display(text = "$$ self.0\n")]
 //! struct ContextHtml(String);
 //! assert_eq!(ContextHtml("&".into()).to_string(), "&amp;");

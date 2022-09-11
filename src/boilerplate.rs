@@ -30,10 +30,16 @@ impl Boilerplate {
       }
     };
 
+    let escape = Path::new(&filename)
+      .extension()
+      .map(|extension| ["html", "htm", "xml"].contains(&extension.to_string_lossy().as_ref()))
+      .unwrap_or(false);
+
     Template {
       ident: self.ident,
-      mime: new_mime_guess::from_path(&filename).first_or_text_plain(),
       source,
+      mime: new_mime_guess::from_path(&filename).first_or_text_plain(),
+      escape,
     }
     .impls()
   }

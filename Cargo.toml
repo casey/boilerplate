@@ -24,6 +24,7 @@ syn = { version = "1.0.0", features = ["derive"] }
 axum = []
 
 [dev-dependencies]
+askama_escape = "0.10.3"
 axum = "0.5.0"
 pretty_assertions = "1.0.0"
 unindent = "0.1.10"

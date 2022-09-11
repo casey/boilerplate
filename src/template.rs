@@ -1,9 +1,10 @@
 use super::*;
 
 pub(crate) struct Template {
+  pub(crate) escape: bool,
   pub(crate) ident: Ident,
-  pub(crate) source: Source,
   pub(crate) mime: Mime,
+  pub(crate) source: Source,
 }
 
 impl Template {
@@ -45,7 +46,7 @@ impl Template {
     loop {
       let rest = &text[j..];
 
-      let block = Block::starting_at(rest);
+      let block = Block::starting_at(rest, self.escape);
 
       if i < j && block.is_some() {
         lines.push(format!("f.write_str(&text[{}..{}])? ;", i, j));
@@ -100,6 +101,7 @@ mod tests {
         ident: Ident::new("Foo", Span::call_site()),
         source: Source::Literal(LitStr::new("", Span::call_site())),
         mime: mime::TEXT_PLAIN,
+        escape: false,
       }
       .display_impl()
       .to_string(),
@@ -120,6 +122,7 @@ mod tests {
       ident: Ident::new("Foo", Span::call_site()),
       source: Source::Literal(LitStr::new(template, Span::call_site())),
       mime: mime::TEXT_PLAIN,
+      escape: false,
     }
     .body();
 
@@ -174,6 +177,7 @@ mod tests {
         ident: Ident::new("Foo", Span::call_site()),
         source: Source::Literal(LitStr::new("", Span::call_site())),
         mime: mime::TEXT_PLAIN,
+        escape: false,
       }
       .axum_into_response_impl()
       .to_string(),
