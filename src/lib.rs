@@ -32,7 +32,7 @@
 //! Define, instantiate, and render the template context:
 //!
 //! ```
-//! #[derive(boilerplate::Display)]
+//! #[derive(boilerplate::Boilerplate)]
 //! struct QuickStartTxt {
 //!   n: u32,
 //! }
@@ -58,16 +58,16 @@
 //! Templates contents be read from a string:
 //!
 //! ```
-//! #[derive(boilerplate::Display)]
-//! #[display(text = "Hello, world!")]
+//! #[derive(boilerplate::Boilerplate)]
+//! #[boilerplate(text = "Hello, world!")]
 //! struct Context {}
 //! assert_eq!(Context {}.to_string(), "Hello, world!");
 //! ```
 //!
 //! ## Guide
 //!
-//! Deriving `boilerplate::Display` on a type generates an implementation of
-//! the`Display` trait, which can be printed or rendered to a string with
+//! Deriving `boilerplate::Boilerplate` on a type generates an implementation of
+//! the `Display` trait, which can be printed or rendered to a string with
 //! `.to_string()`.
 //!
 //! Rust code in templates is inserted into the generated `Display::fmt`,
@@ -79,8 +79,8 @@
 //! Text is included in template output verbatim.
 //!
 //! ```
-//! #[derive(boilerplate::Display)]
-//! #[display(text = "Hello, world!")]
+//! #[derive(boilerplate::Boilerplate)]
+//! #[boilerplate(text = "Hello, world!")]
 //! struct Context {}
 //! assert_eq!(Context {}.to_string(), "Hello, world!");
 //! ```
@@ -90,8 +90,8 @@
 //! Expressions inside `{{…}}` are interpolated into the template output:
 //!
 //! ```
-//! #[derive(boilerplate::Display)]
-//! #[display(text = "Hello, {{self.name}}!")]
+//! #[derive(boilerplate::Boilerplate)]
+//! #[boilerplate(text = "Hello, {{self.name}}!")]
 //! struct Context {
 //!   name: &'static str,
 //! }
@@ -104,8 +104,8 @@
 //! template output:
 //!
 //! ```
-//! #[derive(boilerplate::Display)]
-//! #[display(text = "My favorite byte is $$ self.byte\n")]
+//! #[derive(boilerplate::Boilerplate)]
+//! #[boilerplate(text = "My favorite byte is $$ self.byte\n")]
 //! struct Context {
 //!   byte: u8,
 //! }
@@ -117,8 +117,8 @@
 //! Code inside of {%…%} is included in the display function body:
 //!
 //! ```
-//! #[derive(boilerplate::Display)]
-//! #[display(text = "Knock, knock!
+//! #[derive(boilerplate::Boilerplate)]
+//! #[boilerplate(text = "Knock, knock!
 //! {% if !self.alone { %}
 //! Who's there?
 //! {% } %}
@@ -136,8 +136,8 @@
 //! body:
 //!
 //! ```
-//! #[derive(boilerplate::Display)]
-//! #[display(text = "Knock, knock!
+//! #[derive(boilerplate::Boilerplate)]
+//! #[boilerplate(text = "Knock, knock!
 //! %% if !self.alone {
 //! Who's there?
 //! %% }
@@ -156,15 +156,15 @@
 //! ### Loops
 //!
 //! ```
-//! #[derive(boilerplate::Display)]
-//! #[display(text = "{% for i in 0..5 { %}Hi!{% } %}")]
+//! #[derive(boilerplate::Boilerplate)]
+//! #[boilerplate(text = "{% for i in 0..5 { %}Hi!{% } %}")]
 //! struct Context {}
 //! assert_eq!(Context {}.to_string(), "Hi!Hi!Hi!Hi!Hi!");
 //! ```
 //!
 //! ```
-//! #[derive(boilerplate::Display)]
-//! #[display(text = "%% for i in 0..10 {
+//! #[derive(boilerplate::Boilerplate)]
+//! #[boilerplate(text = "%% for i in 0..10 {
 //! {{ i }}
 //! %% }
 //! ")]
@@ -173,8 +173,8 @@
 //! ```
 //!
 //! ```
-//! #[derive(boilerplate::Display)]
-//! #[display(text = "%% for i in 0..10 {
+//! #[derive(boilerplate::Boilerplate)]
+//! #[boilerplate(text = "%% for i in 0..10 {
 //! $$ i
 //! %% }
 //! ")]
@@ -183,8 +183,8 @@
 //! ```
 //!
 //! ```
-//! #[derive(boilerplate::Display)]
-//! #[display(text = "%% for (i, value) in self.0.iter().enumerate() {
+//! #[derive(boilerplate::Boilerplate)]
+//! #[boilerplate(text = "%% for (i, value) in self.0.iter().enumerate() {
 //! Value {{i}} is {{value}}
 //! %% }
 //! ")]
@@ -199,8 +199,8 @@
 //! ### Match Statements
 //!
 //! ```
-//! #[derive(boilerplate::Display)]
-//! #[display(text = r#"%% match self.item {
+//! #[derive(boilerplate::Boilerplate)]
+//! #[boilerplate(text = r#"%% match self.item {
 //! %%   Some("foo") => {
 //! Found literal foo
 //! %%   }
@@ -224,8 +224,8 @@
 //! ### Multiple Statements in an Interpolation
 //!
 //! ```
-//! #[derive(boilerplate::Display)]
-//! #[display(text = "$$ { let x = !false; x }\n")]
+//! #[derive(boilerplate::Boilerplate)]
+//! #[boilerplate(text = "$$ { let x = !false; x }\n")]
 //! struct Context {}
 //! assert_eq!(Context {}.to_string(), "true\n");
 //! ```
@@ -233,8 +233,8 @@
 //! ### The Empty Template
 //!
 //! ```
-//! #[derive(boilerplate::Display)]
-//! #[display(text = "")]
+//! #[derive(boilerplate::Boilerplate)]
+//! #[boilerplate(text = "")]
 //! struct Context {}
 //! assert_eq!(Context {}.to_string(), "");
 //! ```
@@ -249,7 +249,7 @@
 //! #[cfg(feature = "axum")]
 //! {
 //!   use axum::response::IntoResponse;
-//!   #[derive(boilerplate::Display)]
+//!   #[derive(boilerplate::Boilerplate)]
 //!   struct GuessHtml {}
 //!   assert_eq!(
 //!     GuessHtml {}
@@ -266,7 +266,7 @@
 //! #[cfg(feature = "axum")]
 //! {
 //!   use axum::response::IntoResponse;
-//!   #[derive(boilerplate::Display)]
+//!   #[derive(boilerplate::Boilerplate)]
 //!   struct Guess {}
 //!   assert_eq!(
 //!     Guess {}
@@ -279,7 +279,7 @@
 //! }
 //! ```
 use {
-  self::{block::Block, display::Display, source::Source, template::Template},
+  self::{block::Block, boilerplate::Boilerplate, source::Source, template::Template},
   darling::FromDeriveInput,
   new_mime_guess::Mime,
   proc_macro2::{Span, TokenStream},
@@ -289,15 +289,15 @@ use {
 };
 
 mod block;
-mod display;
+mod boilerplate;
 mod source;
 mod template;
 
-#[proc_macro_derive(Display, attributes(display))]
-pub fn display(item: proc_macro::TokenStream) -> proc_macro::TokenStream {
+#[proc_macro_derive(Boilerplate, attributes(boilerplate))]
+pub fn boilerplate(item: proc_macro::TokenStream) -> proc_macro::TokenStream {
   let derive_input = parse_macro_input!(item as DeriveInput);
 
-  Display::from_derive_input(&derive_input)
+  Boilerplate::from_derive_input(&derive_input)
     .expect("Failed to parse derive input")
     .impls()
     .into()
