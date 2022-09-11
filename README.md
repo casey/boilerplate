@@ -34,7 +34,9 @@ Foo is {{self.n}}!
 Define, instantiate, and render the template context:
 
 ```
-#[derive(boilerplate::Display)]
+use boilerplate::Boilerplate;
+
+#[derive(Boilerplate)]
 struct MyTemplate {
   n: u32,
 }
