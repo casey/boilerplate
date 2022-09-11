@@ -1,13 +1,13 @@
 use super::*;
 
 #[derive(FromDeriveInput)]
-#[darling(attributes(display))]
-pub(crate) struct Display {
+#[darling(attributes(boilerplate))]
+pub(crate) struct Boilerplate {
   ident: Ident,
   text: Option<LitStr>,
 }
 
-impl Display {
+impl Boilerplate {
   pub(crate) fn impls(self) -> TokenStream {
     let source = match self.text {
       Some(text) => Source::Literal(text),
@@ -71,31 +71,34 @@ mod tests {
 
   #[test]
   fn simple() {
-    assert_eq!(Display::filename_from_ident("Foo"), "foo");
+    assert_eq!(Boilerplate::filename_from_ident("Foo"), "foo");
   }
 
   #[test]
   fn with_extension() {
-    assert_eq!(Display::filename_from_ident("FooHtml"), "foo.html");
+    assert_eq!(Boilerplate::filename_from_ident("FooHtml"), "foo.html");
   }
 
   #[test]
   fn multiple_words() {
-    assert_eq!(Display::filename_from_ident("FooBarHtml"), "foo-bar.html");
+    assert_eq!(
+      Boilerplate::filename_from_ident("FooBarHtml"),
+      "foo-bar.html"
+    );
   }
 
   #[test]
   fn single_letter_words() {
-    assert_eq!(Display::filename_from_ident("ABCHtml"), "a-b-c.html");
+    assert_eq!(Boilerplate::filename_from_ident("ABCHtml"), "a-b-c.html");
   }
 
   #[test]
   fn all_lowercase() {
-    assert_eq!(Display::filename_from_ident("foo"), "foo");
+    assert_eq!(Boilerplate::filename_from_ident("foo"), "foo");
   }
 
   #[test]
   fn camel_case() {
-    assert_eq!(Display::filename_from_ident("fooHtml"), "foo.html");
+    assert_eq!(Boilerplate::filename_from_ident("fooHtml"), "foo.html");
   }
 }
