@@ -1,7 +1,7 @@
 use super::*;
 
 #[derive(FromDeriveInput)]
-#[darling(attributes(display))]
+#[darling(attributes(boilerplate))]
 pub(crate) struct Boilerplate {
   ident: Ident,
   text: Option<LitStr>,
@@ -81,7 +81,10 @@ mod tests {
 
   #[test]
   fn multiple_words() {
-    assert_eq!(Boilerplate::filename_from_ident("FooBarHtml"), "foo-bar.html");
+    assert_eq!(
+      Boilerplate::filename_from_ident("FooBarHtml"),
+      "foo-bar.html"
+    );
   }
 
   #[test]

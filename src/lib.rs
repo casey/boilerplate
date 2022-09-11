@@ -59,7 +59,7 @@
 //!
 //! ```
 //! #[derive(boilerplate::Boilerplate)]
-//! #[display(text = "Hello, world!")]
+//! #[boilerplate(text = "Hello, world!")]
 //! struct Context {}
 //! assert_eq!(Context {}.to_string(), "Hello, world!");
 //! ```
@@ -80,7 +80,7 @@
 //!
 //! ```
 //! #[derive(boilerplate::Boilerplate)]
-//! #[display(text = "Hello, world!")]
+//! #[boilerplate(text = "Hello, world!")]
 //! struct Context {}
 //! assert_eq!(Context {}.to_string(), "Hello, world!");
 //! ```
@@ -91,7 +91,7 @@
 //!
 //! ```
 //! #[derive(boilerplate::Boilerplate)]
-//! #[display(text = "Hello, {{self.name}}!")]
+//! #[boilerplate(text = "Hello, {{self.name}}!")]
 //! struct Context {
 //!   name: &'static str,
 //! }
@@ -105,7 +105,7 @@
 //!
 //! ```
 //! #[derive(boilerplate::Boilerplate)]
-//! #[display(text = "My favorite byte is $$ self.byte\n")]
+//! #[boilerplate(text = "My favorite byte is $$ self.byte\n")]
 //! struct Context {
 //!   byte: u8,
 //! }
@@ -118,7 +118,7 @@
 //!
 //! ```
 //! #[derive(boilerplate::Boilerplate)]
-//! #[display(text = "Knock, knock!
+//! #[boilerplate(text = "Knock, knock!
 //! {% if !self.alone { %}
 //! Who's there?
 //! {% } %}
@@ -137,7 +137,7 @@
 //!
 //! ```
 //! #[derive(boilerplate::Boilerplate)]
-//! #[display(text = "Knock, knock!
+//! #[boilerplate(text = "Knock, knock!
 //! %% if !self.alone {
 //! Who's there?
 //! %% }
@@ -157,14 +157,14 @@
 //!
 //! ```
 //! #[derive(boilerplate::Boilerplate)]
-//! #[display(text = "{% for i in 0..5 { %}Hi!{% } %}")]
+//! #[boilerplate(text = "{% for i in 0..5 { %}Hi!{% } %}")]
 //! struct Context {}
 //! assert_eq!(Context {}.to_string(), "Hi!Hi!Hi!Hi!Hi!");
 //! ```
 //!
 //! ```
 //! #[derive(boilerplate::Boilerplate)]
-//! #[display(text = "%% for i in 0..10 {
+//! #[boilerplate(text = "%% for i in 0..10 {
 //! {{ i }}
 //! %% }
 //! ")]
@@ -174,7 +174,7 @@
 //!
 //! ```
 //! #[derive(boilerplate::Boilerplate)]
-//! #[display(text = "%% for i in 0..10 {
+//! #[boilerplate(text = "%% for i in 0..10 {
 //! $$ i
 //! %% }
 //! ")]
@@ -184,7 +184,7 @@
 //!
 //! ```
 //! #[derive(boilerplate::Boilerplate)]
-//! #[display(text = "%% for (i, value) in self.0.iter().enumerate() {
+//! #[boilerplate(text = "%% for (i, value) in self.0.iter().enumerate() {
 //! Value {{i}} is {{value}}
 //! %% }
 //! ")]
@@ -200,7 +200,7 @@
 //!
 //! ```
 //! #[derive(boilerplate::Boilerplate)]
-//! #[display(text = r#"%% match self.item {
+//! #[boilerplate(text = r#"%% match self.item {
 //! %%   Some("foo") => {
 //! Found literal foo
 //! %%   }
@@ -225,7 +225,7 @@
 //!
 //! ```
 //! #[derive(boilerplate::Boilerplate)]
-//! #[display(text = "$$ { let x = !false; x }\n")]
+//! #[boilerplate(text = "$$ { let x = !false; x }\n")]
 //! struct Context {}
 //! assert_eq!(Context {}.to_string(), "true\n");
 //! ```
@@ -234,7 +234,7 @@
 //!
 //! ```
 //! #[derive(boilerplate::Boilerplate)]
-//! #[display(text = "")]
+//! #[boilerplate(text = "")]
 //! struct Context {}
 //! assert_eq!(Context {}.to_string(), "");
 //! ```
@@ -279,7 +279,7 @@
 //! }
 //! ```
 use {
-  self::{block::Block, display::Boilerplate, source::Source, template::Template},
+  self::{block::Block, boilerplate::Boilerplate, source::Source, template::Template},
   darling::FromDeriveInput,
   new_mime_guess::Mime,
   proc_macro2::{Span, TokenStream},
@@ -289,12 +289,12 @@ use {
 };
 
 mod block;
-mod display;
+mod boilerplate;
 mod source;
 mod template;
 
-#[proc_macro_derive(Boilerplate, attributes(display))]
-pub fn display(item: proc_macro::TokenStream) -> proc_macro::TokenStream {
+#[proc_macro_derive(Boilerplate, attributes(boilerplate))]
+pub fn boilerplate(item: proc_macro::TokenStream) -> proc_macro::TokenStream {
   let derive_input = parse_macro_input!(item as DeriveInput);
 
   Boilerplate::from_derive_input(&derive_input)
