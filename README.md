@@ -11,7 +11,7 @@
     <img src="https://github.com/casey/boilerplate/workflows/CI/badge.svg" alt="ci status">
   </a>
 </div>
-  
+
 <br>
 
 `boilerplate` is a minimal compile-time Rust text template engine.
@@ -33,13 +33,14 @@ Foo is {{self.n}}!
 
 Define, instantiate, and render the template context:
 
-```
+```rust
 use boilerplate::Boilerplate;
 
 #[derive(Boilerplate)]
 struct MyTemplate {
   n: u32,
 }
+
 assert_eq!(MyTemplate { n: 10 }.to_string(), "Foo is 10!\n");
 ```
 
