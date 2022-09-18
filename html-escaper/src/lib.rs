@@ -9,7 +9,7 @@ pub struct Trusted<T>(pub T);
 impl<T: Display> Escape for T {
   fn escape(&self, f: &mut Formatter, newline: bool) -> fmt::Result {
     if newline {
-      write!(HtmlEscaper(f), "{}\n", self)
+      writeln!(HtmlEscaper(f), "{}", self)
     } else {
       write!(HtmlEscaper(f), "{}", self)
     }
@@ -19,7 +19,7 @@ impl<T: Display> Escape for T {
 impl<T: Display> Escape for Trusted<T> {
   fn escape(&self, f: &mut Formatter, newline: bool) -> fmt::Result {
     if newline {
-      write!(f, "{}\n", self.0)
+      writeln!(f, "{}", self.0)
     } else {
       write!(f, "{}", self.0)
     }
