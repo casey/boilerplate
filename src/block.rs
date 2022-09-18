@@ -42,22 +42,14 @@ impl Block {
       Self::Interpolation => {
         format!(
           "write!({}, \"{{}}\", {})? ;",
-          if escape {
-            "askama_escape::EscapeWriter(f)"
-          } else {
-            "f"
-          },
+          if escape { "HtmlEscaper(f)" } else { "f" },
           contents
         )
       }
       Self::InterpolationLine => {
         format!(
           "write!({}, \"{{}}\\n\", {})? ;",
-          if escape {
-            "askama_escape::EscapeWriter(f)"
-          } else {
-            "f"
-          },
+          if escape { "HtmlEscaper(f)" } else { "f" },
           contents
         )
       }

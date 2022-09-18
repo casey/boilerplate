@@ -12,12 +12,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "askama_escape"
-version = "0.10.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "619743e34b5ba4e9703bba34deac3427c72507c7159f5fd030aea8cac0cfe341"
-
-[[package]]
 name = "async-trait"
 version = "0.1.57"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -89,9 +83,9 @@ checksum = "bef38d45163c2f1dde094a7dfd33ccf595c92905c8f8f4fdc18d06fb1037718a"
 name = "boilerplate"
 version = "0.0.2"
 dependencies = [
- "askama_escape",
  "axum",
  "darling",
+ "html-escaper",
  "mime",
  "new_mime_guess",
  "pretty_assertions",
@@ -212,6 +206,10 @@ dependencies = [
  "pin-project-lite",
  "pin-utils",
 ]
+
+[[package]]
+name = "html-escaper"
+version = "0.0.0"
 
 [[package]]
 name = "http"
