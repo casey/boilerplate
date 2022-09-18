@@ -9,9 +9,9 @@ impl Write for HtmlEscaper<'_, '_> {
       let replacement = match c {
         '"' => Some("&quot;"),
         '&' => Some("&amp;"),
-        '\'' => Some("&#x39;"),
         '<' => Some("&lt;"),
         '>' => Some("&gt;"),
+        '\'' => Some("&apos;"),
         _ => None,
       };
       if let Some(replacement) = replacement {
