@@ -40,18 +40,18 @@ impl Block {
     let rust = match self {
       Self::Code | Self::CodeLine => contents.into(),
       Self::Interpolation => {
-        format!(
-          "write!({}, \"{{}}\", {})? ;",
-          if escape { "HtmlEscaper(f)" } else { "f" },
-          contents
-        )
+        if escape {
+          format!("({}).escape(f, false)? ;", contents)
+        } else {
+          format!("write!(f, \"{{}}\", {})? ;", contents)
+        }
       }
       Self::InterpolationLine => {
-        format!(
-          "write!({}, \"{{}}\\n\", {})? ;",
-          if escape { "HtmlEscaper(f)" } else { "f" },
-          contents
-        )
+        if escape {
+          format!("({}).escape(f, true)? ;", contents)
+        } else {
+          format!("write!(f, \"{{}}\\n\", {})? ;", contents)
+        }
       }
     };
 

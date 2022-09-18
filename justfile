@@ -1,11 +1,11 @@
-watch +args='test --workspace --all-targets':
+watch +args='test --all':
   cargo watch --clear --exec '{{args}}'
 
 ci:
-  cargo test --workspace --all-targets
-  cargo test --workspace --all-targets --features axum
-  cargo clippy --workspace --all-targets
-  cargo fmt --workspace -- --check
+  cargo test --all
+  cargo test --all --features axum
+  cargo clippy --all
+  cargo fmt --all -- --check
 
 # publish current GitHub master branch
 publish:

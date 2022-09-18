@@ -1,5 +1,35 @@
-use core::fmt::{Formatter, Write};
+use core::fmt::{self, Display, Formatter, Write};
 
+pub trait Escape {
+  /// Write `self` to `f`, escaping if necessary, and appending a newline if
+  /// `newline`.
+  fn escape(&self, f: &mut Formatter, newline: bool) -> fmt::Result;
+}
+
+/// Disable escaping for the wrapped value.
+pub struct Trusted<T: Display>(pub T);
+
+impl<T: Display> Escape for T {
+  fn escape(&self, f: &mut Formatter, newline: bool) -> fmt::Result {
+    if newline {
+      writeln!(HtmlEscaper(f), "{}", self)
+    } else {
+      write!(HtmlEscaper(f), "{}", self)
+    }
+  }
+}
+
+impl<T: Display> Escape for Trusted<T> {
+  fn escape(&self, f: &mut Formatter, newline: bool) -> fmt::Result {
+    if newline {
+      writeln!(f, "{}", self.0)
+    } else {
+      write!(f, "{}", self.0)
+    }
+  }
+}
+
+/// Escaping wrapper for `core::fmt::Formatter`
 pub struct HtmlEscaper<'a, 'b>(pub &'a mut Formatter<'b>);
 
 impl Write for HtmlEscaper<'_, '_> {
