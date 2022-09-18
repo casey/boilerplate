@@ -1,9 +1,12 @@
 use core::fmt::{self, Display, Formatter, Write};
 
 pub trait Escape {
+  /// Write `self` to `f`, escaping if necessary, and appending a newline if
+  /// `newline`.
   fn escape(&self, f: &mut Formatter, newline: bool) -> fmt::Result;
 }
 
+/// Disable escaping for the wrapped value.
 pub struct Trusted<T>(pub T);
 
 impl<T: Display> Escape for T {
@@ -26,6 +29,7 @@ impl<T: Display> Escape for Trusted<T> {
   }
 }
 
+/// Escaping wrapper for `core::fmt::Formatter`
 pub struct HtmlEscaper<'a, 'b>(pub &'a mut Formatter<'b>);
 
 impl Write for HtmlEscaper<'_, '_> {
