@@ -55,7 +55,7 @@ mod tests {
   fn escaped_characters() {
     assert_eq!(Wrapper("\"").to_string(), "&quot;");
     assert_eq!(Wrapper("&").to_string(), "&amp;");
-    assert_eq!(Wrapper("'").to_string(), "&#x39;");
+    assert_eq!(Wrapper("'").to_string(), "&apos;");
     assert_eq!(Wrapper("<").to_string(), "&lt;");
     assert_eq!(Wrapper(">").to_string(), "&gt;");
   }
