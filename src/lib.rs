@@ -14,7 +14,8 @@
 //! `boilerplate` is very simple, requires no runtime dependencies, and is
 //! usable in a `no_std` environment.
 //!
-//! ## Quick Start
+//! Quick Start
+//! -----------
 //!
 //! Add `boilerplate` to your project's `Cargo.toml`:
 //!
@@ -39,7 +40,8 @@
 //! assert_eq!(QuickStartTxt { n: 10 }.to_string(), "Foo is 10!\n");
 //! ```
 //!
-//! ## Template File Locations
+//! Template File Locations
+//! -----------------------
 //!
 //! By default, template file paths are relative to the crate root and derived
 //! from the context name using the following steps:
@@ -53,7 +55,8 @@
 //! 6. templates/quick-start.txt # add templates directory
 //! ```
 //!
-//! ## Inline Templates
+//! Inline Templates
+//! ----------------
 //!
 //! Templates contents be read from a string:
 //!
@@ -64,7 +67,8 @@
 //! assert_eq!(Context {}.to_string(), "Hello, world!");
 //! ```
 //!
-//! ## Guide
+//! Guide
+//! -----
 //!
 //! Deriving `boilerplate::Boilerplate` on a type generates an implementation of
 //! the `Display` trait, which can be printed or rendered to a string with
