@@ -245,12 +245,19 @@
 //!
 //! ### Escaping
 //!
-//! If the template file path ends with `html`, `htm`, or `xml`, HTML escaping
-//! is enabled. HTML escaping is performed by wrapping the `core::fmt::Formatter`
-//! passed to the generated `core::fmt::Display` implementation in a `HtmlEscaper`
-//! struct, which must be in scope where the boilerplate derive macro is invoked.
+//! If the template file path ends with `html`, `htm`, or `xml`, escaping is
+//! enabled. Escaping is performed by calling an `escape` method on
+//! interpolation values with the following signature:
 //!
-//! A suitable `HtmlEscaper` is provided by the `html_escaper` crate.
+//! ```
+//! trait Escape {
+//!   fn escape(&self, f: &mut core::fmt::Formatter, newline: bool) -> fmt::Result;
+//! }
+//! ```
+//!
+//! Thus, a suitable `Escape` trait must be in scope. The `html-escaper` crate
+//! provides such an `Escape` trait, as well as `Trusted` wrapper that disables
+//! escaping.
 //!
 //! ```
 //! use html_escaper::Escape;
