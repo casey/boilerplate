@@ -7,7 +7,7 @@ pub trait Escape {
 }
 
 /// Disable escaping for the wrapped value.
-pub struct Trusted<T>(pub T);
+pub struct Trusted<T: Display>(pub T);
 
 impl<T: Display> Escape for T {
   fn escape(&self, f: &mut Formatter, newline: bool) -> fmt::Result {
