@@ -245,19 +245,18 @@
 //!
 //! ### Escaping
 //!
-//! If the template file path ends with `html`, `htm`, or `xml`, escaping is
-//! enabled. Escaping is performed by calling an `escape` method on
+//! If the template file path ends with an `html`, `htm`, or `xml` extension,
+//! escaping is enabled. Escaping is performed by calling an `escape` method on
 //! interpolation values with the following signature:
 //!
 //! ```
 //! trait Escape {
-//!   fn escape(&self, f: &mut core::fmt::Formatter, newline: bool) -> fmt::Result;
+//!   fn escape(&self, f: &mut core::fmt::Formatter, newline: bool) -> core::fmt::Result;
 //! }
 //! ```
 //!
 //! Thus, a suitable `Escape` trait must be in scope. The `html-escaper` crate
-//! provides such an `Escape` trait, as well as `Trusted` wrapper that disables
-//! escaping.
+//! provides just such an `Escape` trait.
 //!
 //! ```
 //! use html_escaper::Escape;
@@ -276,13 +275,16 @@
 //! assert_eq!(ContextHtml("&").to_string(), "&amp;\n");
 //! ```
 //!
+//! The `html-escaper` crate also provides a `Trusted` wrapper that disables
+//! escaping for trusted values:
+//!
 //! ```
 //! use html_escaper::{Escape, Trusted};
 //!
 //! #[derive(boilerplate::Boilerplate)]
-//! #[boilerplate(text = "$$ self.0\n")]
-//! struct ContextHtml(Trusted<&'static str>);
-//! assert_eq!(ContextHtml(Trusted("&")).to_string(), "&\n");
+//! #[boilerplate(text = "$$ Trusted(self.0)\n")]
+//! struct ContextHtml(&'static str);
+//! assert_eq!(ContextHtml("&").to_string(), "&\n");
 //! ```
 //!
 //! ### Axum Integration
