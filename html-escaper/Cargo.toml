@@ -1,6 +1,6 @@
 [package]
 name = "html-escaper"
-version = "0.0.0"
+version = "0.1.0"
 edition = "2021"
 license = "CC0-1.0"
 description = "HTML escaping wrapper for core::fmt::Formatter"

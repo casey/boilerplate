@@ -9,9 +9,9 @@ impl Write for HtmlEscaper<'_, '_> {
       let replacement = match c {
         '"' => Some("&quot;"),
         '&' => Some("&amp;"),
-        '\'' => Some("&#x39;"),
         '<' => Some("&lt;"),
         '>' => Some("&gt;"),
+        '\'' => Some("&apos;"),
         _ => None,
       };
       if let Some(replacement) = replacement {
@@ -55,7 +55,7 @@ mod tests {
   fn escaped_characters() {
     assert_eq!(Wrapper("\"").to_string(), "&quot;");
     assert_eq!(Wrapper("&").to_string(), "&amp;");
-    assert_eq!(Wrapper("'").to_string(), "&#x39;");
+    assert_eq!(Wrapper("'").to_string(), "&apos;");
     assert_eq!(Wrapper("<").to_string(), "&lt;");
     assert_eq!(Wrapper(">").to_string(), "&gt;");
   }
