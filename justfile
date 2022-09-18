@@ -1,3 +1,6 @@
+# TODO:
+# - run on CI
+
 watch +args='test --workspace --all-targets':
   cargo watch --clear --exec '{{args}}'
 

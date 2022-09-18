@@ -253,20 +253,29 @@
 //! A suitable `HtmlEscaper` is provided by the `html_escaper` crate.
 //!
 //! ```
-//! use html_escaper::HtmlEscaper;
+//! use html_escaper::WriteHtml;
 //!
 //! #[derive(boilerplate::Boilerplate)]
-//! struct EscapeHtml(String);
-//! assert_eq!(EscapeHtml("&".into()).to_string(), "&amp;\n");
+//! struct EscapeHtml(&'static str);
+//! assert_eq!(EscapeHtml("&").to_string(), "&amp;\n");
 //! ```
 //!
 //! ```
-//! use html_escaper::HtmlEscaper;
+//! use html_escaper::WriteHtml;
 //!
 //! #[derive(boilerplate::Boilerplate)]
 //! #[boilerplate(text = "$$ self.0\n")]
-//! struct ContextHtml(String);
-//! assert_eq!(ContextHtml("&".into()).to_string(), "&amp;\n");
+//! struct ContextHtml(&'static str);
+//! assert_eq!(ContextHtml("&").to_string(), "&amp;\n");
+//! ```
+//!
+//! ```
+//! use html_escaper::{WriteHtml, Trusted};
+//!
+//! #[derive(boilerplate::Boilerplate)]
+//! #[boilerplate(text = "$$ self.0\n")]
+//! struct ContextHtml(Trusted<&'static str>);
+//! assert_eq!(ContextHtml(Trusted("&")).to_string(), "&\n");
 //! ```
 //!
 //! ### Axum Integration

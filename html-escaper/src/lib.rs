@@ -1,4 +1,30 @@
-use core::fmt::{Formatter, Write};
+use core::fmt::{self, Display, Formatter, Write};
+
+pub struct Trusted<T>(pub T);
+
+impl<T: Display> WriteHtml for T {
+  fn write_html(&self, f: &mut Formatter, newline: bool) -> fmt::Result {
+    if newline {
+      write!(HtmlEscaper(f), "{}\n", self)
+    } else {
+      write!(HtmlEscaper(f), "{}", self)
+    }
+  }
+}
+
+impl<T: Display> WriteHtml for Trusted<T> {
+  fn write_html(&self, f: &mut Formatter, newline: bool) -> fmt::Result {
+    if newline {
+      write!(f, "{}\n", self.0)
+    } else {
+      write!(f, "{}", self.0)
+    }
+  }
+}
+
+pub trait WriteHtml {
+  fn write_html(&self, f: &mut Formatter, newline: bool) -> fmt::Result;
+}
 
 pub struct HtmlEscaper<'a, 'b>(pub &'a mut Formatter<'b>);
 
