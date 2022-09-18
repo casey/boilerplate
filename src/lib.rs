@@ -239,6 +239,32 @@
 //! assert_eq!(Context {}.to_string(), "");
 //! ```
 //!
+//! ### Escaping
+//!
+//! If the template file path ends with `html`, `htm`, or `xml`, HTML escaping
+//! is enabled. HTML escaping is performed by wrapping the `core::fmt::Formatter`
+//! passed to the generated `core::fmt::Display` implementation in a `HtmlEscaper`
+//! struct, which must be in scope where the boilerplate derive macro is invoked.
+//!
+//! A suitable `HtmlEscaper` is provided by the `html_escaper` crate.
+//!
+//! ```
+//! use html_escaper::HtmlEscaper;
+//!
+//! #[derive(boilerplate::Boilerplate)]
+//! struct EscapeHtml(String);
+//! assert_eq!(EscapeHtml("&".into()).to_string(), "&amp;\n");
+//! ```
+//!
+//! ```
+//! use html_escaper::HtmlEscaper;
+//!
+//! #[derive(boilerplate::Boilerplate)]
+//! #[boilerplate(text = "$$ self.0\n")]
+//! struct ContextHtml(String);
+//! assert_eq!(ContextHtml("&".into()).to_string(), "&amp;\n");
+//! ```
+//!
 //! ### Axum Integration
 //!
 //! When the `axum` feature is enabled, templates will be provided with an
@@ -278,6 +304,7 @@
 //!   );
 //! }
 //! ```
+
 use {
   self::{block::Block, boilerplate::Boilerplate, source::Source, template::Template},
   darling::FromDeriveInput,

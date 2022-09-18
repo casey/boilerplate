@@ -85,6 +85,7 @@ version = "0.0.2"
 dependencies = [
  "axum",
  "darling",
+ "html-escaper",
  "mime",
  "new_mime_guess",
  "pretty_assertions",
@@ -205,6 +206,10 @@ dependencies = [
  "pin-project-lite",
  "pin-utils",
 ]
+
+[[package]]
+name = "html-escaper"
+version = "0.0.0"
 
 [[package]]
 name = "http"

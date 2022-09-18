@@ -1,7 +1,9 @@
 use super::*;
 
 pub(crate) struct Template {
+  pub(crate) escape: bool,
   pub(crate) ident: Ident,
+  pub(crate) mime: Mime,
   pub(crate) source: Source,
 }
 
@@ -25,9 +27,11 @@ impl Template {
     let ident = &self.ident;
     let source = &self.source;
     let body = self.body();
+
     quote! {
       impl core::fmt::Display for #ident {
         fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
+          use core::fmt::Write;
           let text = #source;
           #body
           Ok(())
@@ -44,7 +48,7 @@ impl Template {
     loop {
       let rest = &text[j..];
 
-      let block = Block::starting_at(rest);
+      let block = Block::starting_at(rest, self.escape);
 
       if i < j && block.is_some() {
         lines.push(format!("f.write_str(&text[{}..{}])? ;", i, j));
@@ -73,7 +77,7 @@ impl Template {
 
   fn axum_into_response_impl(&self) -> TokenStream {
     let ident = &self.ident;
-    let content_type = LitStr::new(self.source.mime().as_ref(), Span::call_site());
+    let content_type = LitStr::new(self.mime.as_ref(), Span::call_site());
     quote!(
       impl axum::response::IntoResponse for #ident {
         fn into_response(self) -> axum::response::Response<axum::body::BoxBody> {
@@ -98,12 +102,15 @@ mod tests {
       Template {
         ident: Ident::new("Foo", Span::call_site()),
         source: Source::Literal(LitStr::new("", Span::call_site())),
+        mime: mime::TEXT_PLAIN,
+        escape: false,
       }
       .display_impl()
       .to_string(),
       quote!(
         impl core::fmt::Display for Foo {
           fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
+            use core::fmt::Write;
             let text = "";
             Ok(())
           }
@@ -117,6 +124,8 @@ mod tests {
     let actual = Template {
       ident: Ident::new("Foo", Span::call_site()),
       source: Source::Literal(LitStr::new(template, Span::call_site())),
+      mime: mime::TEXT_PLAIN,
+      escape: false,
     }
     .body();
 
@@ -170,6 +179,8 @@ mod tests {
       Template {
         ident: Ident::new("Foo", Span::call_site()),
         source: Source::Literal(LitStr::new("", Span::call_site())),
+        mime: mime::TEXT_PLAIN,
+        escape: false,
       }
       .axum_into_response_impl()
       .to_string(),

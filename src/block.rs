@@ -7,8 +7,8 @@ pub(super) enum Block {
 }
 
 impl Block {
-  pub(super) fn starting_at(rest: &str) -> Option<(usize, String)> {
-    Some(Self::from_rest(rest)?.implementation(rest))
+  pub(super) fn starting_at(rest: &str, escape: bool) -> Option<(usize, String)> {
+    Some(Self::from_rest(rest)?.implementation(rest, escape))
   }
 
   fn from_rest(rest: &str) -> Option<Self> {
@@ -26,7 +26,7 @@ impl Block {
     None
   }
 
-  fn implementation(self, rest: &str) -> (usize, String) {
+  fn implementation(self, rest: &str, escape: bool) -> (usize, String) {
     let before_open = 0;
     let after_open = before_open + self.open_delimiter().len();
     let before_close = match rest.find(self.close_delimiter()) {
@@ -39,8 +39,20 @@ impl Block {
 
     let rust = match self {
       Self::Code | Self::CodeLine => contents.into(),
-      Self::Interpolation => format!("write!(f, \"{{}}\", {})? ;", contents),
-      Self::InterpolationLine => format!("write!(f, \"{{}}\\n\", {})? ;", contents),
+      Self::Interpolation => {
+        format!(
+          "write!({}, \"{{}}\", {})? ;",
+          if escape { "HtmlEscaper(f)" } else { "f" },
+          contents
+        )
+      }
+      Self::InterpolationLine => {
+        format!(
+          "write!({}, \"{{}}\\n\", {})? ;",
+          if escape { "HtmlEscaper(f)" } else { "f" },
+          contents
+        )
+      }
     };
 
     (after_close, rust)

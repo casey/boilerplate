@@ -25,5 +25,9 @@ axum = []
 
 [dev-dependencies]
 axum = "0.5.0"
+html-escaper = { path = "html-escaper" }
 pretty_assertions = "1.0.0"
 unindent = "0.1.10"
+
+[workspace]
+members = [".", "html-escaper"]
