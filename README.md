@@ -44,4 +44,4 @@ struct MyTemplate {
 assert_eq!(MyTemplate { n: 10 }.to_string(), "Foo is 10!\n");
 ```
 
-See [the docs](https://docs.rs/boilerplate/latest/boilerplate/) for more examples.
+See [the docs](https://docs.rs/boilerplate/latest/boilerplate/) for more information and examples.
