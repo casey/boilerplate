@@ -27,16 +27,11 @@ impl Template {
     let ident = &self.ident;
     let source = &self.source;
     let body = self.body();
-    let imports = self.escape.then(|| {
-      quote! {
-        use core::fmt::Write;
-      }
-    });
 
     quote! {
       impl core::fmt::Display for #ident {
         fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
-          #imports
+          use core::fmt::Write;
           let text = #source;
           #body
           Ok(())
@@ -115,6 +110,7 @@ mod tests {
       quote!(
         impl core::fmt::Display for Foo {
           fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
+            use core::fmt::Write;
             let text = "";
             Ok(())
           }
