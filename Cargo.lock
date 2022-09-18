@@ -81,7 +81,7 @@ checksum = "bef38d45163c2f1dde094a7dfd33ccf595c92905c8f8f4fdc18d06fb1037718a"
 
 [[package]]
 name = "boilerplate"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "axum",
  "darling",
@@ -209,7 +209,7 @@ dependencies = [
 
 [[package]]
 name = "html-escaper"
-version = "0.1.0"
+version = "0.2.0"
 
 [[package]]
 name = "http"
