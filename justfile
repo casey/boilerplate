@@ -1,13 +1,10 @@
-# TODO:
-# - run on CI
-
-watch +args='test --workspace --all-targets':
+watch +args='test --workspace':
   cargo watch --clear --exec '{{args}}'
 
 ci:
-  cargo test --workspace --all-targets
-  cargo test --workspace --all-targets --features axum
-  cargo clippy --workspace --all-targets
+  cargo test --workspace
+  cargo test --workspace --features axum
+  cargo clippy --workspace
   cargo fmt --workspace -- --check
 
 # publish current GitHub master branch

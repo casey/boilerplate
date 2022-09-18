@@ -2,8 +2,8 @@ use core::fmt::{self, Display, Formatter, Write};
 
 pub struct Trusted<T>(pub T);
 
-impl<T: Display> WriteHtml for T {
-  fn write_html(&self, f: &mut Formatter, newline: bool) -> fmt::Result {
+impl<T: Display> Escape for T {
+  fn escape(&self, f: &mut Formatter, newline: bool) -> fmt::Result {
     if newline {
       write!(HtmlEscaper(f), "{}\n", self)
     } else {
@@ -12,8 +12,8 @@ impl<T: Display> WriteHtml for T {
   }
 }
 
-impl<T: Display> WriteHtml for Trusted<T> {
-  fn write_html(&self, f: &mut Formatter, newline: bool) -> fmt::Result {
+impl<T: Display> Escape for Trusted<T> {
+  fn escape(&self, f: &mut Formatter, newline: bool) -> fmt::Result {
     if newline {
       write!(f, "{}\n", self.0)
     } else {
@@ -22,8 +22,8 @@ impl<T: Display> WriteHtml for Trusted<T> {
   }
 }
 
-pub trait WriteHtml {
-  fn write_html(&self, f: &mut Formatter, newline: bool) -> fmt::Result;
+pub trait Escape {
+  fn escape(&self, f: &mut Formatter, newline: bool) -> fmt::Result;
 }
 
 pub struct HtmlEscaper<'a, 'b>(pub &'a mut Formatter<'b>);

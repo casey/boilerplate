@@ -253,7 +253,7 @@
 //! A suitable `HtmlEscaper` is provided by the `html_escaper` crate.
 //!
 //! ```
-//! use html_escaper::WriteHtml;
+//! use html_escaper::Escape;
 //!
 //! #[derive(boilerplate::Boilerplate)]
 //! struct EscapeHtml(&'static str);
@@ -261,7 +261,7 @@
 //! ```
 //!
 //! ```
-//! use html_escaper::WriteHtml;
+//! use html_escaper::Escape;
 //!
 //! #[derive(boilerplate::Boilerplate)]
 //! #[boilerplate(text = "$$ self.0\n")]
@@ -270,7 +270,7 @@
 //! ```
 //!
 //! ```
-//! use html_escaper::{WriteHtml, Trusted};
+//! use html_escaper::{Escape, Trusted};
 //!
 //! #[derive(boilerplate::Boilerplate)]
 //! #[boilerplate(text = "$$ self.0\n")]

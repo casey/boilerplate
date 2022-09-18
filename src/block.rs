@@ -41,14 +41,14 @@ impl Block {
       Self::Code | Self::CodeLine => contents.into(),
       Self::Interpolation => {
         if escape {
-          format!("({}).write_html(f, false)? ;", contents)
+          format!("({}).escape(f, false)? ;", contents)
         } else {
           format!("write!(f, \"{{}}\", {})? ;", contents)
         }
       }
       Self::InterpolationLine => {
         if escape {
-          format!("({}).write_html(f, true)? ;", contents)
+          format!("({}).escape(f, true)? ;", contents)
         } else {
           format!("write!(f, \"{{}}\\n\", {})? ;", contents)
         }
