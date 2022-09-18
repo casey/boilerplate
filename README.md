@@ -15,6 +15,8 @@
 <br>
 
 `boilerplate` is a minimal compile-time Rust text template engine.
+`boilerplate`'s HTML escaping has not been scrutinized, and should not be used
+in production environments with untrusted input.
 
 ## Quick Start
 
