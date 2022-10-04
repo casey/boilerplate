@@ -291,7 +291,9 @@
 //!
 //! When the `axum` feature is enabled, templates will be provided with an
 //! `axum::response::IntoResponse` implementation. The MIME type is deduced
-//! from the template path defaulting to `text/plain`:
+//! from the template path defaulting to `text/plain`. If the MIME type is
+//! `text`, `charset=utf-8` will be added automatically, since all
+//! boilerplate templates are UTF-8.
 //!
 //! ```
 //! #[cfg(feature = "axum")]
@@ -305,7 +307,7 @@
 //!       .headers()
 //!       .get("content-type")
 //!       .unwrap(),
-//!     "text/html",
+//!     "text/html; charset=utf-8",
 //!   );
 //! }
 //! ```
@@ -322,7 +324,7 @@
 //!       .headers()
 //!       .get("content-type")
 //!       .unwrap(),
-//!     "text/plain",
+//!     "text/plain; charset=utf-8",
 //!   );
 //! }
 //! ```

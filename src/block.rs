@@ -12,18 +12,14 @@ impl Block {
   }
 
   fn from_rest(rest: &str) -> Option<Self> {
-    for variant in [
+    [
       Self::Code,
       Self::CodeLine,
       Self::Interpolation,
       Self::InterpolationLine,
-    ] {
-      if rest.starts_with(variant.open_delimiter()) {
-        return Some(variant);
-      }
-    }
-
-    None
+    ]
+    .into_iter()
+    .find(|variant| rest.starts_with(variant.open_delimiter()))
   }
 
   fn implementation(self, rest: &str, escape: bool) -> (usize, String) {
