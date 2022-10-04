@@ -35,10 +35,18 @@ impl Boilerplate {
       .map(|extension| ["html", "htm", "xml"].contains(&extension.to_string_lossy().as_ref()))
       .unwrap_or(false);
 
+    let guess = new_mime_guess::from_path(&filename).first_or_text_plain();
+
+    let mime = if guess.type_() == mime::TEXT && guess.get_param(mime::CHARSET).is_none() {
+      format!("{}; charset=utf-8", guess).parse().unwrap()
+    } else {
+      guess
+    };
+
     Template {
       ident: self.ident,
       source,
-      mime: new_mime_guess::from_path(&filename).first_or_text_plain(),
+      mime,
       escape,
     }
     .impls()
