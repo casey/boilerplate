@@ -30,9 +30,9 @@ impl Template {
 
     quote! {
       impl core::fmt::Display for #ident {
-        fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
+        fn fmt(&self, boilerplate_formatter: &mut core::fmt::Formatter) -> core::fmt::Result {
           use core::fmt::Write;
-          let text = #source;
+          let boilerplate_template = #source;
           #body
           Ok(())
         }
@@ -51,11 +51,17 @@ impl Template {
       let block = Block::starting_at(rest, self.escape);
 
       if i < j && block.is_some() {
-        lines.push(format!("f.write_str(&text[{}..{}])? ;", i, j));
+        lines.push(format!(
+          "boilerplate_formatter.write_str(&boilerplate_template[{}..{}])? ;",
+          i, j
+        ));
       }
 
       if i < j && j == text.len() {
-        lines.push(format!("f.write_str(&text[{}..])? ;", i));
+        lines.push(format!(
+          "boilerplate_formatter.write_str(&boilerplate_template[{}..])? ;",
+          i
+        ));
       }
 
       if j == text.len() {
@@ -109,9 +115,9 @@ mod tests {
       .to_string(),
       quote!(
         impl core::fmt::Display for Foo {
-          fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
+          fn fmt(&self, boilerplate_formatter: &mut core::fmt::Formatter) -> core::fmt::Result {
             use core::fmt::Write;
-            let text = "";
+            let boilerplate_template = "";
             Ok(())
           }
         }
@@ -144,7 +150,10 @@ mod tests {
 
   #[test]
   fn interpolation() {
-    assert_display_body_eq("{{ true }}", quote!(write!(f, "{}", true)?;));
+    assert_display_body_eq(
+      "{{ true }}",
+      quote!(write!(boilerplate_formatter, "{}", true)?;),
+    );
   }
 
   #[test]
@@ -152,7 +161,7 @@ mod tests {
     assert_display_body_eq(
       "{% for i in 0..10 { %}{{ i }}{% } %}",
       quote!(for i in 0..10 {
-        write!(f, "{}", i)?;
+        write!(boilerplate_formatter, "{}", i)?;
       }),
     );
   }
@@ -162,15 +171,18 @@ mod tests {
     assert_display_body_eq(
       "foo {{ true }}",
       quote!(
-        f.write_str(&text[0..4])?;
-        write!(f, "{}", true)?;
+        boilerplate_formatter.write_str(&boilerplate_template[0..4])?;
+        write!(boilerplate_formatter, "{}", true)?;
       ),
     );
   }
 
   #[test]
   fn trailing_text() {
-    assert_display_body_eq("foo", quote!(f.write_str(&text[0..])?;));
+    assert_display_body_eq(
+      "foo",
+      quote!(boilerplate_formatter.write_str(&boilerplate_template[0..])?;),
+    );
   }
 
   #[test]
