@@ -37,16 +37,19 @@ impl Block {
       Self::Code | Self::CodeLine => contents.into(),
       Self::Interpolation => {
         if escape {
-          format!("({}).escape(f, false)? ;", contents)
+          format!("({}).escape(boilerplate_formatter, false)? ;", contents)
         } else {
-          format!("write!(f, \"{{}}\", {})? ;", contents)
+          format!("write!(boilerplate_formatter, \"{{}}\", {})? ;", contents)
         }
       }
       Self::InterpolationLine => {
         if escape {
-          format!("({}).escape(f, true)? ;", contents)
+          format!("({}).escape(boilerplate_formatter, true)? ;", contents)
         } else {
-          format!("write!(f, \"{{}}\\n\", {})? ;", contents)
+          format!(
+            "write!(boilerplate_formatter, \"{{}}\\n\", {})? ;",
+            contents
+          )
         }
       }
     };

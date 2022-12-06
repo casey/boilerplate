@@ -9,7 +9,7 @@ impl Source {
   pub(crate) fn text(&self) -> String {
     match self {
       Self::Literal(literal) => literal.value(),
-      Self::Path(path) => std::fs::read_to_string(&path)
+      Self::Path(path) => std::fs::read_to_string(path)
         .unwrap_or_else(|err| panic!("Failed to read template `{path}`: {err}")),
     }
   }
