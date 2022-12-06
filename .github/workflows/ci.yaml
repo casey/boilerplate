@@ -13,9 +13,7 @@ defaults:
     shell: bash
 
 jobs:
-  all:
-    name: All
-
+  test:
     strategy:
       matrix:
         os:
@@ -33,24 +31,38 @@ jobs:
 
     - uses: actions-rs/toolchain@v1
       with:
+        profile: minimal
+        toolchain: stable
+
+    - uses: Swatinem/rust-cache@v1
+
+    - run: |
+        cargo test --all
+        cargo test --all --features axum
+
+  lint:
+    runs-on: ubuntu-latest
+
+    env:
+      RUSTFLAGS: --deny warnings
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - uses: actions-rs/toolchain@v1
+      with:
         components: clippy, rustfmt
-        override: true
         toolchain: stable
 
     - uses: Swatinem/rust-cache@v1
 
     - run: cargo update --locked --package boilerplate
 
-    - run: |
-        cargo test --all
-        cargo test --all --features axum
-
     - run: cargo clippy --all
 
     - run: cargo fmt --all -- --check
 
-    - if: ${{ matrix.os == 'ubuntu-latest' }}
-      run: |
+    - run: |
         sudo apt-get update
         sudo apt-get install ripgrep
         ./bin/forbid
