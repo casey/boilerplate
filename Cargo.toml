@@ -1,6 +1,6 @@
 [package]
 name = "boilerplate"
-version = "0.2.1"
+version = "0.2.2"
 license = "CC0-1.0"
 edition = "2021"
 description = "Minimal compile-time Rust template engine"
@@ -24,7 +24,7 @@ syn = { version = "1.0.0", features = ["derive"] }
 axum = []
 
 [dev-dependencies]
-axum = "0.5.0"
+axum = "0.6.0"
 html-escaper = { path = "html-escaper" }
 pretty_assertions = "1.0.0"
 unindent = "0.1.10"
