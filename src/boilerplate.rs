@@ -3,6 +3,7 @@ use super::*;
 #[derive(FromDeriveInput)]
 #[darling(attributes(boilerplate))]
 pub(crate) struct Boilerplate {
+  generics: Generics,
   ident: Ident,
   text: Option<LitStr>,
 }
@@ -44,10 +45,11 @@ impl Boilerplate {
     };
 
     Template {
-      ident: self.ident,
-      source,
-      mime,
       escape,
+      generics: self.generics,
+      ident: self.ident,
+      mime,
+      source,
     }
     .impls()
   }

@@ -287,6 +287,19 @@
 //! assert_eq!(ContextHtml("&").to_string(), "&\n");
 //! ```
 //!
+//! ### Generics
+//!
+//! Context types may have lifetimes and generics;
+//!
+//! ```
+//! use std::fmt::Display;
+//!
+//! #[derive(boilerplate::Boilerplate)]
+//! #[boilerplate(text = "$$ self.content\n")]
+//! struct Context<'a, T: Display> { content: &'a T }
+//! assert_eq!(Context { content: &100 }.to_string(), "100\n");
+//! ```
+//!
 //! ### Axum Integration
 //!
 //! When the `axum` feature is enabled, templates will be provided with an
@@ -336,7 +349,7 @@ use {
   proc_macro2::{Span, TokenStream},
   quote::{quote, ToTokens, TokenStreamExt},
   std::path::Path,
-  syn::{parse_macro_input, DeriveInput, Ident, LitStr},
+  syn::{parse_macro_input, DeriveInput, Generics, Ident, LitStr},
 };
 
 mod block;
