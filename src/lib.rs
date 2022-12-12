@@ -291,14 +291,12 @@
 //!
 //! Context types may have lifetimes and generics;
 //!
-//! ```
-//! use std::fmt::Display;
-//!
-//! #[derive(boilerplate::Boilerplate)]
-//! #[boilerplate(text = "$$ self.content\n")]
-//! struct Context<'a, T: Display> { content: &'a T }
-//! assert_eq!(Context {content: &100 }.to_string(), "100\n");
-//! ```
+use std::fmt::Display;
+
+#[derive(boilerplate::Boilerplate)]
+#[boilerplate(text = "$$ self.content\n")]
+struct Context<'a, T: Display> { content: &'a T }
+assert_eq!(Context { content: &100 }.to_string(), "100\n");
 //!
 //! ### Axum Integration
 //!
