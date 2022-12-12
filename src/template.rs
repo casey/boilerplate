@@ -2,6 +2,7 @@ use super::*;
 
 pub(crate) struct Template {
   pub(crate) escape: bool,
+  pub(crate) generics: Generics,
   pub(crate) ident: Ident,
   pub(crate) mime: Mime,
   pub(crate) source: Source,
@@ -27,9 +28,10 @@ impl Template {
     let ident = &self.ident;
     let source = &self.source;
     let body = self.body();
+    let (impl_generics, ty_generics, where_clause) = self.generics.split_for_impl();
 
     quote! {
-      impl core::fmt::Display for #ident {
+      impl #impl_generics core::fmt::Display for #ident #ty_generics #where_clause {
         fn fmt(&self, boilerplate_formatter: &mut core::fmt::Formatter) -> core::fmt::Result {
           use core::fmt::Write;
           let boilerplate_template = #source;
@@ -84,8 +86,10 @@ impl Template {
   fn axum_into_response_impl(&self) -> TokenStream {
     let ident = &self.ident;
     let content_type = LitStr::new(self.mime.as_ref(), Span::call_site());
-    quote!(
-      impl axum::response::IntoResponse for #ident {
+    let (impl_generics, ty_generics, where_clause) = self.generics.split_for_impl();
+
+    quote! {
+      impl #impl_generics axum::response::IntoResponse for #ident #ty_generics #where_clause {
         fn into_response(self) -> axum::response::Response<axum::body::BoxBody> {
           axum::response::Response::builder()
             .header(axum::http::header::CONTENT_TYPE, #content_type)
@@ -94,7 +98,7 @@ impl Template {
           .into_response()
         }
       }
-    )
+    }
   }
 }
 
@@ -110,6 +114,7 @@ mod tests {
         source: Source::Literal(LitStr::new("", Span::call_site())),
         mime: mime::TEXT_PLAIN,
         escape: false,
+        generics: Generics::default(),
       }
       .display_impl()
       .to_string(),
@@ -132,6 +137,7 @@ mod tests {
       source: Source::Literal(LitStr::new(template, Span::call_site())),
       mime: mime::TEXT_PLAIN,
       escape: false,
+      generics: Generics::default(),
     }
     .body();
 
@@ -193,6 +199,7 @@ mod tests {
         source: Source::Literal(LitStr::new("", Span::call_site())),
         mime: mime::TEXT_PLAIN,
         escape: false,
+        generics: Generics::default(),
       }
       .axum_into_response_impl()
       .to_string(),
