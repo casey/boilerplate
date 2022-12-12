@@ -1,6 +1,6 @@
 [package]
 name = "boilerplate"
-version = "0.2.2"
+version = "0.2.3"
 license = "CC0-1.0"
 edition = "2021"
 description = "Minimal compile-time Rust template engine"
