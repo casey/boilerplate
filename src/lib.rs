@@ -55,10 +55,22 @@
 //! 6. templates/quick-start.txt # add templates directory
 //! ```
 //!
+//! Custom Filename
+//! ---------------
+//!
+//! ```
+//! #[derive(boilerplate::Boilerplate)]
+//! #[boilerplate(filename = "quick-start.txt")]
+//! struct Context {
+//!   n: u32,
+//! }
+//! assert_eq!(Context { n: 10 }.to_string(), "Foo is 10!\n");
+//! ```
+//!
 //! Inline Templates
 //! ----------------
 //!
-//! Templates contents be read from a string:
+//! Templates contents can be read from a string:
 //!
 //! ```
 //! #[derive(boilerplate::Boilerplate)]

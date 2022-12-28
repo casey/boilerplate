@@ -3,6 +3,7 @@ use super::*;
 #[derive(FromDeriveInput)]
 #[darling(attributes(boilerplate))]
 pub(crate) struct Boilerplate {
+  filename: Option<String>,
   generics: Generics,
   ident: Ident,
   text: Option<LitStr>,
@@ -10,7 +11,9 @@ pub(crate) struct Boilerplate {
 
 impl Boilerplate {
   pub(crate) fn impls(self) -> TokenStream {
-    let filename = Self::filename_from_ident(&self.ident.to_string());
+    let filename = self
+      .filename
+      .unwrap_or_else(|| Self::filename_from_ident(&self.ident.to_string()));
 
     let source = match self.text {
       Some(text) => Source::Literal(text),
