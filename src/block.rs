@@ -25,11 +25,17 @@ impl Block {
   fn implementation(self, rest: &str, escape: bool) -> (usize, String) {
     let before_open = 0;
     let after_open = before_open + self.open_delimiter().len();
-    let before_close = match rest.find(self.close_delimiter()) {
-      Some(before_close) => before_close,
+    let (before_close, newline) = match rest.find(self.close_delimiter()) {
+      Some(before_close) => (before_close, true),
+      None if self.is_line() => (rest.len(), false),
       None => panic!("Unmatched `{}`", self.open_delimiter()),
     };
-    let after_close = before_close + self.close_delimiter().len();
+
+    let after_close = if newline {
+      before_close + self.close_delimiter().len()
+    } else {
+      before_close
+    };
 
     let contents = &rest[after_open..before_close];
 
@@ -44,12 +50,17 @@ impl Block {
       }
       Self::InterpolationLine => {
         if escape {
-          format!("({}).escape(boilerplate_formatter, true)? ;", contents)
-        } else {
+          format!(
+            "({}).escape(boilerplate_formatter, {})? ;",
+            contents, newline
+          )
+        } else if newline {
           format!(
             "write!(boilerplate_formatter, \"{{}}\\n\", {})? ;",
             contents
           )
+        } else {
+          format!("write!(boilerplate_formatter, \"{{}}\", {})? ;", contents)
         }
       }
     };
@@ -72,6 +83,13 @@ impl Block {
       Self::CodeLine => "\n",
       Self::Interpolation => "}}",
       Self::InterpolationLine => "\n",
+    }
+  }
+
+  fn is_line(self) -> bool {
+    match self {
+      Self::Code | Self::Interpolation => false,
+      Self::CodeLine | Self::InterpolationLine => true,
     }
   }
 }

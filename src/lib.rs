@@ -128,6 +128,31 @@
 //! assert_eq!(Context { byte: 38 }.to_string(), "My favorite byte is 38\n");
 //! ```
 //!
+//! If there is no following newline, the end of the template text terminates
+//! the interpolation:
+//!
+//! ```
+//! #[derive(boilerplate::Boilerplate)]
+//! #[boilerplate(text = "My favorite byte is $$ self.byte")]
+//! struct Context {
+//!   byte: u8,
+//! }
+//! assert_eq!(Context { byte: 38 }.to_string(), "My favorite byte is 38");
+//! ```
+//!
+//! This works for escaped templates as well:
+//!
+//! ```
+//! use html_escaper::Escape;
+//!
+//! #[derive(boilerplate::Boilerplate)]
+//! #[boilerplate(text = "My favorite byte is $$ self.byte")]
+//! struct ContextHtml {
+//!   byte: u8,
+//! }
+//! assert_eq!(ContextHtml { byte: 38 }.to_string(), "My favorite byte is 38");
+//! ```
+//!
 //! ### Code Blocks
 //!
 //! Code inside of {%…%} is included in the display function body:
@@ -165,9 +190,19 @@
 //! assert_eq!(Context { alone: false }.to_string(), "Knock, knock!\nWho's there?\n");
 //! ```
 //!
-//! Code lines are often more legible than code blocks. Additionally, becuase
+//! Code lines are often more legible than code blocks. Additionally, because
 //! the `\n` at the end of a code line is stripped, the rendered templates may
 //! include fewer unwanted newlines.
+//!
+//! If no newline is present, the code line is terminated by the end of the template
+//! text:
+//!
+//! ```
+//! #[derive(boilerplate::Boilerplate)]
+//! #[boilerplate(text = "%% let _x = 2;")]
+//! struct Context {}
+//! assert_eq!(Context { }.to_string(), "");
+//! ```
 //!
 //! ### Loops
 //!
