@@ -14,7 +14,12 @@
 
 <br>
 
-`boilerplate` is a minimal compile-time Rust text template engine.
+`boilerplate` is a minimal Rust text template engine with no runtime
+dependencies.
+
+`boilerplate` uses Rust as the template language, so all templates are checked
+for errors at compile time, and any Rust type that implements `Display` can be
+used in a template context.
 
 ## Quick Start
 
