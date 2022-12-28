@@ -54,15 +54,13 @@ impl Block {
             "({}).escape(boilerplate_formatter, {})? ;",
             contents, newline
           )
+        } else if newline {
+          format!(
+            "write!(boilerplate_formatter, \"{{}}\\n\", {})? ;",
+            contents
+          )
         } else {
-          if newline {
-            format!(
-              "write!(boilerplate_formatter, \"{{}}\\n\", {})? ;",
-              contents
-            )
-          } else {
-            format!("write!(boilerplate_formatter, \"{{}}\", {})? ;", contents)
-          }
+          format!("write!(boilerplate_formatter, \"{{}}\", {})? ;", contents)
         }
       }
     };
