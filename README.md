@@ -14,7 +14,8 @@
 
 <br>
 
-`boilerplate` is a Rust text template engine with no runtime dependencies.
+`boilerplate` is a statically-checked Rust template engine with no runtime
+dependencies.
 
 Derive `Boilerplate` on the type you want to use as a template context:
 
