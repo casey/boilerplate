@@ -14,14 +14,59 @@
 
 <br>
 
-`boilerplate` is a minimal Rust text template engine with no runtime
+`boilerplate` is a statically-checked Rust template engine with no runtime
 dependencies.
 
-`boilerplate` uses Rust as the template language, so all templates are checked
-for errors at compile time, and any Rust type that implements `Display` can be
-used in a template context.
+Derive `Boilerplate` on the type you want to use as a template context:
 
-## Quick Start
+```rust
+use boilerplate::Boilerplate;
+
+#[derive(Boilerplate)]
+struct MyTemplateTxt {
+  foo: bool,
+  bar: Result<String, Box<dyn std::error::Error>>,
+}
+```
+
+`boilerplate` template code and interpolations are Rust, so errors are checked
+at compile time and the template language is easy to learn:
+
+```text
+%% if self.foo {
+Foo was true!
+%% }
+
+%% match &self.bar {
+%%   Ok(ok) => {
+Pretty good: {{ ok }}
+%%   }
+%%   Err(err) => {
+Not so great: {{ err }}
+%%   }
+%% }
+```
+
+The `Boilerplate` macro provides a `Display` implementation, so you can
+instantiate a template context and convert it into a string:
+
+```rust
+let rendered = MyTemplateTxt { foo: true, bar: Ok("hello".into()) }.to_string();
+```
+
+Or use it in a format string:
+
+```rust
+println!("The output is: {}", MyTemplateTxt { foo: false, bar: Err("hello".into()) });
+```
+
+`boilerplate`'s implementation is exceedingly simple. Try using
+[cargo-expand](https://github.com/dtolnay/cargo-expand) to expand the
+`Boilerplate` macro and inspect derived `Display` implementations and debug
+template issues.
+
+Quick Start
+-----------
 
 Add `boilerplate` to your project's `Cargo.toml`:
 
@@ -48,5 +93,8 @@ struct MyTemplate {
 
 assert_eq!(MyTemplate { n: 10 }.to_string(), "Foo is 10!\n");
 ```
+
+Examples
+--------
 
 See [the docs](https://docs.rs/boilerplate/latest/boilerplate/) for more information and examples.
