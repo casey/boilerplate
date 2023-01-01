@@ -36,7 +36,6 @@ at compile time and the template language is easy to learn:
 %% if self.foo {
 Foo was true!
 %% }
-
 %% match &self.bar {
 %%   Ok(ok) => {
 Pretty good: {{ ok }}
@@ -87,11 +86,11 @@ Define, instantiate, and render the template context:
 use boilerplate::Boilerplate;
 
 #[derive(Boilerplate)]
-struct MyTemplate {
+struct MyTemplateTxt {
   n: u32,
 }
 
-assert_eq!(MyTemplate { n: 10 }.to_string(), "Foo is 10!\n");
+assert_eq!(MyTemplateTxt  { n: 10 }.to_string(), "Foo is 10!\n");
 ```
 
 Examples
