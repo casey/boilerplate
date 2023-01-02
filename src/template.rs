@@ -27,7 +27,7 @@ impl Template {
   fn display_impl(&self) -> TokenStream {
     let ident = &self.ident;
     let source = &self.source;
-    let body = self.body();
+    let body = body(&source.text(), self.escape, false);
     let (impl_generics, ty_generics, where_clause) = self.generics.split_for_impl();
 
     quote! {
@@ -40,47 +40,6 @@ impl Template {
         }
       }
     }
-  }
-
-  fn body(&self) -> TokenStream {
-    let text = self.source.text();
-    let mut lines = Vec::new();
-    let mut i = 0;
-    let mut j = 0;
-    loop {
-      let rest = &text[j..];
-
-      let block = Block::starting_at(rest, self.escape);
-
-      if i < j && block.is_some() {
-        lines.push(format!(
-          "boilerplate_formatter.write_str(&boilerplate_template[{}..{}])? ;",
-          i, j
-        ));
-      }
-
-      if i < j && j == text.len() {
-        lines.push(format!(
-          "boilerplate_formatter.write_str(&boilerplate_template[{}..])? ;",
-          i
-        ));
-      }
-
-      if j == text.len() {
-        break;
-      }
-
-      match block {
-        Some((length, line)) => {
-          lines.push(line);
-          j += length;
-          i = j;
-        }
-        None => j += rest.chars().next().unwrap().len_utf8(),
-      }
-    }
-
-    lines.join("").parse().unwrap()
   }
 
   fn axum_into_response_impl(&self) -> TokenStream {
@@ -132,14 +91,7 @@ mod tests {
   }
 
   fn assert_display_body_eq(template: &str, expected: TokenStream) {
-    let actual = Template {
-      ident: Ident::new("Foo", Span::call_site()),
-      source: Source::Literal(LitStr::new(template, Span::call_site())),
-      mime: mime::TEXT_PLAIN,
-      escape: false,
-      generics: Generics::default(),
-    }
-    .body();
+    let actual = body(template, false, false);
 
     assert_eq!(actual.to_string(), expected.to_string());
   }

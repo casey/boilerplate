@@ -396,6 +396,26 @@
 //!
 //! assert_eq!(output, "foo");
 //! ```
+//!
+//! ```
+//! use boilerplate::boilerplate;
+//!
+//! let x = 2;
+//!
+//! let output: String = boilerplate!("{{x}}");
+//!
+//! assert_eq!(output, "2");
+//! ```
+//!
+//! ```
+//! use boilerplate::boilerplate;
+//!
+//! let x = "and";
+//!
+//! let output: String = boilerplate!("Easy {{x}} peasy!");
+//!
+//! assert_eq!(output, "Easy and peasy!");
+//! ```
 
 use {
   self::{block::Block, boilerplate::Boilerplate, source::Source, template::Template},
@@ -412,34 +432,27 @@ mod boilerplate;
 mod source;
 mod template;
 
-#[proc_macro]
-pub fn boilerplate(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
-  let template = parse_macro_input!(input as LitStr);
-  let text = template.value();
+fn body(text: &str, escape: bool, function: bool) -> TokenStream {
+  let error_handler = if function { ".unwrap()" } else { "?" };
   let mut lines = Vec::new();
   let mut i = 0;
   let mut j = 0;
-
-  lines.push("{".into());
-  lines.push("let boilerplate_template = \"foo\";".into());
-  lines.push("let mut boilerplate_output = String::new();".into());
-
   loop {
     let rest = &text[j..];
 
-    let block = Block::starting_at(rest, false);
+    let block = Block::implementation_starting_at(rest, escape, error_handler);
 
     if i < j && block.is_some() {
       lines.push(format!(
-        "boilerplate_output.push_str(&boilerplate_template[{}..{}]);",
-        i, j
+        "boilerplate_formatter.write_str(&boilerplate_template[{}..{}]){} ;",
+        i, j, error_handler,
       ));
     }
 
     if i < j && j == text.len() {
       lines.push(format!(
-        "boilerplate_output.push_str(&boilerplate_template[{}..]);",
-        i
+        "boilerplate_formatter.write_str(&boilerplate_template[{}..]){} ;",
+        i, error_handler,
       ));
     }
 
@@ -457,11 +470,29 @@ pub fn boilerplate(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     }
   }
 
-  lines.push("boilerplate_output".into());
-
-  lines.push("}".into());
-
   lines.join("").parse().unwrap()
+}
+
+#[proc_macro]
+pub fn boilerplate(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+  let template = parse_macro_input!(input as LitStr);
+  let text = template.value();
+
+  let body = body(&text, false, true);
+
+  quote! {
+    {
+      use ::std::fmt::Write;
+
+      let boilerplate_template = #template;
+      let mut boilerplate_formatter = String::new();
+
+      #body
+
+      boilerplate_formatter
+    }
+  }
+  .into()
 }
 
 #[allow(non_snake_case)]
