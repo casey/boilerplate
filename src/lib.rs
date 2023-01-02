@@ -388,6 +388,14 @@
 //!   );
 //! }
 //! ```
+//!
+//! ```
+//! use boilerplate::boilerplate;
+//!
+//! let output: String = boilerplate!("foo");
+//!
+//! assert_eq!(output, "foo");
+//! ```
 
 use {
   self::{block::Block, boilerplate::Boilerplate, source::Source, template::Template},
@@ -404,8 +412,61 @@ mod boilerplate;
 mod source;
 mod template;
 
+#[proc_macro]
+pub fn boilerplate(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+  let template = parse_macro_input!(input as LitStr);
+  let text = template.value();
+  let mut lines = Vec::new();
+  let mut i = 0;
+  let mut j = 0;
+
+  lines.push("{".into());
+  lines.push("let boilerplate_template = \"foo\";".into());
+  lines.push("let mut boilerplate_output = String::new();".into());
+
+  loop {
+    let rest = &text[j..];
+
+    let block = Block::starting_at(rest, false);
+
+    if i < j && block.is_some() {
+      lines.push(format!(
+        "boilerplate_output.push_str(&boilerplate_template[{}..{}]);",
+        i, j
+      ));
+    }
+
+    if i < j && j == text.len() {
+      lines.push(format!(
+        "boilerplate_output.push_str(&boilerplate_template[{}..]);",
+        i
+      ));
+    }
+
+    if j == text.len() {
+      break;
+    }
+
+    match block {
+      Some((length, line)) => {
+        lines.push(line);
+        j += length;
+        i = j;
+      }
+      None => j += rest.chars().next().unwrap().len_utf8(),
+    }
+  }
+
+  lines.push("boilerplate_output".into());
+
+  lines.push("}".into());
+
+  lines.join("").parse().unwrap()
+}
+
+#[allow(non_snake_case)]
 #[proc_macro_derive(Boilerplate, attributes(boilerplate))]
-pub fn boilerplate(item: proc_macro::TokenStream) -> proc_macro::TokenStream {
+pub fn Boilerplate(item: proc_macro::TokenStream) -> proc_macro::TokenStream {
   let derive_input = parse_macro_input!(item as DeriveInput);
 
   Boilerplate::from_derive_input(&derive_input)
