@@ -9,7 +9,20 @@
 //! Templates are checked at compile time, so any error that the Rust compiler
 //! can catch can't make it into production.
 //!
-//! Template contexts are simple Rust types.
+//! There are two ways to use boilerplate.
+//!
+//! One way is with `boilerplate::Boilerplate`, a derive macro, which creates a
+//! `Display` implementation on a context type that you provide. The template
+//! text is stored in a separate file, and reads variables from the context
+//! type when rendered.
+//!
+//! The other way is with `boilerplate::boilerplate`, a function-like macro,
+//! which reads tempalte text from a string literal, and reads variables from
+//! the local scope when rendered.
+//!
+//! Use `boilerplate::Boilerplate` if you want to put your template text in a
+//! separate file, or if you need HTML escaping, and `boilerplate::boilerplate`
+//! if you want to put your template in a string literal.
 //!
 //! `boilerplate` is very simple, requires no runtime dependencies, and is
 //! usable in a `no_std` environment.
@@ -389,32 +402,33 @@
 //! }
 //! ```
 //!
-//! ```
-//! use boilerplate::boilerplate;
+//! Function-like Macro
+//! -------------------
 //!
-//! let output: String = boilerplate!("foo");
-//!
-//! assert_eq!(output, "foo");
-//! ```
+//! A function-like macro named `boilerplate` is also available, which can be
+//! used without needing to define a context type.
 //!
 //! ```
 //! use boilerplate::boilerplate;
 //!
-//! let x = 2;
+//! let foo = true;
+//! let bar: Result<&str, &str> = Ok("yassss");
 //!
-//! let output: String = boilerplate!("{{x}}");
+//! let output = boilerplate!(
+//! "%% if foo {
+//! Foo was true!
+//! %% }
+//! %% match bar {
+//! %%   Ok(ok) => {
+//! Pretty good: {{ ok }}
+//! %%   }
+//! %%   Err(err) => {
+//! Not so great: {{ err }}
+//! %%   }
+//! %% }
+//! ");
 //!
-//! assert_eq!(output, "2");
-//! ```
-//!
-//! ```
-//! use boilerplate::boilerplate;
-//!
-//! let x = "and";
-//!
-//! let output: String = boilerplate!("Easy {{x}} peasy!");
-//!
-//! assert_eq!(output, "Easy and peasy!");
+//! assert_eq!(output, "Foo was true!\nPretty good: yassss\n");
 //! ```
 
 use {
