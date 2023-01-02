@@ -27,12 +27,12 @@ impl Template {
   fn display_impl(&self) -> TokenStream {
     let ident = &self.ident;
     let source = &self.source;
-    let body = self.body();
+    let body = Block::body(&source.text(), self.escape, false);
     let (impl_generics, ty_generics, where_clause) = self.generics.split_for_impl();
 
     quote! {
       impl #impl_generics core::fmt::Display for #ident #ty_generics #where_clause {
-        fn fmt(&self, boilerplate_formatter: &mut core::fmt::Formatter) -> core::fmt::Result {
+        fn fmt(&self, boilerplate_output: &mut core::fmt::Formatter) -> core::fmt::Result {
           use core::fmt::Write;
           let boilerplate_template = #source;
           #body
@@ -40,47 +40,6 @@ impl Template {
         }
       }
     }
-  }
-
-  fn body(&self) -> TokenStream {
-    let text = self.source.text();
-    let mut lines = Vec::new();
-    let mut i = 0;
-    let mut j = 0;
-    loop {
-      let rest = &text[j..];
-
-      let block = Block::starting_at(rest, self.escape);
-
-      if i < j && block.is_some() {
-        lines.push(format!(
-          "boilerplate_formatter.write_str(&boilerplate_template[{}..{}])? ;",
-          i, j
-        ));
-      }
-
-      if i < j && j == text.len() {
-        lines.push(format!(
-          "boilerplate_formatter.write_str(&boilerplate_template[{}..])? ;",
-          i
-        ));
-      }
-
-      if j == text.len() {
-        break;
-      }
-
-      match block {
-        Some((length, line)) => {
-          lines.push(line);
-          j += length;
-          i = j;
-        }
-        None => j += rest.chars().next().unwrap().len_utf8(),
-      }
-    }
-
-    lines.join("").parse().unwrap()
   }
 
   fn axum_into_response_impl(&self) -> TokenStream {
@@ -120,7 +79,7 @@ mod tests {
       .to_string(),
       quote!(
         impl core::fmt::Display for Foo {
-          fn fmt(&self, boilerplate_formatter: &mut core::fmt::Formatter) -> core::fmt::Result {
+          fn fmt(&self, boilerplate_output: &mut core::fmt::Formatter) -> core::fmt::Result {
             use core::fmt::Write;
             let boilerplate_template = "";
             Ok(())
@@ -132,14 +91,7 @@ mod tests {
   }
 
   fn assert_display_body_eq(template: &str, expected: TokenStream) {
-    let actual = Template {
-      ident: Ident::new("Foo", Span::call_site()),
-      source: Source::Literal(LitStr::new(template, Span::call_site())),
-      mime: mime::TEXT_PLAIN,
-      escape: false,
-      generics: Generics::default(),
-    }
-    .body();
+    let actual = Block::body(template, false, false);
 
     assert_eq!(actual.to_string(), expected.to_string());
   }
@@ -158,7 +110,7 @@ mod tests {
   fn interpolation() {
     assert_display_body_eq(
       "{{ true }}",
-      quote!(write!(boilerplate_formatter, "{}", true)?;),
+      quote!(write!(boilerplate_output, "{}", true)?;),
     );
   }
 
@@ -167,7 +119,7 @@ mod tests {
     assert_display_body_eq(
       "{% for i in 0..10 { %}{{ i }}{% } %}",
       quote!(for i in 0..10 {
-        write!(boilerplate_formatter, "{}", i)?;
+        write!(boilerplate_output, "{}", i)?;
       }),
     );
   }
@@ -177,8 +129,8 @@ mod tests {
     assert_display_body_eq(
       "foo {{ true }}",
       quote!(
-        boilerplate_formatter.write_str(&boilerplate_template[0..4])?;
-        write!(boilerplate_formatter, "{}", true)?;
+        boilerplate_output.write_str(&boilerplate_template[0..4])?;
+        write!(boilerplate_output, "{}", true)?;
       ),
     );
   }
@@ -187,7 +139,7 @@ mod tests {
   fn trailing_text() {
     assert_display_body_eq(
       "foo",
-      quote!(boilerplate_formatter.write_str(&boilerplate_template[0..])?;),
+      quote!(boilerplate_output.write_str(&boilerplate_template[0..])?;),
     );
   }
 

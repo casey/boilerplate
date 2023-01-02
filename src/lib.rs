@@ -9,7 +9,20 @@
 //! Templates are checked at compile time, so any error that the Rust compiler
 //! can catch can't make it into production.
 //!
-//! Template contexts are simple Rust types.
+//! There are two ways to use boilerplate.
+//!
+//! One way is with `boilerplate::Boilerplate`, a derive macro, which creates a
+//! `Display` implementation on a context type that you provide. The template
+//! text is stored in a separate file, and reads variables from the context
+//! type when rendered.
+//!
+//! The other way is with `boilerplate::boilerplate`, a function-like macro,
+//! which reads tempalte text from a string literal, and reads variables from
+//! the local scope when rendered.
+//!
+//! Use `boilerplate::Boilerplate` if you want to put your template text in a
+//! separate file, or if you need HTML escaping, and `boilerplate::boilerplate`
+//! if you want to put your template in a string literal.
 //!
 //! `boilerplate` is very simple, requires no runtime dependencies, and is
 //! usable in a `no_std` environment.
@@ -388,6 +401,35 @@
 //!   );
 //! }
 //! ```
+//!
+//! Function-like Macro
+//! -------------------
+//!
+//! A function-like macro named `boilerplate` is also available, which can be
+//! used without needing to define a context type.
+//!
+//! ```
+//! use boilerplate::boilerplate;
+//!
+//! let foo = true;
+//! let bar: Result<&str, &str> = Ok("yassss");
+//!
+//! let output = boilerplate!(
+//! "%% if foo {
+//! Foo was true!
+//! %% }
+//! %% match bar {
+//! %%   Ok(ok) => {
+//! Pretty good: {{ ok }}
+//! %%   }
+//! %%   Err(err) => {
+//! Not so great: {{ err }}
+//! %%   }
+//! %% }
+//! ");
+//!
+//! assert_eq!(output, "Foo was true!\nPretty good: yassss\n");
+//! ```
 
 use {
   self::{block::Block, boilerplate::Boilerplate, source::Source, template::Template},
@@ -404,8 +446,31 @@ mod boilerplate;
 mod source;
 mod template;
 
+#[proc_macro]
+pub fn boilerplate(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+  let template = parse_macro_input!(input as LitStr);
+  let text = template.value();
+
+  let body = Block::body(&text, false, true);
+
+  quote! {
+    {
+      use ::std::fmt::Write;
+
+      let boilerplate_template = #template;
+      let mut boilerplate_output = String::new();
+
+      #body
+
+      boilerplate_output
+    }
+  }
+  .into()
+}
+
+#[allow(non_snake_case)]
 #[proc_macro_derive(Boilerplate, attributes(boilerplate))]
-pub fn boilerplate(item: proc_macro::TokenStream) -> proc_macro::TokenStream {
+pub fn Boilerplate(item: proc_macro::TokenStream) -> proc_macro::TokenStream {
   let derive_input = parse_macro_input!(item as DeriveInput);
 
   Boilerplate::from_derive_input(&derive_input)

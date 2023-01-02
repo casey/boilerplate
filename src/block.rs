@@ -1,3 +1,5 @@
+use super::*;
+
 #[derive(Copy, Clone)]
 pub(super) enum Block {
   Code,
@@ -7,8 +9,53 @@ pub(super) enum Block {
 }
 
 impl Block {
-  pub(super) fn starting_at(rest: &str, escape: bool) -> Option<(usize, String)> {
-    Some(Self::from_rest(rest)?.implementation(rest, escape))
+  pub(crate) fn body(text: &str, escape: bool, function: bool) -> TokenStream {
+    let error_handler = if function { ".unwrap()" } else { "?" };
+    let mut lines = Vec::new();
+    let mut i = 0;
+    let mut j = 0;
+    loop {
+      let rest = &text[j..];
+
+      let block = Self::implementation_starting_at(rest, escape, error_handler);
+
+      if i < j && block.is_some() {
+        lines.push(format!(
+          "boilerplate_output.write_str(&boilerplate_template[{}..{}]){} ;",
+          i, j, error_handler,
+        ));
+      }
+
+      if i < j && j == text.len() {
+        lines.push(format!(
+          "boilerplate_output.write_str(&boilerplate_template[{}..]){} ;",
+          i, error_handler,
+        ));
+      }
+
+      if j == text.len() {
+        break;
+      }
+
+      match block {
+        Some((length, line)) => {
+          lines.push(line);
+          j += length;
+          i = j;
+        }
+        None => j += rest.chars().next().unwrap().len_utf8(),
+      }
+    }
+
+    lines.join("").parse().unwrap()
+  }
+
+  fn implementation_starting_at(
+    rest: &str,
+    escape: bool,
+    error_handler: &str,
+  ) -> Option<(usize, String)> {
+    Some(Self::from_rest(rest)?.implementation(rest, escape, error_handler))
   }
 
   fn from_rest(rest: &str) -> Option<Self> {
@@ -22,7 +69,7 @@ impl Block {
     .find(|variant| rest.starts_with(variant.open_delimiter()))
   }
 
-  fn implementation(self, rest: &str, escape: bool) -> (usize, String) {
+  fn implementation(self, rest: &str, escape: bool, error_handler: &str) -> (usize, String) {
     let before_open = 0;
     let after_open = before_open + self.open_delimiter().len();
     let (before_close, newline) = match rest.find(self.close_delimiter()) {
@@ -43,24 +90,33 @@ impl Block {
       Self::Code | Self::CodeLine => contents.into(),
       Self::Interpolation => {
         if escape {
-          format!("({}).escape(boilerplate_formatter, false)? ;", contents)
+          format!(
+            "({}).escape(boilerplate_output, false){} ;",
+            contents, error_handler
+          )
         } else {
-          format!("write!(boilerplate_formatter, \"{{}}\", {})? ;", contents)
+          format!(
+            "write!(boilerplate_output, \"{{}}\", {}){} ;",
+            contents, error_handler
+          )
         }
       }
       Self::InterpolationLine => {
         if escape {
           format!(
-            "({}).escape(boilerplate_formatter, {})? ;",
-            contents, newline
+            "({}).escape(boilerplate_output, {}){} ;",
+            contents, newline, error_handler
           )
         } else if newline {
           format!(
-            "write!(boilerplate_formatter, \"{{}}\\n\", {})? ;",
-            contents
+            "write!(boilerplate_output, \"{{}}\\n\", {}){} ;",
+            contents, error_handler
           )
         } else {
-          format!("write!(boilerplate_formatter, \"{{}}\", {})? ;", contents)
+          format!(
+            "write!(boilerplate_output, \"{{}}\", {}){} ;",
+            contents, error_handler
+          )
         }
       }
     };

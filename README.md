@@ -15,7 +15,38 @@
 <br>
 
 `boilerplate` is a statically-checked Rust template engine with no runtime
-dependencies.
+dependencies. There are two ways to use boilerplate,
+`boilerplate::boilerplate`, a function-like macro, and
+`boilerplate::Boilerplate`, a derive macro.
+
+Function-like Macro
+-------------------
+
+```rust
+use boilerplate::boilerplate;
+
+let foo = true;
+let bar: Result<&str, &str> = Ok("yassss");
+
+let output = boilerplate!(
+"%% if foo {
+Foo was true!
+%% }
+%% match bar {
+%%   Ok(ok) => {
+Pretty good: {{ ok }}
+%%   }
+%%   Err(err) => {
+Not so great: {{ err }}
+%%   }
+%% }
+");
+
+assert_eq!(output, "Foo was true!\nPretty good: yassss\n");
+```
+
+Derive Macro
+------------
 
 Derive `Boilerplate` on the type you want to use as a template context:
 
