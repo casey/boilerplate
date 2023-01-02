@@ -32,7 +32,7 @@ impl Template {
 
     quote! {
       impl #impl_generics core::fmt::Display for #ident #ty_generics #where_clause {
-        fn fmt(&self, boilerplate_formatter: &mut core::fmt::Formatter) -> core::fmt::Result {
+        fn fmt(&self, boilerplate_output: &mut core::fmt::Formatter) -> core::fmt::Result {
           use core::fmt::Write;
           let boilerplate_template = #source;
           #body
@@ -79,7 +79,7 @@ mod tests {
       .to_string(),
       quote!(
         impl core::fmt::Display for Foo {
-          fn fmt(&self, boilerplate_formatter: &mut core::fmt::Formatter) -> core::fmt::Result {
+          fn fmt(&self, boilerplate_output: &mut core::fmt::Formatter) -> core::fmt::Result {
             use core::fmt::Write;
             let boilerplate_template = "";
             Ok(())
@@ -110,7 +110,7 @@ mod tests {
   fn interpolation() {
     assert_display_body_eq(
       "{{ true }}",
-      quote!(write!(boilerplate_formatter, "{}", true)?;),
+      quote!(write!(boilerplate_output, "{}", true)?;),
     );
   }
 
@@ -119,7 +119,7 @@ mod tests {
     assert_display_body_eq(
       "{% for i in 0..10 { %}{{ i }}{% } %}",
       quote!(for i in 0..10 {
-        write!(boilerplate_formatter, "{}", i)?;
+        write!(boilerplate_output, "{}", i)?;
       }),
     );
   }
@@ -129,8 +129,8 @@ mod tests {
     assert_display_body_eq(
       "foo {{ true }}",
       quote!(
-        boilerplate_formatter.write_str(&boilerplate_template[0..4])?;
-        write!(boilerplate_formatter, "{}", true)?;
+        boilerplate_output.write_str(&boilerplate_template[0..4])?;
+        write!(boilerplate_output, "{}", true)?;
       ),
     );
   }
@@ -139,7 +139,7 @@ mod tests {
   fn trailing_text() {
     assert_display_body_eq(
       "foo",
-      quote!(boilerplate_formatter.write_str(&boilerplate_template[0..])?;),
+      quote!(boilerplate_output.write_str(&boilerplate_template[0..])?;),
     );
   }
 

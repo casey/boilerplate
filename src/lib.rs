@@ -458,11 +458,11 @@ pub fn boilerplate(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
       use ::std::fmt::Write;
 
       let boilerplate_template = #template;
-      let mut boilerplate_formatter = String::new();
+      let mut boilerplate_output = String::new();
 
       #body
 
-      boilerplate_formatter
+      boilerplate_output
     }
   }
   .into()
