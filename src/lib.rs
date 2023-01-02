@@ -432,53 +432,12 @@ mod boilerplate;
 mod source;
 mod template;
 
-fn body(text: &str, escape: bool, function: bool) -> TokenStream {
-  let error_handler = if function { ".unwrap()" } else { "?" };
-  let mut lines = Vec::new();
-  let mut i = 0;
-  let mut j = 0;
-  loop {
-    let rest = &text[j..];
-
-    let block = Block::implementation_starting_at(rest, escape, error_handler);
-
-    if i < j && block.is_some() {
-      lines.push(format!(
-        "boilerplate_formatter.write_str(&boilerplate_template[{}..{}]){} ;",
-        i, j, error_handler,
-      ));
-    }
-
-    if i < j && j == text.len() {
-      lines.push(format!(
-        "boilerplate_formatter.write_str(&boilerplate_template[{}..]){} ;",
-        i, error_handler,
-      ));
-    }
-
-    if j == text.len() {
-      break;
-    }
-
-    match block {
-      Some((length, line)) => {
-        lines.push(line);
-        j += length;
-        i = j;
-      }
-      None => j += rest.chars().next().unwrap().len_utf8(),
-    }
-  }
-
-  lines.join("").parse().unwrap()
-}
-
 #[proc_macro]
 pub fn boilerplate(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
   let template = parse_macro_input!(input as LitStr);
   let text = template.value();
 
-  let body = body(&text, false, true);
+  let body = Block::body(&text, false, true);
 
   quote! {
     {

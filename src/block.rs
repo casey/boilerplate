@@ -1,3 +1,5 @@
+use super::*;
+
 #[derive(Copy, Clone)]
 pub(super) enum Block {
   Code,
@@ -7,7 +9,48 @@ pub(super) enum Block {
 }
 
 impl Block {
-  pub(crate) fn implementation_starting_at(
+  pub(crate) fn body(text: &str, escape: bool, function: bool) -> TokenStream {
+    let error_handler = if function { ".unwrap()" } else { "?" };
+    let mut lines = Vec::new();
+    let mut i = 0;
+    let mut j = 0;
+    loop {
+      let rest = &text[j..];
+
+      let block = Self::implementation_starting_at(rest, escape, error_handler);
+
+      if i < j && block.is_some() {
+        lines.push(format!(
+          "boilerplate_formatter.write_str(&boilerplate_template[{}..{}]){} ;",
+          i, j, error_handler,
+        ));
+      }
+
+      if i < j && j == text.len() {
+        lines.push(format!(
+          "boilerplate_formatter.write_str(&boilerplate_template[{}..]){} ;",
+          i, error_handler,
+        ));
+      }
+
+      if j == text.len() {
+        break;
+      }
+
+      match block {
+        Some((length, line)) => {
+          lines.push(line);
+          j += length;
+          i = j;
+        }
+        None => j += rest.chars().next().unwrap().len_utf8(),
+      }
+    }
+
+    lines.join("").parse().unwrap()
+  }
+
+  fn implementation_starting_at(
     rest: &str,
     escape: bool,
     error_handler: &str,
