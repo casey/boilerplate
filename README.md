@@ -78,7 +78,7 @@ Not so great: {{ err }}
 ```
 
 The `Boilerplate` macro provides a `Display` implementation, so you can
-instantiate a template context and convert it into a string:
+instantiate a template context and convert it to a string:
 
 ```rust
 let rendered = MyTemplateTxt { foo: true, bar: Ok("hello".into()) }.to_string();
