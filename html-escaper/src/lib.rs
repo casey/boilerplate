@@ -12,9 +12,9 @@ pub struct Trusted<T: Display>(pub T);
 impl<T: Display> Escape for T {
   fn escape(&self, f: &mut Formatter, newline: bool) -> fmt::Result {
     if newline {
-      writeln!(HtmlEscaper(f), "{}", self)
+      writeln!(HtmlEscaper(f), "{self}")
     } else {
-      write!(HtmlEscaper(f), "{}", self)
+      write!(HtmlEscaper(f), "{self}")
     }
   }
 }

@@ -21,15 +21,13 @@ impl Block {
 
       if i < j && block.is_some() {
         lines.push(format!(
-          "boilerplate_output.write_str(&boilerplate_template[{}..{}]){} ;",
-          i, j, error_handler,
+          "boilerplate_output.write_str(&boilerplate_template[{i}..{j}]){error_handler} ;",
         ));
       }
 
       if i < j && j == text.len() {
         lines.push(format!(
-          "boilerplate_output.write_str(&boilerplate_template[{}..]){} ;",
-          i, error_handler,
+          "boilerplate_output.write_str(&boilerplate_template[{i}..]){error_handler} ;",
         ));
       }
 
@@ -90,33 +88,18 @@ impl Block {
       Self::Code | Self::CodeLine => contents.into(),
       Self::Interpolation => {
         if escape {
-          format!(
-            "({}).escape(boilerplate_output, false){} ;",
-            contents, error_handler
-          )
+          format!("({contents}).escape(boilerplate_output, false){error_handler} ;")
         } else {
-          format!(
-            "write!(boilerplate_output, \"{{}}\", {}){} ;",
-            contents, error_handler
-          )
+          format!("write!(boilerplate_output, \"{{}}\", {contents}){error_handler} ;")
         }
       }
       Self::InterpolationLine => {
         if escape {
-          format!(
-            "({}).escape(boilerplate_output, {}){} ;",
-            contents, newline, error_handler
-          )
+          format!("({contents}).escape(boilerplate_output, {newline}){error_handler} ;")
         } else if newline {
-          format!(
-            "write!(boilerplate_output, \"{{}}\\n\", {}){} ;",
-            contents, error_handler
-          )
+          format!("write!(boilerplate_output, \"{{}}\\n\", {contents}){error_handler} ;")
         } else {
-          format!(
-            "write!(boilerplate_output, \"{{}}\", {}){} ;",
-            contents, error_handler
-          )
+          format!("write!(boilerplate_output, \"{{}}\", {contents}){error_handler} ;")
         }
       }
     };
