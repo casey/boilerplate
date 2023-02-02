@@ -42,7 +42,7 @@ impl Boilerplate {
     let guess = new_mime_guess::from_path(&filename).first_or_text_plain();
 
     let mime = if guess.type_() == mime::TEXT && guess.get_param(mime::CHARSET).is_none() {
-      format!("{}; charset=utf-8", guess).parse().unwrap()
+      format!("{guess}; charset=utf-8").parse().unwrap()
     } else {
       guess
     };
