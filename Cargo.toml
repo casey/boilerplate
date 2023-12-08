@@ -24,10 +24,10 @@ syn = { version = "2.0.23", features = ["derive"] }
 axum = []
 
 [dev-dependencies]
-axum = "0.6.0"
+axum = "0.7.2"
 html-escaper = { path = "html-escaper" }
 pretty_assertions = "1.0.0"
-unindent = "0.1.10"
+unindent = "0.2.3"
 
 [workspace]
 members = [".", "html-escaper"]
