@@ -49,10 +49,10 @@ impl Template {
 
     quote! {
       impl #impl_generics axum::response::IntoResponse for #ident #ty_generics #where_clause {
-        fn into_response(self) -> axum::response::Response<axum::body::BoxBody> {
+        fn into_response(self) -> axum::response::Response {
           axum::response::Response::builder()
             .header(axum::http::header::CONTENT_TYPE, #content_type)
-          .body(axum::body::Full::from(self.to_string()))
+          .body(axum::body::Body::from(self.to_string()))
           .unwrap()
           .into_response()
         }
@@ -157,10 +157,10 @@ mod tests {
       .to_string(),
       quote!(
         impl axum::response::IntoResponse for Foo {
-          fn into_response(self) -> axum::response::Response<axum::body::BoxBody> {
+          fn into_response(self) -> axum::response::Response {
             axum::response::Response::builder()
               .header(axum::http::header::CONTENT_TYPE, "text/plain")
-              .body(axum::body::Full::from(self.to_string()))
+              .body(axum::body::Body::from(self.to_string()))
               .unwrap()
               .into_response()
           }
