@@ -17,7 +17,7 @@
 //! type when rendered.
 //!
 //! The other way is with `boilerplate::boilerplate`, a function-like macro,
-//! which reads tempalte text from a string literal, and reads variables from
+//! which reads template text from a string literal, and reads variables from
 //! the local scope when rendered.
 //!
 //! Use `boilerplate::Boilerplate` if you want to put your template text in a
