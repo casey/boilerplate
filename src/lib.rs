@@ -430,6 +430,75 @@
 //!
 //! assert_eq!(output, "Foo was true!\nPretty good: yassss\n");
 //! ```
+//!
+//! Nesting Templates
+//! -----------------
+//!
+//! Since templates implement `Display` they can used in interpolations inside
+//! other templates:
+//!
+//! ```
+//! #[derive(boilerplate::Boilerplate)]
+//! #[boilerplate(text = "Hello {{ self.0 }}!")]
+//! struct OuterTxt(InnerTxt);
+//!
+//! #[derive(boilerplate::Boilerplate)]
+//! #[boilerplate(text = "Mr. {{ self.0 }}")]
+//! struct InnerTxt(&'static str);
+//!
+//! assert_eq!(OuterTxt(InnerTxt("Miller")).to_string(), "Hello Mr. Miller!");
+//! ```
+//!
+//! This is especially useful when generating multiple HTML pages unique
+//! content, but with headers and footers that are common to all pages. Note
+//! the use of `html_escaper::Trusted` to prevent escaping the inner HTML:
+//!
+//! ```
+//! use {
+//!   html_escaper::{Escape, Trusted},
+//!   std::fmt::Display,
+//! };
+//!
+//! trait Page: Display {
+//!   fn title(&self) -> &str;
+//! }
+//!
+//! #[derive(boilerplate::Boilerplate)]
+//! #[boilerplate(text = "<!doctype html>
+//! <html>
+//!   <head>
+//!     <title>{{ self.0.title() }}</title>
+//!   </head>
+//!   <body>
+//!     {{ Trusted(&self.0) }}
+//!   </body>
+//! </html>
+//! ")]
+//! struct OuterHtml<T: Page>(T);
+//!
+//! #[derive(boilerplate::Boilerplate)]
+//! #[boilerplate(text = "<div>{{ self.0 }}</div>")]
+//! struct InnerHtml(&'static str);
+//!
+//! impl Page for InnerHtml {
+//!   fn title(&self) -> &str {
+//!     "awesome page"
+//!   }
+//! }
+//!
+//! assert_eq!(
+//!   OuterHtml(InnerHtml("awesome content")).to_string(),
+//!   "<!doctype html>
+//! <html>
+//!   <head>
+//!     <title>awesome page</title>
+//!   </head>
+//!   <body>
+//!     <div>awesome content</div>
+//!   </body>
+//! </html>
+//! ");
+//! ```
 
 use {
   self::{block::Block, boilerplate::Boilerplate, source::Source, template::Template},
