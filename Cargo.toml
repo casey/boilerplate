@@ -24,7 +24,7 @@ syn = { version = "2.0.23", features = ["derive"] }
 axum = []
 
 [dev-dependencies]
-axum = "0.7.2"
+axum = "0.7.5"
 html-escaper = { path = "html-escaper" }
 pretty_assertions = "1.0.0"
 unindent = "0.2.3"
