@@ -1,4 +1,4 @@
-watch +args='test --all':
+watch +args='lcheck --all':
   cargo watch --clear --exec '{{args}}'
 
 ci:

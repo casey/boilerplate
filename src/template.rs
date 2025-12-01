@@ -27,7 +27,8 @@ impl Template {
   fn display_impl(&self) -> TokenStream {
     let ident = &self.ident;
     let source = &self.source;
-    let body = Block::body(&source.text(), self.escape, false);
+    let body = body(&source.text(), self.escape, false);
+
     let (impl_generics, ty_generics, where_clause) = self.generics.split_for_impl();
 
     quote! {
@@ -90,8 +91,7 @@ mod tests {
   }
 
   fn assert_display_body_eq(template: &str, expected: TokenStream) {
-    let actual = Block::body(template, false, false);
-
+    let actual = body(template, false, false);
     assert_eq!(actual.to_string(), expected.to_string());
   }
 
@@ -138,7 +138,7 @@ mod tests {
   fn trailing_text() {
     assert_display_body_eq(
       "foo",
-      quote!(boilerplate_output.write_str(&boilerplate_template[0..])?;),
+      quote!(boilerplate_output.write_str(&boilerplate_template[0..3])?;),
     );
   }
 
