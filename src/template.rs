@@ -25,12 +25,9 @@ impl Template {
   }
 
   fn display_impl(&self) -> TokenStream {
-    let text = self.source.text();
-
-    let body = body(&text, self.escape, false);
-
     let ident = &self.ident;
     let source = &self.source;
+    let body = body(&source.text(), self.escape, false);
 
     let (impl_generics, ty_generics, where_clause) = self.generics.split_for_impl();
 
