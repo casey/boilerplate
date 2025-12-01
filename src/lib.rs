@@ -505,11 +505,11 @@ use core::fmt::{self, Formatter};
 pub use boilerplate_macros::{boilerplate, Boilerplate};
 
 pub trait Boilerplate {
-  const BOILERPLATE_TEMPLATE: &'static [&'static str];
+  const BOILERPLATE_TEXT: &'static [&'static str];
 
   fn fmt_template(
     &self,
-    boilerplate_template: &[&str],
+    boilerplate_text: &[&str],
     boilerplate_output: &mut Formatter,
   ) -> fmt::Result;
 }

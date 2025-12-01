@@ -26,6 +26,7 @@ html-escaper = { path = "html-escaper" }
 
 [features]
 axum = ["boilerplate-macros/axum"]
+reload = ["boilerplate-macros/reload"]
 
 [workspace]
 members = [".", "boilerplate-macros", "html-escaper"]

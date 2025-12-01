@@ -27,7 +27,7 @@ impl<'src> Token<'src> {
     let error_handler = if function { ".unwrap()" } else { "?" };
     match self {
       Token::Text { index, .. } => {
-        format!("boilerplate_output.write_str(boilerplate_template[{index}]){error_handler} ;",)
+        format!("boilerplate_output.write_str(boilerplate_text[{index}]){error_handler} ;",)
       }
       Token::Code { contents } | Token::CodeLine { contents } => (*contents).into(),
       Token::Interpolation { contents } => {
@@ -110,6 +110,36 @@ impl<'src> Token<'src> {
       Some(&template[start..end])
     } else {
       None
+    }
+  }
+
+  pub(crate) fn foo(self) -> TokenStream {
+    match self {
+      Self::Code { contents } => {
+        quote! {
+          boilerplate::Token::Code { contents: #contents }
+        }
+      }
+      Self::CodeLine { contents } => {
+        quote! {
+          boilerplate::Token::CodeLine { contents: #contents }
+        }
+      }
+      Self::Interpolation { contents } => {
+        quote! {
+          boilerplate::Token::Interpolation { contents: #contents }
+        }
+      }
+      Self::InterpolationLine { contents, newline } => {
+        quote! {
+          boilerplate::Token::InterpolationLine { contents: #contents, newline: #newline }
+        }
+      }
+      Self::Text { start, end, index } => {
+        quote! {
+          boilerplate::Token::Text { start: #start, end: #end, index: #index }
+        }
+      }
     }
   }
 }

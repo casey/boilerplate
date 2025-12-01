@@ -16,7 +16,7 @@ mod source;
 mod template;
 mod token;
 
-pub(crate) fn body(src: &str, escape: bool, function: bool) -> (TokenStream, Vec<LitStr>) {
+pub(crate) fn body(src: &str, escape: bool, function: bool) -> (TokenStream, Vec<String>) {
   let (tokens, text) = Token::parse(src);
 
   (
@@ -27,10 +27,7 @@ pub(crate) fn body(src: &str, escape: bool, function: bool) -> (TokenStream, Vec
       .join("")
       .parse()
       .unwrap(),
-    text
-      .iter()
-      .map(|s| LitStr::new(s, Span::call_site()))
-      .collect::<Vec<LitStr>>(),
+    text.iter().copied().map(|s| s.to_owned()).collect(),
   )
 }
 
@@ -45,7 +42,7 @@ pub fn boilerplate(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     {
       use ::core::fmt::Write;
 
-      let boilerplate_template = &[ #(#template),* ];
+      let boilerplate_text = &[ #(#template),* ];
       let mut boilerplate_output = String::new();
 
       #body
