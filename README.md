@@ -92,7 +92,7 @@ println!("The output is: {}", MyTemplateTxt { foo: false, bar: Err("hello".into(
 
 `boilerplate`'s implementation is exceedingly simple. Try using
 [cargo-expand](https://github.com/dtolnay/cargo-expand) to expand the
-`Boilerplate` macro and inspect derived `Display` implementations and debug
+`Boilerplate` macro, inspect derived `Display` implementations, and debug
 template issues.
 
 Quick Start
