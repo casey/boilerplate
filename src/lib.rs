@@ -513,12 +513,20 @@ pub use boilerplate_macros::{boilerplate, Boilerplate};
 #[cfg(feature = "reload")]
 mod reload;
 
+/// The boilerplate trait, automatically implemented by the `Boilerplate`
+/// derive macro.
 pub trait Boilerplate {
+  /// The parsed template's text blocks.
   const TEXT: &'static [&'static str];
 
   #[cfg(feature = "reload")]
+  /// The parsed template's tokens.
   const TOKENS: &'static [Token<'static>];
 
+  /// Render the template.
+  ///
+  /// - `boilerplate_text` - The template's text blocks.
+  /// - `boilerplate_output` - The formatter to write to.
   fn boilerplate(
     &self,
     boilerplate_text: &[impl AsRef<str>],
@@ -526,6 +534,14 @@ pub trait Boilerplate {
   ) -> fmt::Result;
 
   #[cfg(feature = "reload")]
+  /// Reload the template from a new template string.
+  ///
+  /// The new template must be compatible with the original template. Templates
+  /// are compatible if all of their code blocks, i.e., blocks that contain
+  /// Rust code, like `{{ ... }}` are the same. Text blocks, i.e., blocks that
+  /// contain literal text, may be different.
+  ///
+  /// - `text` - The new template string.
   fn reload<'a>(&self, text: &'a str) -> Result<Reload<&Self>, Error<'a>> {
     let tokens = Token::parse(text).map_err(Error::Parse)?;
 

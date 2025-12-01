@@ -1,5 +1,6 @@
 use {super::*, core::fmt::Display};
 
+/// Reloaded template.
 pub struct Reload<T> {
   pub(super) text: Vec<String>,
   pub(super) inner: T,
@@ -11,10 +12,14 @@ impl<T: Boilerplate> Display for Reload<&T> {
   }
 }
 
+/// Template reload errors.
 #[derive(Debug)]
 pub enum Error<'a> {
+  /// New template is not compatible with the old template.
   Incompatible { new: Token<'a>, old: Token<'a> },
+  /// New template does not have the same number of blocks.
   Length { new: usize, old: usize },
+  /// Failed to parse new template.
   Parse(boilerplate_parser::Error),
 }
 
