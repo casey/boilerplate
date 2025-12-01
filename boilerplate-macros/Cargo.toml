@@ -3,6 +3,7 @@ name = "boilerplate-macros"
 version = "0.0.0"
 description = "Minimal compile-time Rust template engine macros"
 authors.workspace = true
+categories.workspace = true
 edition.workspace = true
 homepage.workspace = true
 license.workspace = true
