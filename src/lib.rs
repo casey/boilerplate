@@ -404,13 +404,19 @@
 //!
 //! ### Reloading Templates
 //!
-
-//! When the `reload` feature is enabled, templates will be provided with a
-//! `Boilerplate::reload`, which provides a limited form of hot-reloading.
+//! When the `reload` feature is enabled, templates support a limited form of
+//! hot-reloading.
 //!
-//! Boilerplate templates contain Rust code, which cannot be recompiled at
-//! runtime. Consequently, the new template's code blocks must match those of
-//! the original template. If they do not, `Boilerplate::reload` will return an
+//! Using `#[derive(Boilerplate]` derives both an implementation of `Display`,
+//! and an implementation of the `Boilerplate` trait. Normally the
+//! `Boilerplate` trait and its implementation can be ignored, but when the
+//! `reload` feature is enabled, The `Boilerplate` trait includes
+//! `Boilerplate::reload`, which takes a new template string, and allows you to
+//! reload the template at runtime.
+//!
+//! Boilerplate templates contain Rust code which is compiled ahead of time.
+//! Consequently, the new template's code blocks must match those of the
+//! original template. If they do not, `Boilerplate::reload` will return an
 //! error.
 //!
 //! Template text outside of code blocks may be different.
@@ -436,14 +442,16 @@
 //!
 //!   // Try to reload an incompatible template with different code:
 //!   let incompatible_template = "Goodbye, {{self.id}}!";
-//!   assert!(context.reload(incompatible_template).is_err());
+//!   assert_eq!(
+//!     context.reload(incompatible_template).err().unwrap().to_string(),
+//!     "template blocks are not compatible: {{self.id}} != {{self.name}}",
+//!   );
 //!
 //!   // Whitespace around code is allowed to be different:
 //!   let compatible_template = "Goodbye, {{ self.name }}!";
 //!   assert_eq!(context.reload(compatible_template).unwrap().to_string(), "Goodbye, Bob!");
 //! }
 //! ```
-
 //!
 //! Function-like Macro
 //! -------------------

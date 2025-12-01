@@ -44,10 +44,6 @@ impl Display for Token<'_> {
       }
     }
 
-    if let Some(block) = block {
-      write!(f, "{}", block.close_delimiter())?;
-    }
-
     Ok(())
   }
 }
