@@ -72,7 +72,7 @@ impl<'src> Token<'src> {
       let (before_close, closed) = match src[after_open..].find(block.close_delimiter()) {
         Some(before_close) => (after_open + before_close, true),
         None if block.is_line() => (src.len(), false),
-        None => panic!("unmatched `{}`", block.open_delimiter()),
+        None => return Err(Error::Unclosed(block)),
       };
 
       let after_close = if closed {
@@ -114,7 +114,7 @@ impl<'src> Token<'src> {
       Self::Code { .. }
       | Self::CodeLine { .. }
       | Self::Interpolation { .. }
-      | Self::InterpolationLine { .. } => Some(self.contents().trim()),
+      | Self::InterpolationLine { .. } => Some(self.contents()),
       Self::Text { .. } => None,
     }
   }

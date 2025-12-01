@@ -5,7 +5,7 @@ pub struct Reload<T> {
   pub(super) inner: T,
 }
 
-impl<T: Boilerplate> Display for Reload<T> {
+impl<T: Boilerplate> Display for Reload<&T> {
   fn fmt(&self, f: &mut Formatter) -> fmt::Result {
     self.inner.boilerplate(&self.text, f)
   }

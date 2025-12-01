@@ -503,7 +503,7 @@
 use core::fmt::{self, Formatter};
 
 #[cfg(feature = "reload")]
-use {
+pub use {
   self::reload::{Error, Reload},
   boilerplate_parser::Token,
 };
