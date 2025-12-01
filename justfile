@@ -20,3 +20,9 @@ publish:
   cargo publish
   cd ../..
   rm -rf tmp/release
+
+outdated:
+  cargo outdated --root-deps-only --workspace
+
+unused:
+  cargo +nightly udeps --workspace
