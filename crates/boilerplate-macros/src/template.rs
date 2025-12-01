@@ -47,15 +47,8 @@ impl Template {
           Token::InterpolationLine { contents, closed } => {
             quote!(boilerplate::Token::InterpolationLine { closed: #closed, contents: #contents })
           }
-          Token::Text {
-            contents,
-            start,
-            end,
-            index,
-          } => quote!(boilerplate::Token::Text {
+          Token::Text { contents, index } => quote!(boilerplate::Token::Text {
             contents: #contents,
-            start: #start,
-            end: #end,
             index: #index
           }),
         })

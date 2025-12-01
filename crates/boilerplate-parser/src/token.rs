@@ -3,26 +3,11 @@ use super::*;
 // todo: add round-trip tests
 #[derive(Clone, Copy, Debug)]
 pub enum Token<'src> {
-  Code {
-    contents: &'src str,
-  },
-  CodeLine {
-    closed: bool,
-    contents: &'src str,
-  },
-  Interpolation {
-    contents: &'src str,
-  },
-  InterpolationLine {
-    contents: &'src str,
-    closed: bool,
-  },
-  Text {
-    contents: &'src str,
-    start: usize,
-    end: usize,
-    index: usize,
-  },
+  Code { contents: &'src str },
+  CodeLine { closed: bool, contents: &'src str },
+  Interpolation { contents: &'src str },
+  InterpolationLine { contents: &'src str, closed: bool },
+  Text { contents: &'src str, index: usize },
 }
 
 impl Display for Token<'_> {
@@ -80,8 +65,6 @@ impl<'src> Token<'src> {
       if i != j {
         tokens.push(Self::Text {
           contents: &src[i..j],
-          start: i,
-          end: j,
           index,
         });
         index += 1;
@@ -96,8 +79,6 @@ impl<'src> Token<'src> {
     if i != j {
       tokens.push(Self::Text {
         contents: &src[i..j],
-        start: i,
-        end: j,
         index,
       });
     }
@@ -155,9 +136,9 @@ impl<'src> Token<'src> {
 
   // todo: can I replate this with call to contents?
   #[must_use]
-  pub fn text(self, template: &str) -> Option<&str> {
-    if let Self::Text { start, end, .. } = self {
-      Some(&template[start..end])
+  pub fn text(self) -> Option<&'src str> {
+    if let Self::Text { contents, .. } = self {
+      Some(contents)
     } else {
       None
     }

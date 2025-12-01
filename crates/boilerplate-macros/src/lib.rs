@@ -57,7 +57,7 @@ pub(crate) fn body(
       .collect::<String>()
       .parse()
       .unwrap(),
-    tokens.iter().filter_map(|token| token.text(src)).collect(),
+    tokens.iter().filter_map(|token| token.text()).collect(),
     tokens,
   )
 }
