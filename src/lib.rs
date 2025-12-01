@@ -503,11 +503,11 @@
 use core::fmt::{self, Formatter};
 
 pub trait Boilerplate {
-  const BOILERPLATE_TEMPLATE: &'static str;
+  const BOILERPLATE_TEMPLATE: &'static [&'static str];
 
   fn fmt_template(
     &self,
-    boilerplate_template: &str,
+    boilerplate_template: &[&str],
     boilerplate_output: &mut Formatter,
   ) -> fmt::Result;
 }

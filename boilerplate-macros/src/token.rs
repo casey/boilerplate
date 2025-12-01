@@ -2,21 +2,32 @@ use super::*;
 
 #[derive(Clone, Copy)]
 pub(crate) enum Token<'src> {
-  Code { contents: &'src str },
-  CodeLine { contents: &'src str },
-  Interpolation { contents: &'src str },
-  InterpolationLine { contents: &'src str, newline: bool },
-  Text { start: usize, end: usize },
+  Code {
+    contents: &'src str,
+  },
+  CodeLine {
+    contents: &'src str,
+  },
+  Interpolation {
+    contents: &'src str,
+  },
+  InterpolationLine {
+    contents: &'src str,
+    newline: bool,
+  },
+  Text {
+    start: usize,
+    end: usize,
+    index: usize,
+  },
 }
 
 impl<'src> Token<'src> {
   pub(crate) fn line(self, escape: bool, function: bool) -> String {
     let error_handler = if function { ".unwrap()" } else { "?" };
     match self {
-      Token::Text { start, end } => {
-        format!(
-          "boilerplate_output.write_str(&boilerplate_template[{start}..{end}]){error_handler} ;",
-        )
+      Token::Text { index, .. } => {
+        format!("boilerplate_output.write_str(boilerplate_template[{index}]){error_handler} ;",)
       }
       Token::Code { contents } | Token::CodeLine { contents } => (*contents).into(),
       Token::Interpolation { contents } => {
@@ -38,10 +49,11 @@ impl<'src> Token<'src> {
     }
   }
 
-  pub(crate) fn parse(src: &'src str) -> Vec<Self> {
+  pub(crate) fn parse(src: &'src str) -> (Vec<Self>, Vec<&'src str>) {
     let mut tokens = Vec::new();
     let mut i = 0;
     let mut j = 0;
+    let mut index = 0;
     while j < src.len() {
       let rest = &src[j..];
 
@@ -66,7 +78,12 @@ impl<'src> Token<'src> {
       };
 
       if i != j {
-        tokens.push(Self::Text { start: i, end: j });
+        tokens.push(Self::Text {
+          start: i,
+          end: j,
+          index,
+        });
+        index += 1;
       }
 
       tokens.push(block.token(&src[after_open..before_close], newline));
@@ -76,9 +93,23 @@ impl<'src> Token<'src> {
     }
 
     if i != j {
-      tokens.push(Self::Text { start: i, end: j });
+      tokens.push(Self::Text {
+        start: i,
+        end: j,
+        index,
+      });
     }
 
-    tokens
+    let text = tokens.iter().flat_map(|token| token.text(&src)).collect();
+
+    (tokens, text)
+  }
+
+  pub(crate) fn text(self, template: &str) -> Option<&str> {
+    if let Token::Text { start, end, .. } = self {
+      Some(&template[start..end])
+    } else {
+      None
+    }
   }
 }

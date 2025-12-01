@@ -27,17 +27,19 @@ impl Template {
   fn display_impl(&self) -> TokenStream {
     let ident = &self.ident;
     let source = &self.source;
-    let body = body(&source.text(), self.escape, false);
+    let text = source.text();
+
+    let (body, template) = body(&text, self.escape, false);
 
     let (impl_generics, ty_generics, where_clause) = self.generics.split_for_impl();
 
     quote! {
       impl #impl_generics boilerplate::Boilerplate for #ident #ty_generics #where_clause {
-        const BOILERPLATE_TEMPLATE: &'static str = #source;
+        const BOILERPLATE_TEMPLATE: &'static [&'static str] = &[ #(#template),* ];
 
         fn fmt_template(
           &self,
-          boilerplate_template: &str,
+          boilerplate_template: &[&str],
           boilerplate_output: &mut core::fmt::Formatter,
         ) -> core::fmt::Result {
           use core::fmt::Write;
@@ -94,11 +96,11 @@ mod tests {
       .to_string(),
       quote!(
         impl boilerplate::Boilerplate for Foo {
-            const BOILERPLATE_TEMPLATE: &'static str = "";
+            const BOILERPLATE_TEMPLATE: &'static [&'static str] = &[];
 
             fn fmt_template(
               &self,
-              boilerplate_template: &str,
+              boilerplate_template: &[&str],
               boilerplate_output: &mut core::fmt::Formatter,
             ) -> core::fmt::Result {
               use core::fmt::Write;
@@ -121,7 +123,7 @@ mod tests {
   }
 
   fn assert_display_body_eq(template: &str, expected: TokenStream) {
-    let actual = body(template, false, false);
+    let (actual, _template) = body(template, false, false);
     assert_eq!(actual.to_string(), expected.to_string());
   }
 
@@ -158,7 +160,7 @@ mod tests {
     assert_display_body_eq(
       "foo {{ true }}",
       quote!(
-        boilerplate_output.write_str(&boilerplate_template[0..4])?;
+        boilerplate_output.write_str(boilerplate_template[0])?;
         write!(boilerplate_output, "{}", true)?;
       ),
     );
@@ -168,7 +170,7 @@ mod tests {
   fn trailing_text() {
     assert_display_body_eq(
       "foo",
-      quote!(boilerplate_output.write_str(&boilerplate_template[0..3])?;),
+      quote!(boilerplate_output.write_str(boilerplate_template[0])?;),
     );
   }
 
