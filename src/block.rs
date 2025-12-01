@@ -1,7 +1,7 @@
 use super::*;
 
 #[derive(Clone, Copy, Debug)]
-pub enum Block {
+pub(crate) enum Block {
   Code,
   CodeLine,
   Interpolation,
