@@ -424,6 +424,7 @@
 //! ```
 //! #[cfg(feature = "reload")]
 //! {
+//!   // import the `Boilerplate` trait for the `reload` method
 //!   use boilerplate::Boilerplate;
 //!
 //!   #[derive(Boilerplate)]
@@ -434,11 +435,14 @@
 //!   }
 //!
 //!   let context = Context { first: "Bob", last: "Smith" };
-//!
 //!   assert_eq!(context.to_string(), "Hello, Bob!");
 //!
 //!   // Reload a compatible template:
 //!   let compatible_template = "Goodbye, {{self.first}}!";
+//!   assert_eq!(context.reload(compatible_template).unwrap().to_string(), "Goodbye, Bob!");
+//!
+//!   // Whitespace around code is allowed to be different:
+//!   let compatible_template = "Goodbye, {{ self.first }}!";
 //!   assert_eq!(context.reload(compatible_template).unwrap().to_string(), "Goodbye, Bob!");
 //!
 //!   // Try to reload an incompatible template with different code:
@@ -455,16 +459,12 @@
 //!     "new template has 5 blocks but old template has 3 blocks",
 //!   );
 //!
-//!   // Try to reload an template with invalid syntax:
+//!   // Try to reload a template with invalid syntax:
 //!   let incompatible_template = "Goodbye, {{self.first";
 //!   assert_eq!(
 //!     context.reload(incompatible_template).err().unwrap().to_string(),
 //!     "failed to parse new template: unmatched `{{`",
 //!   );
-//!
-//!   // Whitespace around code is allowed to be different:
-//!   let compatible_template = "Goodbye, {{ self.first }}!";
-//!   assert_eq!(context.reload(compatible_template).unwrap().to_string(), "Goodbye, Bob!");
 //! }
 //! ```
 //!
