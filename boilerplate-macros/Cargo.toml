@@ -11,7 +11,7 @@ repository.workspace = true
 proc-macro = true
 
 [dependencies]
-darling = "0.20.1"
+darling = "0.21.3"
 mime = "0.3.17"
 new_mime_guess = "4.0.1"
 proc-macro2 = "1.0.63"

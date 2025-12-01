@@ -20,7 +20,7 @@ repository = "https://github.com/casey/boilerplate"
 boilerplate-macros = { version = "0.0.0", path = "boilerplate-macros" }
 
 [dev-dependencies]
-axum = "0.7.5"
+axum = "0.8.7"
 html-escaper = { path = "html-escaper" }
 
 [features]
