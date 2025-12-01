@@ -1,13 +1,20 @@
 [package]
 name = "boilerplate"
 version = "1.0.1"
-license = "CC0-1.0"
-edition = "2021"
 description = "Minimal compile-time Rust template engine"
-authors = ["Casey Rodarmor <casey@rodarmor.com>"]
-homepage = "https://github.com/casey/boilerplate"
-repository = "https://github.com/casey/boilerplate"
 categories = ["template-engine", "no-std"]
+authors.workspace = true
+edition.workspace = true
+homepage.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[workspace.package]
+authors = ["Casey Rodarmor <casey@rodarmor.com>"]
+edition = "2021"
+homepage = "https://github.com/casey/boilerplate"
+license = "CC0-1.0"
+repository = "https://github.com/casey/boilerplate"
 
 [dependencies]
 boilerplate-macros = { version = "0.0.0", path = "boilerplate-macros" }
