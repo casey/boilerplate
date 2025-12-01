@@ -402,6 +402,49 @@
 //! }
 //! ```
 //!
+//! ### Reloading Templates
+//!
+
+//! When the `reload` feature is enabled, templates will be provided with a
+//! `Boilerplate::reload`, which provides a limited form of hot-reloading.
+//!
+//! Boilerplate templates contain Rust code, which cannot be recompiled at
+//! runtime. Consequently, the new template's code blocks must match those of
+//! the original template. If they do not, `Boilerplate::reload` will return an
+//! error.
+//!
+//! Template text outside of code blocks may be different.
+//!
+//! ```
+//! #[cfg(feature = "reload")]
+//! {
+//!   use boilerplate::Boilerplate;
+//!
+//!   #[derive(Boilerplate)]
+//!   #[boilerplate(text = "Hello, {{self.name}}!")]
+//!   struct Context {
+//!     name: &'static str,
+//!   }
+//!
+//!   let context = Context { name: "Bob" };
+//!
+//!   assert_eq!(context.to_string(), "Hello, Bob!");
+//!
+//!   // Reload a compatible template:
+//!   let compatible_template = "Goodbye, {{self.name}}!";
+//!   assert_eq!(context.reload(compatible_template).unwrap().to_string(), "Goodbye, Bob!");
+//!
+//!   // Try to reload an incompatible template with different code:
+//!   let incompatible_template = "Goodbye, {{self.id}}!";
+//!   assert!(context.reload(incompatible_template).is_err());
+//!
+//!   // Whitespace around code is allowed to be different:
+//!   let compatible_template = "Goodbye, {{ self.name }}!";
+//!   assert_eq!(context.reload(compatible_template).unwrap().to_string(), "Goodbye, Bob!");
+//! }
+//! ```
+
+//!
 //! Function-like Macro
 //! -------------------
 //!

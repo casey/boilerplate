@@ -121,6 +121,14 @@ mod tests {
 
   #[test]
   fn boilerplate_impl() {
+    let tokens = if cfg!(feature = "reload") {
+      Some(quote! {
+        const TOKENS: &'static [boilerplate::Token<'static>] = &[];
+      })
+    } else {
+      None
+    };
+
     assert_eq!(
       Template {
         ident: Ident::new("Foo", Span::call_site()),
@@ -134,6 +142,8 @@ mod tests {
       quote!(
         impl boilerplate::Boilerplate for Foo {
             const TEXT: &'static [&'static str] = &[];
+
+            #tokens
 
             fn boilerplate(
               &self,
