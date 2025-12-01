@@ -19,7 +19,7 @@ repository = "https://github.com/casey/boilerplate"
 
 [dependencies]
 boilerplate-macros = { version = "0.0.0", path = "crates/boilerplate-macros" }
-boilerplate-parser = { version = "0.0.0", path = "crates/boilerplate-parser" }
+boilerplate-parser = { version = "0.0.0", path = "crates/boilerplate-parser", optional = true }
 
 [dev-dependencies]
 axum = "0.8.7"
@@ -27,7 +27,7 @@ html-escaper = { path = "crates/html-escaper" }
 
 [features]
 axum = ["boilerplate-macros/axum"]
-reload = ["boilerplate-macros/reload"]
+reload = ["boilerplate-macros/reload", "dep:boilerplate-parser"]
 
 [workspace]
 members = [".", "crates/*"]

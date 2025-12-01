@@ -35,11 +35,11 @@ impl Template {
 
     quote! {
       impl #impl_generics boilerplate::Boilerplate for #ident #ty_generics #where_clause {
-        const BOILERPLATE_TEXT: &'static [&'static str] = &[ #(#template),* ];
+        const TEXT: &'static [&'static str] = &[ #(#template),* ];
 
-        fn fmt_template(
+        fn boilerplate(
           &self,
-          boilerplate_text: &[&str],
+          boilerplate_text: &[impl AsRef<str>],
           boilerplate_output: &mut core::fmt::Formatter,
         ) -> core::fmt::Result {
           use core::fmt::Write;
@@ -50,9 +50,9 @@ impl Template {
 
       impl #impl_generics core::fmt::Display for #ident #ty_generics #where_clause {
         fn fmt(&self, boilerplate_output: &mut core::fmt::Formatter) -> core::fmt::Result {
-          <Self as boilerplate::Boilerplate>::fmt_template(
+          <Self as boilerplate::Boilerplate>::boilerplate(
             self,
-            <Self as boilerplate::Boilerplate>::BOILERPLATE_TEXT,
+            <Self as boilerplate::Boilerplate>::TEXT,
             boilerplate_output,
           )
         }
@@ -96,11 +96,11 @@ mod tests {
       .to_string(),
       quote!(
         impl boilerplate::Boilerplate for Foo {
-            const BOILERPLATE_TEXT: &'static [&'static str] = &[];
+            const TEXT: &'static [&'static str] = &[];
 
-            fn fmt_template(
+            fn boilerplate(
               &self,
-              boilerplate_text: &[&str],
+              boilerplate_text: &[impl AsRef<str>],
               boilerplate_output: &mut core::fmt::Formatter,
             ) -> core::fmt::Result {
               use core::fmt::Write;
@@ -110,9 +110,9 @@ mod tests {
 
         impl core::fmt::Display for Foo {
           fn fmt(&self, boilerplate_output: &mut core::fmt::Formatter) -> core::fmt::Result {
-            <Self as boilerplate::Boilerplate>::fmt_template(
+            <Self as boilerplate::Boilerplate>::boilerplate(
               self,
-              <Self as boilerplate::Boilerplate>::BOILERPLATE_TEXT,
+              <Self as boilerplate::Boilerplate>::TEXT,
               boilerplate_output,
             )
           }
@@ -160,7 +160,7 @@ mod tests {
     assert_display_body_eq(
       "foo {{ true }}",
       quote!(
-        boilerplate_output.write_str(boilerplate_text[0])?;
+        boilerplate_output.write_str(boilerplate_text[0].as_ref())?;
         write!(boilerplate_output, "{}", true)?;
       ),
     );
@@ -170,7 +170,7 @@ mod tests {
   fn trailing_text() {
     assert_display_body_eq(
       "foo",
-      quote!(boilerplate_output.write_str(boilerplate_text[0])?;),
+      quote!(boilerplate_output.write_str(boilerplate_text[0].as_ref())?;),
     );
   }
 

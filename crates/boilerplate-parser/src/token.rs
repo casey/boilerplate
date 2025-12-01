@@ -1,11 +1,13 @@
 use super::*;
 
-#[derive(Clone, Copy)]
+// todo: add round-trip tests
+#[derive(Clone, Copy, Debug)]
 pub enum Token<'src> {
   Code {
     contents: &'src str,
   },
   CodeLine {
+    closed: bool,
     contents: &'src str,
   },
   Interpolation {
@@ -13,17 +15,45 @@ pub enum Token<'src> {
   },
   InterpolationLine {
     contents: &'src str,
-    newline: bool,
+    closed: bool,
   },
   Text {
+    contents: &'src str,
     start: usize,
     end: usize,
     index: usize,
   },
 }
 
+impl Display for Token<'_> {
+  fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+    let block = self.block();
+
+    if let Some(block) = block {
+      write!(f, "{}", block.open_delimiter())?;
+    }
+
+    write!(f, "{}", self.contents())?;
+
+    match self {
+      Self::CodeLine { closed, .. } | Self::InterpolationLine { closed, .. } if !closed => {}
+      _ => {
+        if let Some(block) = block {
+          write!(f, "{}", block.close_delimiter())?;
+        }
+      }
+    }
+
+    if let Some(block) = block {
+      write!(f, "{}", block.close_delimiter())?;
+    }
+
+    Ok(())
+  }
+}
+
 impl<'src> Token<'src> {
-  pub fn parse(src: &'src str) -> Vec<Self> {
+  pub fn parse(src: &'src str) -> Result<Vec<Self>, Error> {
     let mut tokens = Vec::new();
     let mut i = 0;
     let mut j = 0;
@@ -39,13 +69,13 @@ impl<'src> Token<'src> {
       let before_open = j;
       let after_open = before_open + block.open_delimiter().len();
 
-      let (before_close, newline) = match src[after_open..].find(block.close_delimiter()) {
+      let (before_close, closed) = match src[after_open..].find(block.close_delimiter()) {
         Some(before_close) => (after_open + before_close, true),
         None if block.is_line() => (src.len(), false),
         None => panic!("unmatched `{}`", block.open_delimiter()),
       };
 
-      let after_close = if newline {
+      let after_close = if closed {
         before_close + block.close_delimiter().len()
       } else {
         before_close
@@ -53,6 +83,7 @@ impl<'src> Token<'src> {
 
       if i != j {
         tokens.push(Self::Text {
+          contents: &src[i..j],
           start: i,
           end: j,
           index,
@@ -60,7 +91,7 @@ impl<'src> Token<'src> {
         index += 1;
       }
 
-      tokens.push(block.token(&src[after_open..before_close], newline));
+      tokens.push(block.token(&src[after_open..before_close], closed));
 
       j = after_close;
       i = after_close;
@@ -68,12 +99,69 @@ impl<'src> Token<'src> {
 
     if i != j {
       tokens.push(Self::Text {
+        contents: &src[i..j],
         start: i,
         end: j,
         index,
       });
     }
 
-    tokens
+    Ok(tokens)
+  }
+
+  fn code(self) -> Option<&'src str> {
+    match self {
+      Self::Code { .. }
+      | Self::CodeLine { .. }
+      | Self::Interpolation { .. }
+      | Self::InterpolationLine { .. } => Some(self.contents()),
+      Self::Text { .. } => None,
+    }
+  }
+
+  fn contents(self) -> &'src str {
+    match self {
+      Self::Code { contents }
+      | Self::CodeLine { contents, .. }
+      | Self::Interpolation { contents }
+      | Self::InterpolationLine { contents, .. }
+      | Self::Text { contents, .. } => contents,
+    }
+  }
+
+  fn block(self) -> Option<Block> {
+    match self {
+      Self::Code { .. } => Some(Block::Code),
+      Self::CodeLine { .. } => Some(Block::CodeLine),
+      Self::Interpolation { .. } => Some(Block::Interpolation),
+      Self::InterpolationLine { .. } => Some(Block::InterpolationLine),
+      Self::Text { .. } => None,
+    }
+  }
+
+  pub fn is_compatible_with(self, other: &Self) -> bool {
+    if self.code() != other.code() {
+      return false;
+    }
+
+    match (self, other) {
+      (Self::Code { .. }, Self::Code { .. })
+      | (Self::Interpolation { .. }, Self::Interpolation { .. })
+      | (Self::Text { .. }, Self::Text { .. }) => true,
+      (Self::CodeLine { closed, .. }, Self::CodeLine { closed: other, .. })
+      | (Self::InterpolationLine { closed, .. }, Self::InterpolationLine { closed: other, .. }) => {
+        closed == *other
+      }
+      _ => false,
+    }
+  }
+
+  // todo: can I replate this with call to contents?
+  pub fn text(self, template: &str) -> Option<&str> {
+    if let Self::Text { start, end, .. } = self {
+      Some(&template[start..end])
+    } else {
+      None
+    }
   }
 }

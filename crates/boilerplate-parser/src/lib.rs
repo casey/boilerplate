@@ -1,6 +1,7 @@
-pub use self::token::Token;
+pub use self::{block::Block, error::Error, token::Token};
 
-use self::block::Block;
+use core::fmt::{self, Display, Formatter};
 
 mod block;
+mod error;
 mod token;

@@ -1,7 +1,9 @@
 use super::*;
 
+// todo:
+// turn this into tokenkind?
 #[derive(Clone, Copy, Debug)]
-pub(crate) enum Block {
+pub enum Block {
   Code,
   CodeLine,
   Interpolation,
@@ -45,12 +47,12 @@ impl Block {
     }
   }
 
-  pub(crate) fn token<'src>(self, contents: &'src str, newline: bool) -> Token<'src> {
+  pub(crate) fn token<'src>(self, contents: &'src str, closed: bool) -> Token<'src> {
     match self {
       Self::Code => Token::Code { contents },
-      Self::CodeLine => Token::CodeLine { contents },
+      Self::CodeLine => Token::CodeLine { contents, closed },
       Self::Interpolation => Token::Interpolation { contents },
-      Self::InterpolationLine => Token::InterpolationLine { contents, newline },
+      Self::InterpolationLine => Token::InterpolationLine { contents, closed },
     }
   }
 }

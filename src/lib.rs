@@ -502,17 +502,52 @@
 
 use core::fmt::{self, Formatter};
 
+#[cfg(feature = "reload")]
+use {
+  self::reload::{Error, Reload},
+  boilerplate_parser::Token,
+};
+
 pub use boilerplate_macros::{boilerplate, Boilerplate};
 
+#[cfg(feature = "reload")]
+mod reload;
+
 pub trait Boilerplate {
-  const BOILERPLATE_TEXT: &'static [&'static str];
+  const TEXT: &'static [&'static str];
 
   #[cfg(feature = "reload")]
-  const BOILERPLATE_TEMPLATE: &'static [boilerplate_parser::Token<'static>];
+  const TOKENS: &'static [Token<'static>];
 
-  fn fmt_template(
+  fn boilerplate(
     &self,
-    boilerplate_text: &[&str],
+    boilerplate_text: &[impl AsRef<str>],
     boilerplate_output: &mut Formatter,
   ) -> fmt::Result;
+
+  #[cfg(feature = "reload")]
+  fn reload<'a>(&self, text: &'a str) -> Result<Reload<&Self>, Error<'a>> {
+    let tokens = Token::parse(text).map_err(Error::Parse)?;
+
+    let new = tokens.len();
+    let old = Self::TOKENS.len();
+    if new != old {
+      return Err(Error::Length { new, old });
+    }
+
+    for (&new, &old) in tokens.iter().zip(Self::TOKENS) {
+      if !new.is_compatible_with(&old) {
+        return Err(Error::Incompatible { new, old });
+      }
+    }
+
+    Ok(Reload {
+      inner: self,
+      text: tokens
+        .into_iter()
+        .flat_map(|token| token.text(text))
+        .map(|text| text.to_owned())
+        .collect(),
+    })
+  }
 }

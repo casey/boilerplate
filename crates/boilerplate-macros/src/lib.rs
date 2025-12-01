@@ -13,14 +13,14 @@ mod boilerplate;
 mod source;
 mod template;
 
-pub(crate) fn body(src: &str, escape: bool, function: bool) -> (TokenStream, Vec<String>) {
+pub(crate) fn body(src: &str, escape: bool, function: bool) -> (TokenStream, Vec<&str>) {
   fn line(token: Token, escape: bool, function: bool) -> String {
     let error_handler = if function { ".unwrap()" } else { "?" };
     match token {
       Token::Text { index, .. } => {
-        format!("boilerplate_output.write_str(boilerplate_text[{index}]){error_handler} ;",)
+        format!("boilerplate_output.write_str(boilerplate_text[{index}].as_ref()){error_handler} ;",)
       }
-      Token::Code { contents } | Token::CodeLine { contents } => (*contents).into(),
+      Token::Code { contents } | Token::CodeLine { contents, .. } => contents.into(),
       Token::Interpolation { contents } => {
         if escape {
           format!("({contents}).escape(boilerplate_output, false){error_handler} ;")
@@ -28,10 +28,10 @@ pub(crate) fn body(src: &str, escape: bool, function: bool) -> (TokenStream, Vec
           format!("write!(boilerplate_output, \"{{}}\", {contents}){error_handler} ;")
         }
       }
-      Token::InterpolationLine { contents, newline } => {
+      Token::InterpolationLine { contents, closed } => {
         if escape {
-          format!("({contents}).escape(boilerplate_output, {newline}){error_handler} ;")
-        } else if newline {
+          format!("({contents}).escape(boilerplate_output, {closed}){error_handler} ;")
+        } else if closed {
           format!("write!(boilerplate_output, \"{{}}\\n\", {contents}){error_handler} ;")
         } else {
           format!("write!(boilerplate_output, \"{{}}\", {contents}){error_handler} ;")
@@ -40,7 +40,10 @@ pub(crate) fn body(src: &str, escape: bool, function: bool) -> (TokenStream, Vec
     }
   }
 
-  let tokens = Token::parse(src);
+  let tokens = match Token::parse(src) {
+    Ok(tokens) => tokens,
+    Err(err) => panic!("{err}"),
+  };
 
   (
     tokens
@@ -50,16 +53,7 @@ pub(crate) fn body(src: &str, escape: bool, function: bool) -> (TokenStream, Vec
       .join("")
       .parse()
       .unwrap(),
-    tokens
-      .iter()
-      .flat_map(|token| {
-        if let Token::Text { start, end, .. } = *token {
-          Some(src[start..end].into())
-        } else {
-          None
-        }
-      })
-      .collect(),
+    tokens.iter().flat_map(|token| token.text(src)).collect(),
   )
 }
 
