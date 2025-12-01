@@ -427,28 +427,43 @@
 //!   use boilerplate::Boilerplate;
 //!
 //!   #[derive(Boilerplate)]
-//!   #[boilerplate(text = "Hello, {{self.name}}!")]
+//!   #[boilerplate(text = "Hello, {{self.first}}!")]
 //!   struct Context {
-//!     name: &'static str,
+//!     first: &'static str,
+//!     last: &'static str,
 //!   }
 //!
-//!   let context = Context { name: "Bob" };
+//!   let context = Context { first: "Bob", last: "Smith" };
 //!
 //!   assert_eq!(context.to_string(), "Hello, Bob!");
 //!
 //!   // Reload a compatible template:
-//!   let compatible_template = "Goodbye, {{self.name}}!";
+//!   let compatible_template = "Goodbye, {{self.first}}!";
 //!   assert_eq!(context.reload(compatible_template).unwrap().to_string(), "Goodbye, Bob!");
 //!
 //!   // Try to reload an incompatible template with different code:
 //!   let incompatible_template = "Goodbye, {{self.id}}!";
 //!   assert_eq!(
 //!     context.reload(incompatible_template).err().unwrap().to_string(),
-//!     "template blocks are not compatible: {{self.id}} != {{self.name}}",
+//!     "template blocks are not compatible: {{self.id}} != {{self.first}}",
+//!   );
+//!
+//!   // Try to reload an incompatible template with a different number of code blocks:
+//!   let incompatible_template = "Goodbye, {{self.first}} {{self.last}}!";
+//!   assert_eq!(
+//!     context.reload(incompatible_template).err().unwrap().to_string(),
+//!     "new template has 5 blocks but old template has 3 blocks",
+//!   );
+//!
+//!   // Try to reload an template with invalid syntax:
+//!   let incompatible_template = "Goodbye, {{self.first";
+//!   assert_eq!(
+//!     context.reload(incompatible_template).err().unwrap().to_string(),
+//!     "failed to parse new template: unmatched `{{`",
 //!   );
 //!
 //!   // Whitespace around code is allowed to be different:
-//!   let compatible_template = "Goodbye, {{ self.name }}!";
+//!   let compatible_template = "Goodbye, {{ self.first }}!";
 //!   assert_eq!(context.reload(compatible_template).unwrap().to_string(), "Goodbye, Bob!");
 //! }
 //! ```

@@ -31,7 +31,7 @@ impl Display for Error<'_> {
       }
       Self::Length { new, old } => write!(
         f,
-        "new and old template block length mismatch: {new} != {old}"
+        "new template has {new} blocks but old template has {old} blocks",
       ),
       Self::Parse(err) => write!(f, "failed to parse new template: {err}"),
     }
