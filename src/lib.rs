@@ -507,6 +507,9 @@ pub use boilerplate_macros::{boilerplate, Boilerplate};
 pub trait Boilerplate {
   const BOILERPLATE_TEXT: &'static [&'static str];
 
+  #[cfg(feature = "reload")]
+  const BOILERPLATE_TEMPLATE: &'static [boilerplate_parser::Token<'static>];
+
   fn fmt_template(
     &self,
     boilerplate_text: &[&str],

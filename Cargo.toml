@@ -18,15 +18,15 @@ license = "CC0-1.0"
 repository = "https://github.com/casey/boilerplate"
 
 [dependencies]
-boilerplate-macros = { version = "0.0.0", path = "boilerplate-macros" }
+boilerplate-macros = { version = "0.0.0", path = "crates/boilerplate-macros" }
 
 [dev-dependencies]
 axum = "0.8.7"
-html-escaper = { path = "html-escaper" }
+html-escaper = { path = "crates/html-escaper" }
 
 [features]
 axum = ["boilerplate-macros/axum"]
 reload = ["boilerplate-macros/reload"]
 
 [workspace]
-members = [".", "boilerplate-macros", "html-escaper"]
+members = [".", "crates/*"]
