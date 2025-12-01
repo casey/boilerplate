@@ -102,9 +102,16 @@ dependencies = [
 name = "boilerplate"
 version = "1.0.1"
 dependencies = [
+ "boilerplate-macros",
+ "html-escaper",
+]
+
+[[package]]
+name = "boilerplate-macros"
+version = "0.0.0"
+dependencies = [
  "axum",
  "darling",
- "html-escaper",
  "mime",
  "new_mime_guess",
  "pretty_assertions",

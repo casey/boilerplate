@@ -9,25 +9,11 @@ homepage = "https://github.com/casey/boilerplate"
 repository = "https://github.com/casey/boilerplate"
 categories = ["template-engine", "no-std"]
 
-[lib]
-proc-macro = true
-
 [dependencies]
-darling = "0.20.1"
-mime = "0.3.17"
-new_mime_guess = "4.0.1"
-proc-macro2 = "1.0.63"
-quote = "1.0.29"
-syn = { version = "2.0.23", features = ["derive"] }
-
-[features]
-axum = []
+boilerplate-macros = { version = "0.0.0", path = "boilerplate-macros" }
 
 [dev-dependencies]
-axum = "0.7.5"
 html-escaper = { path = "html-escaper" }
-pretty_assertions = "1.0.0"
-unindent = "0.2.3"
 
 [workspace]
-members = [".", "html-escaper"]
+members = [".", "boilerplate-macros", "html-escaper"]

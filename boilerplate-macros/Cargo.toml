@@ -1,0 +1,23 @@
+[package]
+name = "boilerplate-macros"
+version = "0.0.0"
+edition = "2021"
+
+[lib]
+proc-macro = true
+
+[dependencies]
+darling = "0.20.1"
+mime = "0.3.17"
+new_mime_guess = "4.0.1"
+proc-macro2 = "1.0.63"
+quote = "1.0.29"
+syn = { version = "2.0.23", features = ["derive"] }
+
+[dev-dependencies]
+axum = "0.7.5"
+pretty_assertions = "1.0.0"
+unindent = "0.2.3"
+
+[features]
+axum = []
