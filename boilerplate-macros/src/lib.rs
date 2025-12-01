@@ -35,7 +35,7 @@ pub fn boilerplate(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 
   quote! {
     {
-      use ::std::fmt::Write;
+      use ::core::fmt::Write;
 
       let boilerplate_template = #template;
       let mut boilerplate_output = String::new();

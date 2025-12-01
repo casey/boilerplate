@@ -32,12 +32,27 @@ impl Template {
     let (impl_generics, ty_generics, where_clause) = self.generics.split_for_impl();
 
     quote! {
-      impl #impl_generics core::fmt::Display for #ident #ty_generics #where_clause {
-        fn fmt(&self, boilerplate_output: &mut core::fmt::Formatter) -> core::fmt::Result {
+      impl #impl_generics boilerplate::Boilerplate for #ident #ty_generics #where_clause {
+        const BOILERPLATE_TEMPLATE: &'static str = #source;
+
+        fn fmt_template(
+          &self,
+          boilerplate_template: &str,
+          boilerplate_output: &mut core::fmt::Formatter,
+        ) -> core::fmt::Result {
           use core::fmt::Write;
-          let boilerplate_template = #source;
           #body
           Ok(())
+        }
+      }
+
+      impl #impl_generics core::fmt::Display for #ident #ty_generics #where_clause {
+        fn fmt(&self, boilerplate_output: &mut core::fmt::Formatter) -> core::fmt::Result {
+          <Self as boilerplate::Boilerplate>::fmt_template(
+            self,
+            <Self as boilerplate::Boilerplate>::BOILERPLATE_TEMPLATE,
+            boilerplate_output,
+          )
         }
       }
     }
@@ -78,11 +93,26 @@ mod tests {
       .display_impl()
       .to_string(),
       quote!(
+        impl boilerplate::Boilerplate for Foo {
+            const BOILERPLATE_TEMPLATE: &'static str = "";
+
+            fn fmt_template(
+              &self,
+              boilerplate_template: &str,
+              boilerplate_output: &mut core::fmt::Formatter,
+            ) -> core::fmt::Result {
+              use core::fmt::Write;
+              Ok(())
+            }
+        }
+
         impl core::fmt::Display for Foo {
           fn fmt(&self, boilerplate_output: &mut core::fmt::Formatter) -> core::fmt::Result {
-            use core::fmt::Write;
-            let boilerplate_template = "";
-            Ok(())
+            <Self as boilerplate::Boilerplate>::fmt_template(
+              self,
+              <Self as boilerplate::Boilerplate>::BOILERPLATE_TEMPLATE,
+              boilerplate_output,
+            )
           }
         }
       )

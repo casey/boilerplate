@@ -500,4 +500,16 @@
 //! ");
 //! ```
 
+use core::fmt::{self, Formatter};
+
+pub trait Boilerplate {
+  const BOILERPLATE_TEMPLATE: &'static str;
+
+  fn fmt_template(
+    &self,
+    boilerplate_template: &str,
+    boilerplate_output: &mut Formatter,
+  ) -> fmt::Result;
+}
+
 pub use boilerplate_macros::{boilerplate, Boilerplate};
