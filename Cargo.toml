@@ -2,8 +2,8 @@
 name = "boilerplate"
 version = "1.0.1"
 description = "Minimal compile-time Rust template engine"
-categories = ["template-engine", "no-std"]
 authors.workspace = true
+categories.workspace = true
 edition.workspace = true
 homepage.workspace = true
 license.workspace = true
@@ -11,6 +11,7 @@ repository.workspace = true
 
 [workspace.package]
 authors = ["Casey Rodarmor <casey@rodarmor.com>"]
+categories = ["template-engine", "no-std"]
 edition = "2021"
 homepage = "https://github.com/casey/boilerplate"
 license = "CC0-1.0"
