@@ -114,7 +114,7 @@ impl<'src> Token<'src> {
       Self::Code { .. }
       | Self::CodeLine { .. }
       | Self::Interpolation { .. }
-      | Self::InterpolationLine { .. } => Some(self.contents()),
+      | Self::InterpolationLine { .. } => Some(self.contents().trim()),
       Self::Text { .. } => None,
     }
   }
