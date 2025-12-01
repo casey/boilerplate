@@ -1,7 +1,7 @@
 use super::*;
 
 #[derive(Clone, Copy)]
-pub(crate) enum Token<'src> {
+pub enum Token<'src> {
   Code {
     contents: &'src str,
   },
@@ -23,7 +23,7 @@ pub(crate) enum Token<'src> {
 }
 
 impl<'src> Token<'src> {
-  pub(crate) fn parse(src: &'src str) -> (Vec<Self>, Vec<&'src str>) {
+  pub fn parse(src: &'src str) -> Vec<Self> {
     let mut tokens = Vec::new();
     let mut i = 0;
     let mut j = 0;
@@ -74,16 +74,6 @@ impl<'src> Token<'src> {
       });
     }
 
-    let text = tokens.iter().flat_map(|token| token.text(src)).collect();
-
-    (tokens, text)
-  }
-
-  pub(crate) fn text(self, template: &str) -> Option<&str> {
-    if let Token::Text { start, end, .. } = self {
-      Some(&template[start..end])
-    } else {
-      None
-    }
+    tokens
   }
 }

@@ -19,6 +19,7 @@ repository = "https://github.com/casey/boilerplate"
 
 [dependencies]
 boilerplate-macros = { version = "0.0.0", path = "crates/boilerplate-macros" }
+boilerplate-parser = { version = "0.0.0", path = "crates/boilerplate-parser" }
 
 [dev-dependencies]
 axum = "0.8.7"

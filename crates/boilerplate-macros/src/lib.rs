@@ -1,7 +1,6 @@
 use {
-  self::{
-    block::Block, boilerplate::Boilerplate, source::Source, template::Template, token::Token,
-  },
+  self::{boilerplate::Boilerplate, source::Source, template::Template},
+  boilerplate_parser::Token,
   darling::FromDeriveInput,
   new_mime_guess::Mime,
   proc_macro2::{Span, TokenStream},
@@ -10,24 +9,57 @@ use {
   syn::{parse_macro_input, DeriveInput, Generics, Ident, LitStr},
 };
 
-mod block;
 mod boilerplate;
 mod source;
 mod template;
-mod token;
 
 pub(crate) fn body(src: &str, escape: bool, function: bool) -> (TokenStream, Vec<String>) {
-  let (tokens, text) = Token::parse(src);
+  fn line(token: Token, escape: bool, function: bool) -> String {
+    let error_handler = if function { ".unwrap()" } else { "?" };
+    match token {
+      Token::Text { index, .. } => {
+        format!("boilerplate_output.write_str(boilerplate_text[{index}]){error_handler} ;",)
+      }
+      Token::Code { contents } | Token::CodeLine { contents } => (*contents).into(),
+      Token::Interpolation { contents } => {
+        if escape {
+          format!("({contents}).escape(boilerplate_output, false){error_handler} ;")
+        } else {
+          format!("write!(boilerplate_output, \"{{}}\", {contents}){error_handler} ;")
+        }
+      }
+      Token::InterpolationLine { contents, newline } => {
+        if escape {
+          format!("({contents}).escape(boilerplate_output, {newline}){error_handler} ;")
+        } else if newline {
+          format!("write!(boilerplate_output, \"{{}}\\n\", {contents}){error_handler} ;")
+        } else {
+          format!("write!(boilerplate_output, \"{{}}\", {contents}){error_handler} ;")
+        }
+      }
+    }
+  }
+
+  let tokens = Token::parse(src);
 
   (
     tokens
       .iter()
-      .map(|token| token.line(escape, function))
+      .map(|token| line(*token, escape, function))
       .collect::<Vec<String>>()
       .join("")
       .parse()
       .unwrap(),
-    text.iter().copied().map(|s| s.to_owned()).collect(),
+    tokens
+      .iter()
+      .flat_map(|token| {
+        if let Token::Text { start, end, .. } = *token {
+          Some(src[start..end].into())
+        } else {
+          None
+        }
+      })
+      .collect(),
   )
 }
 
