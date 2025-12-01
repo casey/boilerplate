@@ -545,8 +545,8 @@ pub trait Boilerplate {
       inner: self,
       text: tokens
         .into_iter()
-        .flat_map(|token| token.text(text))
-        .map(|text| text.to_owned())
+        .filter_map(|token| token.text(text))
+        .map(ToOwned::to_owned)
         .collect(),
     })
   }

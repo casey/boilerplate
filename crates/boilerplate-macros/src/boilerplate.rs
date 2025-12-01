@@ -15,29 +15,27 @@ impl Boilerplate {
       .filename
       .unwrap_or_else(|| Self::filename_from_ident(&self.ident.to_string()));
 
-    let source = match self.text {
-      Some(text) => Source::Literal(text),
-      None => {
-        let manifest_dir = std::env::var("CARGO_MANIFEST_DIR")
-          .expect("Failed to get `CARGO_MANIFEST_DIR` environment variable");
+    let source = if let Some(text) = self.text {
+      Source::Literal(text)
+    } else {
+      let manifest_dir = std::env::var("CARGO_MANIFEST_DIR")
+        .expect("Failed to get `CARGO_MANIFEST_DIR` environment variable");
 
-        let path = Path::new(&manifest_dir).join("templates").join(&filename);
+      let path = Path::new(&manifest_dir).join("templates").join(&filename);
 
-        let path = path.to_str().unwrap_or_else(|| {
-          panic!(
-            "Path to template `{}` was not valid unicode",
-            path.display()
-          )
-        });
+      let path = path.to_str().unwrap_or_else(|| {
+        panic!(
+          "Path to template `{}` was not valid unicode",
+          path.display()
+        )
+      });
 
-        Source::Path(path.into())
-      }
+      Source::Path(path.into())
     };
 
-    let escape = Path::new(&filename)
-      .extension()
-      .map(|extension| ["html", "htm", "xml"].contains(&extension.to_string_lossy().as_ref()))
-      .unwrap_or(false);
+    let escape = Path::new(&filename).extension().is_some_and(|extension| {
+      ["html", "htm", "xml"].contains(&extension.to_string_lossy().as_ref())
+    });
 
     let guess = new_mime_guess::from_path(&filename).first_or_text_plain();
 

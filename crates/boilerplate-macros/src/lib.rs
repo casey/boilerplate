@@ -13,7 +13,12 @@ mod boilerplate;
 mod source;
 mod template;
 
-pub(crate) fn body(src: &str, escape: bool, function: bool) -> (TokenStream, Vec<&str>) {
+// todo: return value order? maybe a struct?
+pub(crate) fn body(
+  src: &str,
+  escape: bool,
+  function: bool,
+) -> (TokenStream, Vec<&str>, Vec<Token>) {
   fn line(token: Token, escape: bool, function: bool) -> String {
     let error_handler = if function { ".unwrap()" } else { "?" };
     match token {
@@ -49,11 +54,11 @@ pub(crate) fn body(src: &str, escape: bool, function: bool) -> (TokenStream, Vec
     tokens
       .iter()
       .map(|token| line(*token, escape, function))
-      .collect::<Vec<String>>()
-      .join("")
+      .collect::<String>()
       .parse()
       .unwrap(),
-    tokens.iter().flat_map(|token| token.text(src)).collect(),
+    tokens.iter().filter_map(|token| token.text(src)).collect(),
+    tokens,
   )
 }
 
@@ -62,7 +67,7 @@ pub fn boilerplate(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
   let template = parse_macro_input!(input as LitStr);
   let text = template.value();
 
-  let (body, template) = body(&text, false, true);
+  let (body, template, _tokens) = body(&text, false, true);
 
   quote! {
     {

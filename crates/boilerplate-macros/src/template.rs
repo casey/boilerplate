@@ -29,13 +29,50 @@ impl Template {
     let source = &self.source;
     let text = source.text();
 
-    let (body, template) = body(&text, self.escape, false);
+    let (body, template, tokens) = body(&text, self.escape, false);
 
     let (impl_generics, ty_generics, where_clause) = self.generics.split_for_impl();
+
+    let tokens = if cfg!(feature = "reload") {
+      let tokens = tokens
+        .into_iter()
+        .map(|token| match token {
+          Token::Code { contents } => quote!(boilerplate::Token::Code { contents: #contents }),
+          Token::CodeLine { closed, contents } => {
+            quote!(boilerplate::Token::CodeLine { closed: #closed, contents: #contents })
+          }
+          Token::Interpolation { contents } => {
+            quote!(boilerplate::Token::Interpolation { contents: #contents })
+          }
+          Token::InterpolationLine { contents, closed } => {
+            quote!(boilerplate::Token::InterpolationLine { closed: #closed, contents: #contents })
+          }
+          Token::Text {
+            contents,
+            start,
+            end,
+            index,
+          } => quote!(boilerplate::Token::Text {
+            contents: #contents,
+            start: #start,
+            end: #end,
+            index: #index
+          }),
+        })
+        .collect::<Vec<TokenStream>>();
+
+      Some(quote! {
+        const TOKENS: &'static [boilerplate::Token<'static>] = &[ #(#tokens),* ];
+      })
+    } else {
+      None
+    };
 
     quote! {
       impl #impl_generics boilerplate::Boilerplate for #ident #ty_generics #where_clause {
         const TEXT: &'static [&'static str] = &[ #(#template),* ];
+
+        #tokens
 
         fn boilerplate(
           &self,
@@ -123,7 +160,7 @@ mod tests {
   }
 
   fn assert_display_body_eq(template: &str, expected: TokenStream) {
-    let (actual, _template) = body(template, false, false);
+    let (actual, _template, _tokens) = body(template, false, false);
     assert_eq!(actual.to_string(), expected.to_string());
   }
 

@@ -139,6 +139,7 @@ impl<'src> Token<'src> {
     }
   }
 
+  #[must_use]
   pub fn is_compatible_with(self, other: &Self) -> bool {
     if self.code() != other.code() {
       return false;
@@ -157,6 +158,7 @@ impl<'src> Token<'src> {
   }
 
   // todo: can I replate this with call to contents?
+  #[must_use]
   pub fn text(self, template: &str) -> Option<&str> {
     if let Self::Text { start, end, .. } = self {
       Some(&template[start..end])
