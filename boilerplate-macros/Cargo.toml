@@ -1,13 +1,17 @@
 [package]
 name = "boilerplate-macros"
 version = "0.0.0"
-edition = "2021"
+authors.workspace = true
+edition.workspace = true
+homepage.workspace = true
+license.workspace = true
+repository.workspace = true
 
 [lib]
 proc-macro = true
 
 [dependencies]
-darling = "0.20.1"
+darling = "0.21.3"
 mime = "0.3.17"
 new_mime_guess = "4.0.1"
 proc-macro2 = "1.0.63"
