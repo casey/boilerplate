@@ -100,7 +100,7 @@ impl<'src> Token<'src> {
       });
     }
 
-    let text = tokens.iter().flat_map(|token| token.text(&src)).collect();
+    let text = tokens.iter().flat_map(|token| token.text(src)).collect();
 
     (tokens, text)
   }
