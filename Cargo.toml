@@ -13,7 +13,11 @@ categories = ["template-engine", "no-std"]
 boilerplate-macros = { version = "0.0.0", path = "boilerplate-macros" }
 
 [dev-dependencies]
+axum = "0.7.5"
 html-escaper = { path = "html-escaper" }
+
+[features]
+axum = ["boilerplate-macros/axum"]
 
 [workspace]
 members = [".", "boilerplate-macros", "html-escaper"]
