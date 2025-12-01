@@ -501,7 +501,9 @@
 //! ```
 
 use {
-  self::{block::Block, boilerplate::Boilerplate, source::Source, template::Template},
+  self::{
+    block::Block, boilerplate::Boilerplate, source::Source, template::Template, token::Token,
+  },
   darling::FromDeriveInput,
   new_mime_guess::Mime,
   proc_macro2::{Span, TokenStream},
@@ -514,13 +516,24 @@ mod block;
 mod boilerplate;
 mod source;
 mod template;
+mod token;
+
+pub(crate) fn body(src: &str, escape: bool, function: bool) -> TokenStream {
+  Token::parse(src)
+    .iter()
+    .map(|token| token.line(escape, function))
+    .collect::<Vec<String>>()
+    .join("")
+    .parse()
+    .unwrap()
+}
 
 #[proc_macro]
 pub fn boilerplate(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
   let template = parse_macro_input!(input as LitStr);
   let text = template.value();
 
-  let body = Block::body(&text, false, true);
+  let body = body(&text, false, true);
 
   quote! {
     {

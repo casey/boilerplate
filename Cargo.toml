@@ -31,3 +31,9 @@ unindent = "0.2.3"
 
 [workspace]
 members = [".", "html-escaper"]
+
+[lints]
+workspace = true
+
+[workspace.lints.rust]
+mismatched_lifetime_syntaxes = "allow"
