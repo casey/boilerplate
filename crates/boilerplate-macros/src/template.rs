@@ -87,6 +87,7 @@ impl Template {
           boilerplate_output: &mut ::core::fmt::Formatter,
         ) -> ::core::fmt::Result {
           use ::core::fmt::Write;
+          use ::boilerplate::Escape;
           #body
           Ok(())
         }
@@ -182,6 +183,7 @@ mod tests {
               boilerplate_output: &mut ::core::fmt::Formatter,
             ) -> ::core::fmt::Result {
               use ::core::fmt::Write;
+              use ::boilerplate::Escape;
               #body
               Ok(())
             }

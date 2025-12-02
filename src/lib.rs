@@ -156,8 +156,6 @@
 //! This works for escaped templates as well:
 //!
 //! ```
-//! use boilerplate::Escape;
-//!
 //! #[derive(boilerplate::Boilerplate)]
 //! #[boilerplate(text = "My favorite byte is $$ self.byte")]
 //! struct ContextHtml {
@@ -306,29 +304,15 @@
 //! ### Escaping
 //!
 //! If the template file path ends with an `html`, `htm`, or `xml` extension,
-//! escaping is enabled. Escaping is performed by calling an `escape` method on
-//! interpolation values with the following signature:
+//! escaping is enabled.
 //!
 //! ```
-//! trait Escape {
-//!   fn escape(&self, f: &mut core::fmt::Formatter, newline: bool) -> core::fmt::Result;
-//! }
-//! ```
-//!
-//! Thus, a suitable `Escape` trait must be in scope. `boilerplate` provides
-//! just such an `Escape` trait:
-//!
-//! ```
-//! use boilerplate::Escape;
-//!
 //! #[derive(boilerplate::Boilerplate)]
 //! struct EscapeHtml(&'static str);
 //! assert_eq!(EscapeHtml("&").to_string(), "&amp;\n");
 //! ```
 //!
 //! ```
-//! use boilerplate::Escape;
-//!
 //! #[derive(boilerplate::Boilerplate)]
 //! #[boilerplate(text = "$$ self.0\n")]
 //! struct ContextHtml(&'static str);
@@ -338,7 +322,7 @@
 //! The `Trusted` wrapper disables escaping for trusted values:
 //!
 //! ```
-//! use boilerplate::{Escape, Trusted};
+//! use boilerplate::Trusted;
 //!
 //! #[derive(boilerplate::Boilerplate)]
 //! #[boilerplate(text = "$$ Trusted(self.0)\n")]
@@ -621,7 +605,7 @@
 //!
 //! ```
 //! use {
-//!   boilerplate::{Escape, Trusted},
+//!   boilerplate::Trusted,
 //!   std::fmt::Display,
 //! };
 //!
