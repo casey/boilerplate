@@ -691,6 +691,8 @@ pub trait Boilerplate {
   }
 
   #[cfg(feature = "reload")]
+  /// Reload the template from its original path. Cannot be used on templates
+  /// created from string literals.
   fn reload_from_path(&self) -> Result<Reload<&Self>, Error> {
     let Some(path) = Self::PATH else {
       return Err(Error::Path);
