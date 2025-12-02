@@ -1,6 +1,7 @@
 [package]
 name = "boilerplate-tests"
 version = "0.0.0"
+publish = false
 authors.workspace = true
 categories.workspace = true
 edition.workspace = true
