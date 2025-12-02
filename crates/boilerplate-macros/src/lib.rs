@@ -21,7 +21,7 @@ pub fn boilerplate(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
   let template = parse_macro_input!(input as LitStr);
   let src = template.value();
 
-  let Implementation { body, text, .. } = Implementation::parse(&src, false, true);
+  let Implementation { body, text } = Implementation::parse(&src, false, true);
 
   quote! {
     {
