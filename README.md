@@ -16,34 +16,8 @@
 
 `boilerplate` is a statically-checked Rust template engine with no runtime
 dependencies. There are two ways to use boilerplate,
-`boilerplate::boilerplate`, a function-like macro, and
-`boilerplate::Boilerplate`, a derive macro.
-
-Function-like Macro
--------------------
-
-```rust
-use boilerplate::boilerplate;
-
-let foo = true;
-let bar: Result<&str, &str> = Ok("yassss");
-
-let output = boilerplate!(
-"%% if foo {
-Foo was true!
-%% }
-%% match bar {
-%%   Ok(ok) => {
-Pretty good: {{ ok }}
-%%   }
-%%   Err(err) => {
-Not so great: {{ err }}
-%%   }
-%% }
-");
-
-assert_eq!(output, "Foo was true!\nPretty good: yassss\n");
-```
+`boilerplate::Boilerplate`, a derive macro, and `boilerplate::boilerplate`, a
+function-like macro.
 
 Derive Macro
 ------------
@@ -94,6 +68,33 @@ println!("The output is: {}", MyTemplateTxt { foo: false, bar: Err("hello".into(
 [cargo-expand](https://github.com/dtolnay/cargo-expand) to expand the
 `Boilerplate` macro, inspect derived `Display` implementations, and debug
 template issues.
+
+Function-like Macro
+-------------------
+
+```rust
+use boilerplate::boilerplate;
+
+let foo = true;
+let bar: Result<&str, &str> = Ok("yassss");
+
+let output = boilerplate!(
+"%% if foo {
+Foo was true!
+%% }
+%% match bar {
+%%   Ok(ok) => {
+Pretty good: {{ ok }}
+%%   }
+%%   Err(err) => {
+Not so great: {{ err }}
+%%   }
+%% }
+");
+
+assert_eq!(output, "Foo was true!\nPretty good: yassss\n");
+```
+
 
 Quick Start
 -----------
