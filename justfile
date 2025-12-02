@@ -20,7 +20,7 @@ publish:
   cd tmp/release
   git tag -a $VERSION -m "Release $VERSION"
   git push origin $VERSION
-  cargo publish
+  cargo publish --workspace
   cd ../..
   rm -rf tmp/release
 
