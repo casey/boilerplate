@@ -652,6 +652,9 @@
 
 #![cfg_attr(not(feature = "reload"), no_std)]
 
+#[cfg(not(feature = "reload"))]
+extern crate alloc;
+
 pub use {
   self::escape::{Escape, Trusted},
   boilerplate_macros::{boilerplate, Boilerplate},

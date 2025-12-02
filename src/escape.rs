@@ -68,6 +68,9 @@ mod tests {
     core::fmt::{self, Display},
   };
 
+  #[cfg(not(feature = "reload"))]
+  use alloc::string::ToString;
+
   struct Wrapper(&'static str);
 
   impl Display for Wrapper {
