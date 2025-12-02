@@ -1,6 +1,6 @@
 use super::*;
 
-// todo: add round-trip tests
+// Parsed template token.
 #[derive(Clone, Copy, Debug)]
 pub enum Token<'src> {
   Code { contents: &'src str },
