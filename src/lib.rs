@@ -474,6 +474,48 @@
 //! }
 //! ```
 //!
+//! If a template was created from a file, you can call
+//! `Boilerplate::reload_path` to reload it from its original location:
+//!
+//! ```
+//! #[cfg(feature = "reload")]
+//! {
+//!   // import the `Boilerplate` trait for the `reload_from_path` method
+//!   use boilerplate::Boilerplate;
+//!
+//!   #[derive(boilerplate::Boilerplate)]
+//!   struct QuickStartTxt {
+//!     n: u32,
+//!   }
+//!   assert_eq!(QuickStartTxt { n: 10 }.to_string(), "Foo is 10!\n");
+//!   assert_eq!(
+//!     QuickStartTxt { n: 10 }.reload_from_path().unwrap().to_string(),
+//!     "Foo is 10!\n",
+//!   );
+//! }
+//! ```
+//!
+//! `reload_path` will error if the template was created from a string literal:
+//!
+//! ```
+//! #[cfg(feature = "reload")]
+//! {
+//!   // import the `Boilerplate` trait for the `reload_from_path` method
+//!   use boilerplate::Boilerplate;
+//!
+//!   #[derive(boilerplate::Boilerplate)]
+//!   #[boilerplate(text = "Foo is {{ self.n }}!\n")]
+//!   struct Context {
+//!     n: u32,
+//!   }
+//!   assert_eq!(Context { n: 10 }.to_string(), "Foo is 10!\n");
+//!   assert_eq!(
+//!     Context { n: 10 }.reload_from_path().err().unwrap().to_string(),
+//!     "template has no path",
+//!   );
+//! }
+//! ```
+//!
 //! Function-like Macro
 //! -------------------
 //!
