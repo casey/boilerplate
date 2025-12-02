@@ -41,6 +41,10 @@ jobs:
         cargo test --all --features axum
         cargo test --all --features reload
 
+    - run: |
+        rustup target add thumbv6m-none-eabi
+        cargo build --no-default-features --target thumbv6m-none-eabi
+
   lint:
     runs-on: ubuntu-latest
 
