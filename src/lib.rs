@@ -495,7 +495,8 @@
 //! }
 //! ```
 //!
-//! `reload_path` will error if the template was created from a string literal:
+//! `Boilerplate::reload_path` will return `Error::Path` if the template was
+//! created from a string literal:
 //!
 //! ```
 //! #[cfg(feature = "reload")]
