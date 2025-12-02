@@ -88,6 +88,9 @@ dependencies = [
 [[package]]
 name = "boilerplate-parser"
 version = "0.0.0"
+dependencies = [
+ "pretty_assertions",
+]
 
 [[package]]
 name = "bytes"
