@@ -451,7 +451,14 @@
 //!     "template blocks are not compatible: {{self.id}} != {{self.first}}",
 //!   );
 //!
-//!   // Try to reload an incompatible template with a different number of code blocks:
+//!   // Text blocks cannot be removed entirely:
+//!   let incompatible_template = "{{ self.first }}";
+//!   assert_eq!(
+//!     context.reload(incompatible_template).err().unwrap().to_string(),
+//!     "new template has 1 blocks but old template has 3 blocks",
+//!   );
+//!
+//!   // Try to reload an incompatible template with a different number of blocks:
 //!   let incompatible_template = "Goodbye, {{self.first}} {{self.last}}!";
 //!   assert_eq!(
 //!     context.reload(incompatible_template).err().unwrap().to_string(),
@@ -610,14 +617,15 @@ pub trait Boilerplate {
   fn reload<'a>(&self, src: &'a str) -> Result<Reload<&Self>, Error<'a>> {
     let tokens = Token::parse(src).map_err(Error::Parse)?;
 
-    let new = tokens.len();
-    let old = Self::TOKENS.len();
-    if new != old {
-      return Err(Error::Length { new, old });
+    if tokens.len() != Self::TOKENS.len() {
+      return Err(Error::Length {
+        new: tokens.len(),
+        old: Self::TOKENS.len(),
+      });
     }
 
-    for (&new, &old) in tokens.iter().zip(Self::TOKENS) {
-      if !new.is_compatible_with(&old) {
+    for (new, old) in tokens.iter().copied().zip(Self::TOKENS.iter().copied()) {
+      if !new.is_compatible_with(old) {
         return Err(Error::Incompatible { new, old });
       }
     }

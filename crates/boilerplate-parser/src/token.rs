@@ -117,21 +117,28 @@ impl<'src> Token<'src> {
   }
 
   #[must_use]
-  pub fn is_compatible_with(self, other: &Self) -> bool {
+  pub fn is_compatible_with(self, other: Self) -> bool {
     if self.code() != other.code() {
       return false;
     }
 
-    match (self, other) {
-      (Self::Code { .. }, Self::Code { .. })
-      | (Self::Interpolation { .. }, Self::Interpolation { .. })
-      | (Self::Text { .. }, Self::Text { .. }) => true,
-      (Self::CodeLine { closed, .. }, Self::CodeLine { closed: other, .. })
-      | (Self::InterpolationLine { closed, .. }, Self::InterpolationLine { closed: other, .. }) => {
-        closed == *other
+    if self.block() != other.block() {
+      for token in [self, other] {
+        if !matches!(token, Self::Code { .. } | Self::CodeLine { .. }) {
+          return false;
+        }
       }
-      _ => false,
     }
+
+    if let Self::InterpolationLine { closed, .. } = self {
+      if let Self::InterpolationLine { closed: other, .. } = other {
+        if closed != other {
+          return false;
+        }
+      }
+    }
+
+    true
   }
 
   #[must_use]
@@ -147,6 +154,148 @@ impl<'src> Token<'src> {
 #[cfg(test)]
 mod tests {
   use {super::*, pretty_assertions::assert_eq, Token::*};
+
+  #[test]
+  fn compatibility() {
+    #[track_caller]
+    fn case(a: Token, b: Token) {
+      assert!(a.is_compatible_with(b));
+    }
+    case(
+      Text {
+        contents: "foo",
+        index: 0,
+      },
+      Text {
+        contents: "bar",
+        index: 1,
+      },
+    );
+    case(Code { contents: "foo" }, Code { contents: "foo" });
+    case(Code { contents: " foo" }, Code { contents: "foo" });
+    case(Code { contents: "foo " }, Code { contents: "foo" });
+    case(
+      CodeLine {
+        contents: "foo",
+        closed: true,
+      },
+      CodeLine {
+        contents: "foo",
+        closed: true,
+      },
+    );
+    case(
+      CodeLine {
+        contents: "foo",
+        closed: false,
+      },
+      CodeLine {
+        contents: "foo",
+        closed: false,
+      },
+    );
+    case(
+      CodeLine {
+        contents: "foo",
+        closed: true,
+      },
+      CodeLine {
+        contents: "foo",
+        closed: false,
+      },
+    );
+    case(
+      CodeLine {
+        contents: "foo",
+        closed: false,
+      },
+      CodeLine {
+        contents: "foo",
+        closed: true,
+      },
+    );
+    case(
+      Code { contents: "foo" },
+      CodeLine {
+        contents: "foo",
+        closed: true,
+      },
+    );
+    case(
+      CodeLine {
+        contents: "foo",
+        closed: true,
+      },
+      Code { contents: "foo" },
+    );
+    case(
+      Interpolation { contents: "foo" },
+      Interpolation { contents: "foo" },
+    );
+    case(
+      InterpolationLine {
+        contents: "foo",
+        closed: true,
+      },
+      InterpolationLine {
+        contents: "foo",
+        closed: true,
+      },
+    );
+    case(
+      InterpolationLine {
+        contents: "foo",
+        closed: false,
+      },
+      InterpolationLine {
+        contents: "foo",
+        closed: false,
+      },
+    );
+  }
+
+  #[test]
+  fn incompatibility() {
+    #[track_caller]
+    fn case(a: Token, b: Token) {
+      assert!(!a.is_compatible_with(b));
+    }
+    case(
+      Text {
+        contents: "foo",
+        index: 0,
+      },
+      Code { contents: "bar" },
+    );
+    case(Code { contents: "foo" }, Interpolation { contents: "bar" });
+    case(
+      Interpolation { contents: "foo" },
+      InterpolationLine {
+        contents: "bar",
+        closed: false,
+      },
+    );
+    case(
+      InterpolationLine {
+        contents: "foo",
+        closed: true,
+      },
+      InterpolationLine {
+        contents: "bar",
+        closed: true,
+      },
+    );
+    case(
+      InterpolationLine {
+        contents: "foo",
+        closed: true,
+      },
+      InterpolationLine {
+        contents: "foo",
+        closed: false,
+      },
+    );
+  }
 
   #[track_caller]
   fn assert_parse(expected: &str, expected_tokens: &[Token]) {

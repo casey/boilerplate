@@ -36,6 +36,7 @@ missing-errors-doc = "allow"
 missing-panics-doc = "allow"
 needless-pass-by-value = "allow"
 pedantic = { level = "deny", priority = -1 }
+too-many-lines = "allow"
 wildcard-imports = "allow"
 
 [workspace.lints.rust]
