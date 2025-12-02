@@ -64,7 +64,7 @@ impl<'src> Token<'src> {
 
       let previous_is_code = matches!(
         tokens.last(),
-        Some(Token::Code { .. } | Token::CodeLine { .. })
+        Some(Token::Code { .. } | Token::CodeLine { .. }),
       );
 
       let current_is_code = matches! {
