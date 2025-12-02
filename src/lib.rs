@@ -607,9 +607,9 @@ pub trait Boilerplate {
   /// Rust code, like `{{ ... }}` are the same. Text blocks, i.e., blocks that
   /// contain literal text, may be different.
   ///
-  /// - `text` - The new template string.
-  fn reload<'a>(&self, text: &'a str) -> Result<Reload<&Self>, Error<'a>> {
-    let tokens = Token::parse(text).map_err(Error::Parse)?;
+  /// - `src` - The new template source text.
+  fn reload<'a>(&self, src: &'a str) -> Result<Reload<&Self>, Error<'a>> {
+    let tokens = Token::parse(src).map_err(Error::Parse)?;
 
     let new = tokens.len();
     let old = Self::TOKENS.len();

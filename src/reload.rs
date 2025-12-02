@@ -14,9 +14,9 @@ impl<T: Boilerplate> Display for Reload<&T> {
 
 /// Template reload errors.
 #[derive(Debug)]
-pub enum Error<'a> {
+pub enum Error<'src> {
   /// New template is not compatible with the old template.
-  Incompatible { new: Token<'a>, old: Token<'a> },
+  Incompatible { new: Token<'src>, old: Token<'src> },
   /// New template does not have the same number of blocks.
   Length { new: usize, old: usize },
   /// Failed to parse new template.
