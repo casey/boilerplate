@@ -451,11 +451,18 @@
 //!     "template blocks are not compatible: {{self.id}} != {{self.first}}",
 //!   );
 //!
-//!   // Try to reload an incompatible template with a different number of code blocks:
+//!   // Text blocks cannot be removed entirely:
+//!   let incompatible_template = "{{ self.first }}";
+//!   assert_eq!(
+//!     context.reload(incompatible_template).err().unwrap().to_string(),
+//!     "new template has 1 blocks but old template has 3 blocks",
+//!   );
+//!
+//!   // Try to reload an incompatible template with a different number of blocks:
 //!   let incompatible_template = "Goodbye, {{self.first}} {{self.last}}!";
 //!   assert_eq!(
 //!     context.reload(incompatible_template).err().unwrap().to_string(),
-//!     "new template has 2 blocks but old template has 1 blocks",
+//!     "new template has 5 blocks but old template has 3 blocks",
 //!   );
 //!
 //!   // Try to reload a template with invalid syntax:
@@ -610,26 +617,14 @@ pub trait Boilerplate {
   fn reload<'a>(&self, src: &'a str) -> Result<Reload<&Self>, Error<'a>> {
     let tokens = Token::parse(src).map_err(Error::Parse)?;
 
-    let new = tokens
-      .iter()
-      .copied()
-      .filter(|token| !matches!(token, Token::Text { .. }))
-      .collect::<Vec<Token>>();
-
-    let old = Self::TOKENS
-      .iter()
-      .copied()
-      .filter(|token| !matches!(token, Token::Text { .. }))
-      .collect::<Vec<Token>>();
-
-    if new.len() != old.len() {
+    if tokens.len() != Self::TOKENS.len() {
       return Err(Error::Length {
-        new: new.len(),
-        old: old.len(),
+        new: tokens.len(),
+        old: Self::TOKENS.len(),
       });
     }
 
-    for (new, old) in new.into_iter().zip(old) {
+    for (new, old) in tokens.iter().copied().zip(Self::TOKENS.iter().copied()) {
       if !new.is_compatible_with(old) {
         return Err(Error::Incompatible { new, old });
       }
