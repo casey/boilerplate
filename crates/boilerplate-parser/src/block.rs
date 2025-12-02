@@ -1,7 +1,5 @@
 use super::*;
 
-// todo:
-// turn this into tokenkind?
 #[derive(Clone, Copy, Debug)]
 pub enum Block {
   Code,
