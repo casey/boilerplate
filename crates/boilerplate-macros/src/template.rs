@@ -37,17 +37,17 @@ impl Template {
       let tokens = tokens
         .into_iter()
         .map(|token| match token {
-          Token::Code { contents } => quote!(boilerplate::Token::Code { contents: #contents }),
+          Token::Code { contents } => quote!(::boilerplate::Token::Code { contents: #contents }),
           Token::CodeLine { closed, contents } => {
-            quote!(boilerplate::Token::CodeLine { closed: #closed, contents: #contents })
+            quote!(::boilerplate::Token::CodeLine { closed: #closed, contents: #contents })
           }
           Token::Interpolation { contents } => {
-            quote!(boilerplate::Token::Interpolation { contents: #contents })
+            quote!(::boilerplate::Token::Interpolation { contents: #contents })
           }
           Token::InterpolationLine { contents, closed } => {
-            quote!(boilerplate::Token::InterpolationLine { closed: #closed, contents: #contents })
+            quote!(::boilerplate::Token::InterpolationLine { closed: #closed, contents: #contents })
           }
-          Token::Text { contents, index } => quote!(boilerplate::Token::Text {
+          Token::Text { contents, index } => quote!(::boilerplate::Token::Text {
             contents: #contents,
             index: #index
           }),
@@ -55,34 +55,34 @@ impl Template {
         .collect::<Vec<TokenStream>>();
 
       Some(quote! {
-        const TOKENS: &'static [boilerplate::Token<'static>] = &[ #(#tokens),* ];
+        const TOKENS: &'static [::boilerplate::Token<'static>] = &[ #(#tokens),* ];
       })
     } else {
       None
     };
 
     quote! {
-      impl #impl_generics boilerplate::Boilerplate for #ident #ty_generics #where_clause {
+      impl #impl_generics ::boilerplate::Boilerplate for #ident #ty_generics #where_clause {
         const TEXT: &'static [&'static str] = &[ #(#text),* ];
 
         #tokens
 
         fn boilerplate(
           &self,
-          boilerplate_text: &[impl AsRef<str>],
-          boilerplate_output: &mut core::fmt::Formatter,
-        ) -> core::fmt::Result {
-          use core::fmt::Write;
+          boilerplate_text: &[impl ::core::convert::AsRef<str>],
+          boilerplate_output: &mut ::core::fmt::Formatter,
+        ) -> ::core::fmt::Result {
+          use ::core::fmt::Write;
           #body
           Ok(())
         }
       }
 
-      impl #impl_generics core::fmt::Display for #ident #ty_generics #where_clause {
-        fn fmt(&self, boilerplate_output: &mut core::fmt::Formatter) -> core::fmt::Result {
-          <Self as boilerplate::Boilerplate>::boilerplate(
+      impl #impl_generics ::core::fmt::Display for #ident #ty_generics #where_clause {
+        fn fmt(&self, boilerplate_output: &mut ::core::fmt::Formatter) -> ::core::fmt::Result {
+          <Self as ::boilerplate::Boilerplate>::boilerplate(
             self,
-            <Self as boilerplate::Boilerplate>::TEXT,
+            <Self as ::boilerplate::Boilerplate>::TEXT,
             boilerplate_output,
           )
         }
@@ -96,10 +96,10 @@ impl Template {
     let (impl_generics, ty_generics, where_clause) = self.generics.split_for_impl();
 
     quote! {
-      impl #impl_generics axum::response::IntoResponse for #ident #ty_generics #where_clause {
-        fn into_response(self) -> axum::response::Response {
+      impl #impl_generics ::axum::response::IntoResponse for #ident #ty_generics #where_clause {
+        fn into_response(self) -> ::axum::response::Response {
           (
-            [(axum::http::header::CONTENT_TYPE, #content_type)],
+            [(::axum::http::header::CONTENT_TYPE, #content_type)],
             self.to_string(),
           ).into_response()
         }
@@ -116,7 +116,7 @@ mod tests {
   fn display_impl() {
     let tokens = if cfg!(feature = "reload") {
       Some(quote! {
-        const TOKENS: &'static [boilerplate::Token<'static>] = &[];
+        const TOKENS: &'static [::boilerplate::Token<'static>] = &[];
       })
     } else {
       None
@@ -133,26 +133,26 @@ mod tests {
       .display_impl()
       .to_string(),
       quote!(
-        impl boilerplate::Boilerplate for Foo {
+        impl ::boilerplate::Boilerplate for Foo {
             const TEXT: &'static [&'static str] = &[];
 
             #tokens
 
             fn boilerplate(
               &self,
-              boilerplate_text: &[impl AsRef<str>],
-              boilerplate_output: &mut core::fmt::Formatter,
-            ) -> core::fmt::Result {
-              use core::fmt::Write;
+              boilerplate_text: &[impl ::core::convert::AsRef<str>],
+              boilerplate_output: &mut ::core::fmt::Formatter,
+            ) -> ::core::fmt::Result {
+              use ::core::fmt::Write;
               Ok(())
             }
         }
 
-        impl core::fmt::Display for Foo {
-          fn fmt(&self, boilerplate_output: &mut core::fmt::Formatter) -> core::fmt::Result {
-            <Self as boilerplate::Boilerplate>::boilerplate(
+        impl ::core::fmt::Display for Foo {
+          fn fmt(&self, boilerplate_output: &mut ::core::fmt::Formatter) -> ::core::fmt::Result {
+            <Self as ::boilerplate::Boilerplate>::boilerplate(
               self,
-              <Self as boilerplate::Boilerplate>::TEXT,
+              <Self as ::boilerplate::Boilerplate>::TEXT,
               boilerplate_output,
             )
           }
@@ -231,10 +231,10 @@ mod tests {
       .axum_into_response_impl()
       .to_string(),
       quote!(
-        impl axum::response::IntoResponse for Foo {
-          fn into_response(self) -> axum::response::Response {
+        impl ::axum::response::IntoResponse for Foo {
+          fn into_response(self) -> ::axum::response::Response {
             (
-              [(axum::http::header::CONTENT_TYPE, "text/plain")],
+              [(::axum::http::header::CONTENT_TYPE, "text/plain")],
               self.to_string(),
             ).into_response()
           }
