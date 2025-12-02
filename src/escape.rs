@@ -30,7 +30,7 @@ impl<T: Display> Escape for Trusted<T> {
 }
 
 /// Escaping wrapper for `core::fmt::Formatter`
-struct HtmlEscaper<'a, 'b>(pub &'a mut Formatter<'b>);
+struct HtmlEscaper<'a, 'b>(&'a mut Formatter<'b>);
 
 impl Write for HtmlEscaper<'_, '_> {
   fn write_str(&mut self, s: &str) -> core::fmt::Result {
