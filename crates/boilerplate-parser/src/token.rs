@@ -1,7 +1,7 @@
 use super::*;
 
 /// Parsed template token.
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Token<'src> {
   Code { contents: &'src str },
   CodeLine { closed: bool, contents: &'src str },
@@ -141,5 +141,460 @@ impl<'src> Token<'src> {
     } else {
       None
     }
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use {super::*, pretty_assertions::assert_eq, Token::*};
+
+  #[track_caller]
+  fn assert_parse(expected: &str, expected_tokens: &[Token]) {
+    let actual_tokens = Token::parse(expected).unwrap();
+    assert_eq!(actual_tokens, expected_tokens);
+    let actual = actual_tokens
+      .iter()
+      .map(ToString::to_string)
+      .collect::<String>();
+    assert_eq!(actual, expected);
+  }
+
+  #[test]
+  fn empty() {
+    assert_parse("", &[]);
+  }
+
+  #[test]
+  fn text() {
+    assert_parse(
+      "foo",
+      &[Text {
+        contents: "foo",
+        index: 0,
+      }],
+    );
+  }
+
+  #[test]
+  fn code() {
+    assert_parse("{% foo %}", &[Code { contents: " foo " }]);
+    assert_parse("{%%}", &[Code { contents: "" }]);
+  }
+
+  #[test]
+  fn code_line() {
+    assert_parse(
+      "%% foo\n",
+      &[CodeLine {
+        contents: " foo",
+        closed: true,
+      }],
+    );
+    assert_parse(
+      "%% foo",
+      &[CodeLine {
+        contents: " foo",
+        closed: false,
+      }],
+    );
+    assert_parse(
+      "%%\n",
+      &[CodeLine {
+        contents: "",
+        closed: true,
+      }],
+    );
+    assert_parse(
+      "%%",
+      &[CodeLine {
+        contents: "",
+        closed: false,
+      }],
+    );
+  }
+
+  #[test]
+  fn interpolation() {
+    assert_parse("{{ foo }}", &[Interpolation { contents: " foo " }]);
+    assert_parse("{{foo}}", &[Interpolation { contents: "foo" }]);
+    assert_parse("{{ }}", &[Interpolation { contents: " " }]);
+    assert_parse("{{}}", &[Interpolation { contents: "" }]);
+  }
+
+  #[test]
+  fn interpolation_line() {
+    assert_parse(
+      "$$ foo\n",
+      &[InterpolationLine {
+        contents: " foo",
+        closed: true,
+      }],
+    );
+    assert_parse(
+      "$$ foo",
+      &[InterpolationLine {
+        contents: " foo",
+        closed: false,
+      }],
+    );
+    assert_parse(
+      "$$\n",
+      &[InterpolationLine {
+        contents: "",
+        closed: true,
+      }],
+    );
+    assert_parse(
+      "$$",
+      &[InterpolationLine {
+        contents: "",
+        closed: false,
+      }],
+    );
+  }
+
+  #[test]
+  fn mixed() {
+    assert_parse(
+      "foo {% bar %} baz",
+      &[
+        Text {
+          contents: "foo ",
+          index: 0,
+        },
+        Code { contents: " bar " },
+        Text {
+          contents: " baz",
+          index: 1,
+        },
+      ],
+    );
+    assert_parse(
+      "{{ foo }} bar {% baz %} bob",
+      &[
+        Interpolation { contents: " foo " },
+        Text {
+          contents: " bar ",
+          index: 0,
+        },
+        Code { contents: " baz " },
+        Text {
+          contents: " bob",
+          index: 1,
+        },
+      ],
+    );
+    assert_parse(
+      "foo %% bar\nbaz",
+      &[
+        Text {
+          contents: "foo ",
+          index: 0,
+        },
+        CodeLine {
+          contents: " bar",
+          closed: true,
+        },
+        Text {
+          contents: "baz",
+          index: 1,
+        },
+      ],
+    );
+    assert_parse(
+      "foo $$ bar\nbaz",
+      &[
+        Text {
+          contents: "foo ",
+          index: 0,
+        },
+        InterpolationLine {
+          contents: " bar",
+          closed: true,
+        },
+        Text {
+          contents: "baz",
+          index: 1,
+        },
+      ],
+    );
+    assert_parse(
+      "{{ foo }}{{ bar }}{{ baz }}",
+      &[
+        Interpolation { contents: " foo " },
+        Interpolation { contents: " bar " },
+        Interpolation { contents: " baz " },
+      ],
+    );
+    assert_parse(
+      "a {{ b }} c {{ d }} e",
+      &[
+        Text {
+          contents: "a ",
+          index: 0,
+        },
+        Interpolation { contents: " b " },
+        Text {
+          contents: " c ",
+          index: 1,
+        },
+        Interpolation { contents: " d " },
+        Text {
+          contents: " e",
+          index: 2,
+        },
+      ],
+    );
+    assert_parse(
+      "foo {% bar %} baz {% bob %} bill",
+      &[
+        Text {
+          contents: "foo ",
+          index: 0,
+        },
+        Code { contents: " bar " },
+        Text {
+          contents: " baz ",
+          index: 1,
+        },
+        Code { contents: " bob " },
+        Text {
+          contents: " bill",
+          index: 2,
+        },
+      ],
+    );
+    assert_parse(
+      "foo %% bar\nbaz %% bob\nbill",
+      &[
+        Text {
+          contents: "foo ",
+          index: 0,
+        },
+        CodeLine {
+          contents: " bar",
+          closed: true,
+        },
+        Text {
+          contents: "baz ",
+          index: 1,
+        },
+        CodeLine {
+          contents: " bob",
+          closed: true,
+        },
+        Text {
+          contents: "bill",
+          index: 2,
+        },
+      ],
+    );
+    assert_parse(
+      "text {{ interp }} more {% code %} text %% line\n$$ value\nend",
+      &[
+        Text {
+          contents: "text ",
+          index: 0,
+        },
+        Interpolation {
+          contents: " interp ",
+        },
+        Text {
+          contents: " more ",
+          index: 1,
+        },
+        Code { contents: " code " },
+        Text {
+          contents: " text ",
+          index: 2,
+        },
+        CodeLine {
+          contents: " line",
+          closed: true,
+        },
+        InterpolationLine {
+          contents: " value",
+          closed: true,
+        },
+        Text {
+          contents: "end",
+          index: 3,
+        },
+      ],
+    );
+  }
+
+  #[test]
+  fn delimiters() {
+    assert_parse(
+      "{ } % $ %} }}",
+      &[Text {
+        contents: "{ } % $ %} }}",
+        index: 0,
+      }],
+    );
+    assert_parse(
+      "%}",
+      &[Text {
+        contents: "%}",
+        index: 0,
+      }],
+    );
+    assert_parse(
+      "}}",
+      &[Text {
+        contents: "}}",
+        index: 0,
+      }],
+    );
+  }
+
+  #[test]
+  fn nesting() {
+    assert_parse(
+      "{{ foo {{ bar }}",
+      &[Interpolation {
+        contents: " foo {{ bar ",
+      }],
+    );
+    assert_parse(
+      "{% foo {% bar %}",
+      &[Code {
+        contents: " foo {% bar ",
+      }],
+    );
+  }
+
+  #[test]
+  fn unicode() {
+    assert_parse(
+      "Hello 世界",
+      &[Text {
+        contents: "Hello 世界",
+        index: 0,
+      }],
+    );
+    assert_parse(
+      "{{ 日本語 }}",
+      &[Interpolation {
+        contents: " 日本語 ",
+      }],
+    );
+    assert_parse(
+      "{% émoji 🚀 %}",
+      &[Code {
+        contents: " émoji 🚀 ",
+      }],
+    );
+    assert_parse(
+      "%% unicode line 中文\n",
+      &[CodeLine {
+        contents: " unicode line 中文",
+        closed: true,
+      }],
+    );
+    assert_parse(
+      "$$ emoji 🎉\n",
+      &[InterpolationLine {
+        contents: " emoji 🎉",
+        closed: true,
+      }],
+    );
+  }
+
+  #[test]
+  fn whitespace() {
+    assert_parse(
+      "   foo",
+      &[Text {
+        contents: "   foo",
+        index: 0,
+      }],
+    );
+    assert_parse(
+      "foo   ",
+      &[Text {
+        contents: "foo   ",
+        index: 0,
+      }],
+    );
+    assert_parse(
+      "  {{  foo  }}  ",
+      &[
+        Text {
+          contents: "  ",
+          index: 0,
+        },
+        Interpolation {
+          contents: "  foo  ",
+        },
+        Text {
+          contents: "  ",
+          index: 1,
+        },
+      ],
+    );
+    assert_parse(
+      "\t\tfoo\t\t",
+      &[Text {
+        contents: "\t\tfoo\t\t",
+        index: 0,
+      }],
+    );
+    assert_parse(
+      "\n\nfoo\n\n",
+      &[Text {
+        contents: "\n\nfoo\n\n",
+        index: 0,
+      }],
+    );
+  }
+
+  #[test]
+  fn complex() {
+    assert_parse(
+      "Hello {{ name }}!
+{% for item in items { %}
+Item: {{ item }}
+{% } %}
+Done.",
+      &[
+        Text {
+          contents: "Hello ",
+          index: 0,
+        },
+        Interpolation { contents: " name " },
+        Text {
+          contents: "!\n",
+          index: 1,
+        },
+        Code {
+          contents: " for item in items { ",
+        },
+        Text {
+          contents: "\nItem: ",
+          index: 2,
+        },
+        Interpolation { contents: " item " },
+        Text {
+          contents: "\n",
+          index: 3,
+        },
+        Code { contents: " } " },
+        Text {
+          contents: "\nDone.",
+          index: 4,
+        },
+      ],
+    );
+  }
+
+  #[test]
+  fn unclosed() {
+    assert_eq!(Token::parse("{%"), Err(Error::Unclosed(Block::Code)),);
+    assert_eq!(
+      Token::parse("{{"),
+      Err(Error::Unclosed(Block::Interpolation)),
+    );
   }
 }

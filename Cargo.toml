@@ -9,14 +9,6 @@ homepage.workspace = true
 license.workspace = true
 repository.workspace = true
 
-[workspace.package]
-authors = ["Casey Rodarmor <casey@rodarmor.com>"]
-categories = ["template-engine", "no-std"]
-edition = "2021"
-homepage = "https://github.com/casey/boilerplate"
-license = "CC0-1.0"
-repository = "https://github.com/casey/boilerplate"
-
 [dependencies]
 boilerplate-macros = { version = "0.0.0", path = "crates/boilerplate-macros" }
 boilerplate-parser = { version = "0.0.0", path = "crates/boilerplate-parser", optional = true }
@@ -35,8 +27,8 @@ workspace = true
 [workspace]
 members = [".", "crates/*"]
 
-[workspace.lints.rust]
-mismatched-lifetime-syntaxes = "allow"
+[workspace.dependencies]
+pretty_assertions = "1.0.0"
 
 [workspace.lints.clippy]
 all = { level = "deny", priority = -1 }
@@ -45,3 +37,14 @@ missing-panics-doc = "allow"
 needless-pass-by-value = "allow"
 pedantic = { level = "deny", priority = -1 }
 wildcard-imports = "allow"
+
+[workspace.lints.rust]
+mismatched-lifetime-syntaxes = "allow"
+
+[workspace.package]
+authors = ["Casey Rodarmor <casey@rodarmor.com>"]
+categories = ["template-engine", "no-std"]
+edition = "2021"
+homepage = "https://github.com/casey/boilerplate"
+license = "CC0-1.0"
+repository = "https://github.com/casey/boilerplate"
