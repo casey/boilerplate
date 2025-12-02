@@ -62,7 +62,7 @@ impl Template {
     };
 
     let path = if cfg!(feature = "reload") {
-      if let Some(path) = self.source.path() {
+      if let Source::Path(path) = &self.source {
         Some(quote!(const PATH: Option<&'static str> = Some(#path);))
       } else {
         Some(quote!(

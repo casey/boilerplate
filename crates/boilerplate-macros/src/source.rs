@@ -13,12 +13,4 @@ impl Source {
         .unwrap_or_else(|err| panic!("Failed to read template `{path}`: {err}")),
     }
   }
-
-  pub(crate) fn path(&self) -> Option<&str> {
-    if let Self::Path(path) = self {
-      Some(path)
-    } else {
-      None
-    }
-  }
 }
