@@ -67,7 +67,6 @@ dependencies = [
  "axum",
  "boilerplate-macros",
  "boilerplate-parser",
- "html-escaper",
 ]
 
 [[package]]
@@ -186,10 +185,6 @@ dependencies = [
  "pin-project-lite",
  "pin-utils",
 ]
-
-[[package]]
-name = "html-escaper"
-version = "0.2.0"
 
 [[package]]
 name = "http"

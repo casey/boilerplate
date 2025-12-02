@@ -156,7 +156,7 @@
 //! This works for escaped templates as well:
 //!
 //! ```
-//! use html_escaper::Escape;
+//! use boilerplate::Escape;
 //!
 //! #[derive(boilerplate::Boilerplate)]
 //! #[boilerplate(text = "My favorite byte is $$ self.byte")]
@@ -315,11 +315,11 @@
 //! }
 //! ```
 //!
-//! Thus, a suitable `Escape` trait must be in scope. The `html-escaper` crate
-//! provides just such an `Escape` trait.
+//! Thus, a suitable `Escape` trait must be in scope. `boilerplate` provides
+//! just such an `Escape` trait:
 //!
 //! ```
-//! use html_escaper::Escape;
+//! use boilerplate::Escape;
 //!
 //! #[derive(boilerplate::Boilerplate)]
 //! struct EscapeHtml(&'static str);
@@ -327,7 +327,7 @@
 //! ```
 //!
 //! ```
-//! use html_escaper::Escape;
+//! use boilerplate::Escape;
 //!
 //! #[derive(boilerplate::Boilerplate)]
 //! #[boilerplate(text = "$$ self.0\n")]
@@ -335,11 +335,10 @@
 //! assert_eq!(ContextHtml("&").to_string(), "&amp;\n");
 //! ```
 //!
-//! The `html-escaper` crate also provides a `Trusted` wrapper that disables
-//! escaping for trusted values:
+//! The `Trusted` wrapper disables escaping for trusted values:
 //!
 //! ```
-//! use html_escaper::{Escape, Trusted};
+//! use boilerplate::{Escape, Trusted};
 //!
 //! #[derive(boilerplate::Boilerplate)]
 //! #[boilerplate(text = "$$ Trusted(self.0)\n")]
@@ -618,11 +617,11 @@
 //!
 //! This is especially useful when generating multiple HTML pages unique
 //! content, but with headers and footers that are common to all pages. Note
-//! the use of `html_escaper::Trusted` to prevent escaping the inner HTML:
+//! the use of `boilerplate::Trusted` to prevent escaping the inner HTML:
 //!
 //! ```
 //! use {
-//!   html_escaper::{Escape, Trusted},
+//!   boilerplate::{Escape, Trusted},
 //!   std::fmt::Display,
 //! };
 //!
@@ -667,7 +666,10 @@
 //! ");
 //! ```
 
-use core::fmt::{self, Formatter};
+pub use {
+  self::escape::{Escape, Trusted},
+  boilerplate_macros::{boilerplate, Boilerplate},
+};
 
 #[cfg(feature = "reload")]
 pub use {
@@ -675,7 +677,9 @@ pub use {
   boilerplate_parser::Token,
 };
 
-pub use boilerplate_macros::{boilerplate, Boilerplate};
+use core::fmt::{self, Formatter};
+
+mod escape;
 
 #[cfg(feature = "reload")]
 mod reload;
