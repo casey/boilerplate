@@ -1,12 +1,12 @@
 use super::*;
 
-// Parsed template token.
+/// Parsed template token.
 #[derive(Clone, Copy, Debug)]
 pub enum Token<'src> {
   Code { contents: &'src str },
   CodeLine { closed: bool, contents: &'src str },
   Interpolation { contents: &'src str },
-  InterpolationLine { contents: &'src str, closed: bool },
+  InterpolationLine { closed: bool, contents: &'src str },
   Text { contents: &'src str, index: usize },
 }
 
