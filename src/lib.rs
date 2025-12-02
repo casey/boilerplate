@@ -455,7 +455,7 @@
 //!   let incompatible_template = "Goodbye, {{self.first}} {{self.last}}!";
 //!   assert_eq!(
 //!     context.reload(incompatible_template).err().unwrap().to_string(),
-//!     "new template has 5 blocks but old template has 3 blocks",
+//!     "new template has 2 blocks but old template has 1 blocks",
 //!   );
 //!
 //!   // Try to reload a template with invalid syntax:
@@ -610,14 +610,27 @@ pub trait Boilerplate {
   fn reload<'a>(&self, src: &'a str) -> Result<Reload<&Self>, Error<'a>> {
     let tokens = Token::parse(src).map_err(Error::Parse)?;
 
-    let new = tokens.len();
-    let old = Self::TOKENS.len();
-    if new != old {
-      return Err(Error::Length { new, old });
+    let new = tokens
+      .iter()
+      .copied()
+      .filter(|token| !matches!(token, Token::Text { .. }))
+      .collect::<Vec<Token>>();
+
+    let old = Self::TOKENS
+      .iter()
+      .copied()
+      .filter(|token| !matches!(token, Token::Text { .. }))
+      .collect::<Vec<Token>>();
+
+    if new.len() != old.len() {
+      return Err(Error::Length {
+        new: new.len(),
+        old: old.len(),
+      });
     }
 
-    for (&new, &old) in tokens.iter().zip(Self::TOKENS) {
-      if !new.is_compatible_with(&old) {
+    for (new, old) in new.into_iter().zip(old) {
+      if !new.is_compatible_with(old) {
         return Err(Error::Incompatible { new, old });
       }
     }
