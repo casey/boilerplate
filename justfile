@@ -7,7 +7,8 @@ ci:
   cargo test --all
   cargo test --all --features axum
   cargo test --all --features reload
-  cargo build --no-default-features --target thumbv6m-none-eabi
+  cargo build --target thumbv6m-none-eabi --package boilerplate
+  cargo build --target thumbv6m-none-eabi --package boilerplate-tests
 
 # publish current GitHub master branch
 publish:

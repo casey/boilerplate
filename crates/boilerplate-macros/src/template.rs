@@ -1,6 +1,7 @@
 use super::*;
 
 pub(crate) struct Template {
+  pub(crate) axum: Option<bool>,
   pub(crate) escape: bool,
   pub(crate) generics: Generics,
   pub(crate) ident: Ident,
@@ -12,7 +13,7 @@ impl Template {
   pub(crate) fn impls(self) -> TokenStream {
     let display_impl = self.display_impl();
 
-    let axum_into_response_impl = if cfg!(feature = "axum") {
+    let axum_into_response_impl = if self.axum.unwrap_or(cfg!(feature = "axum")) {
       Some(self.axum_into_response_impl())
     } else {
       None
@@ -113,6 +114,8 @@ impl Template {
     quote! {
       impl #impl_generics ::axum::response::IntoResponse for #ident #ty_generics #where_clause {
         fn into_response(self) -> ::axum::response::Response {
+          extern crate alloc;
+          use alloc::string::ToString;
           (
             [(::axum::http::header::CONTENT_TYPE, #content_type)],
             self.to_string(),
@@ -161,11 +164,12 @@ mod tests {
 
     assert_eq!(
       Template {
-        ident: Ident::new("Foo", Span::call_site()),
-        source: Source::Literal(LitStr::new("", Span::call_site())),
-        mime: mime::TEXT_PLAIN,
+        axum: None,
         escape: false,
         generics: Generics::default(),
+        ident: Ident::new("Foo", Span::call_site()),
+        mime: mime::TEXT_PLAIN,
+        source: Source::Literal(LitStr::new("", Span::call_site())),
       }
       .display_impl()
       .to_string(),
@@ -327,17 +331,21 @@ mod tests {
   fn axum_into_response_impl() {
     assert_eq!(
       Template {
-        ident: Ident::new("Foo", Span::call_site()),
-        source: Source::Literal(LitStr::new("", Span::call_site())),
-        mime: mime::TEXT_PLAIN,
+        axum: Some(true),
         escape: false,
         generics: Generics::default(),
+        ident: Ident::new("Foo", Span::call_site()),
+        mime: mime::TEXT_PLAIN,
+        source: Source::Literal(LitStr::new("", Span::call_site())),
       }
       .axum_into_response_impl()
       .to_string(),
       quote!(
         impl ::axum::response::IntoResponse for Foo {
           fn into_response(self) -> ::axum::response::Response {
+            extern crate alloc;
+            use alloc::string::ToString;
+
             (
               [(::axum::http::header::CONTENT_TYPE, "text/plain")],
               self.to_string(),

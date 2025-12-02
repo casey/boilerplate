@@ -43,7 +43,8 @@ jobs:
 
     - run: |
         rustup target add thumbv6m-none-eabi
-        cargo build --no-default-features --target thumbv6m-none-eabi
+        cargo build --target thumbv6m-none-eabi --package boilerplate
+        cargo build --target thumbv6m-none-eabi --package boilerplate-tests
 
   lint:
     runs-on: ubuntu-latest
