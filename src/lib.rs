@@ -709,8 +709,8 @@ pub trait Boilerplate {
   /// The parsed template's text blocks.
   const TEXT: &'static [&'static str];
 
-  /// Path to the original template file.
   #[cfg(feature = "reload")]
+  /// Path to the original template file.
   const PATH: Option<&'static str>;
 
   /// Render the template.
@@ -723,6 +723,7 @@ pub trait Boilerplate {
     boilerplate_output: &mut Formatter,
   ) -> fmt::Result;
 
+  #[cfg(feature = "reload")]
   /// Reload the template from a new template string.
   ///
   /// The new template must be compatible with the original template. Templates
@@ -731,7 +732,6 @@ pub trait Boilerplate {
   /// contain literal text, may be different.
   ///
   /// - `src` - The new template source text.
-  #[cfg(feature = "reload")]
   fn reload(&self, src: &str) -> Result<Reload<&Self>, Error> {
     let new = Token::parse(src).map_err(Error::ParseNew)?;
     let old = Token::parse(Self::TEMPLATE).map_err(Error::ParseOld)?;
@@ -762,9 +762,9 @@ pub trait Boilerplate {
     })
   }
 
+  #[cfg(feature = "reload")]
   /// Reload the template from its original path. Cannot be used on templates
   /// created from string literals.
-  #[cfg(feature = "reload")]
   fn reload_from_path(&self) -> Result<Reload<&Self>, Error> {
     let Some(path) = Self::PATH else {
       return Err(Error::Path);
