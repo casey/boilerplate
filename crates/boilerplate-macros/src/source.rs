@@ -6,7 +6,7 @@ pub(crate) enum Source {
 }
 
 impl Source {
-  pub(crate) fn text(&self) -> String {
+  pub(crate) fn src(&self) -> String {
     match self {
       Self::Literal(literal) => literal.value(),
       Self::Path(path) => std::fs::read_to_string(path)

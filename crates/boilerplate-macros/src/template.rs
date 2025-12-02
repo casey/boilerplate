@@ -27,9 +27,9 @@ impl Template {
   fn boilerplate_impl(&self) -> TokenStream {
     let ident = &self.ident;
     let source = &self.source;
-    let text = source.text();
+    let src = source.src();
 
-    let (body, template, tokens) = body(&text, self.escape, false);
+    let Body { code, text, tokens } = Body::parse(&src, self.escape, false);
 
     let (impl_generics, ty_generics, where_clause) = self.generics.split_for_impl();
 
@@ -63,7 +63,7 @@ impl Template {
 
     quote! {
       impl #impl_generics boilerplate::Boilerplate for #ident #ty_generics #where_clause {
-        const TEXT: &'static [&'static str] = &[ #(#template),* ];
+        const TEXT: &'static [&'static str] = &[ #(#text),* ];
 
         #tokens
 
@@ -73,7 +73,7 @@ impl Template {
           boilerplate_output: &mut core::fmt::Formatter,
         ) -> core::fmt::Result {
           use core::fmt::Write;
-          #body
+          #code
           Ok(())
         }
       }
@@ -163,8 +163,10 @@ mod tests {
   }
 
   fn assert_display_body_eq(template: &str, expected: TokenStream) {
-    let (actual, _template, _tokens) = body(template, false, false);
-    assert_eq!(actual.to_string(), expected.to_string());
+    assert_eq!(
+      Body::parse(template, false, false).code.to_string(),
+      expected.to_string(),
+    );
   }
 
   #[test]
