@@ -615,7 +615,7 @@
 //! assert_eq!(OuterTxt(InnerTxt("Miller")).to_string(), "Hello Mr. Miller!");
 //! ```
 //!
-//! This is especially useful when generating multiple HTML pages unique
+//! This is especially useful when generating multiple HTML pages with unique
 //! content, but with headers and footers that are common to all pages. Note
 //! the use of `boilerplate::Trusted` to prevent escaping the inner HTML:
 //!
