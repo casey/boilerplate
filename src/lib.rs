@@ -475,7 +475,7 @@
 //! ```
 //!
 //! If a template was created from a file, you can call
-//! `Boilerplate::reload_path` to reload it from its original location:
+//! `Boilerplate::reload_from_path` to reload it from its original location:
 //!
 //! ```
 //! #[cfg(feature = "reload")]
@@ -495,7 +495,7 @@
 //! }
 //! ```
 //!
-//! `Boilerplate::reload_path` will return `Error::Path` if the template was
+//! `Boilerplate::reload_from_path` will return `Error::Path` if the template was
 //! created from a string literal:
 //!
 //! ```
