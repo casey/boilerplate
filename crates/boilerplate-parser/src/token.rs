@@ -282,6 +282,16 @@ mod tests {
       },
       InterpolationLine {
         contents: "bar",
+        closed: true,
+      },
+    );
+    case(
+      InterpolationLine {
+        contents: "foo",
+        closed: true,
+      },
+      InterpolationLine {
+        contents: "foo",
         closed: false,
       },
     );
