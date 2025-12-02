@@ -1,11 +1,12 @@
-watch +args='lcheck --all':
+watch +args='check --all':
   cargo watch --clear --exec '{{args}}'
 
 ci:
+  cargo clippy --all --all-targets -- --deny warnings
+  cargo fmt --all -- --check
   cargo test --all
   cargo test --all --features axum
-  cargo clippy --all
-  cargo fmt --all -- --check
+  cargo test --all --features reload
 
 # publish current GitHub master branch
 publish:

@@ -1,10 +1,13 @@
 [package]
-name = "html-escaper"
-version = "0.2.0"
-description = "HTML escaping wrapper for core::fmt::Formatter"
+name = "boilerplate-parser"
+version = "0.0.0"
+description = "Minimal compile-time Rust template engine parser"
 authors.workspace = true
 categories.workspace = true
 edition.workspace = true
 homepage.workspace = true
 license.workspace = true
 repository.workspace = true
+
+[lints]
+workspace = true

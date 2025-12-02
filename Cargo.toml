@@ -18,14 +18,30 @@ license = "CC0-1.0"
 repository = "https://github.com/casey/boilerplate"
 
 [dependencies]
-boilerplate-macros = { version = "0.0.0", path = "boilerplate-macros" }
+boilerplate-macros = { version = "0.0.0", path = "crates/boilerplate-macros" }
+boilerplate-parser = { version = "0.0.0", path = "crates/boilerplate-parser", optional = true }
 
 [dev-dependencies]
 axum = "0.8.7"
-html-escaper = { path = "html-escaper" }
+html-escaper = { path = "crates/html-escaper" }
 
 [features]
 axum = ["boilerplate-macros/axum"]
+reload = ["boilerplate-macros/reload", "dep:boilerplate-parser"]
+
+[lints]
+workspace = true
 
 [workspace]
-members = [".", "boilerplate-macros", "html-escaper"]
+members = [".", "crates/*"]
+
+[workspace.lints.rust]
+mismatched-lifetime-syntaxes = "allow"
+
+[workspace.lints.clippy]
+all = { level = "deny", priority = -1 }
+missing-errors-doc = "allow"
+missing-panics-doc = "allow"
+needless-pass-by-value = "allow"
+pedantic = { level = "deny", priority = -1 }
+wildcard-imports = "allow"

@@ -402,6 +402,71 @@
 //! }
 //! ```
 //!
+//! ### Reloading Templates
+//!
+//! When the `reload` feature is enabled, templates support a limited form of
+//! hot-reloading.
+//!
+//! Using `#[derive(Boilerplate]` derives both an implementation of `Display`,
+//! and an implementation of the `Boilerplate` trait. Normally the
+//! `Boilerplate` trait and its implementation can be ignored, but when the
+//! `reload` feature is enabled, The `Boilerplate` trait includes
+//! `Boilerplate::reload` which allows a template to be reloaded at runtime.
+//!
+//! Boilerplate templates contain Rust code which is compiled ahead of time.
+//! Consequently, the new template's code blocks must match those of the
+//! original template. If they do not, `Boilerplate::reload` will return an
+//! error.
+//!
+//! Template text outside of code blocks may be different.
+//!
+//! ```
+//! #[cfg(feature = "reload")]
+//! {
+//!   // import the `Boilerplate` trait for the `reload` method
+//!   use boilerplate::Boilerplate;
+//!
+//!   #[derive(Boilerplate)]
+//!   #[boilerplate(text = "Hello, {{self.first}}!")]
+//!   struct Context {
+//!     first: &'static str,
+//!     last: &'static str,
+//!   }
+//!
+//!   let context = Context { first: "Bob", last: "Smith" };
+//!   assert_eq!(context.to_string(), "Hello, Bob!");
+//!
+//!   // Reload a compatible template:
+//!   let compatible_template = "Goodbye, {{self.first}}!";
+//!   assert_eq!(context.reload(compatible_template).unwrap().to_string(), "Goodbye, Bob!");
+//!
+//!   // Whitespace around code is allowed to be different:
+//!   let compatible_template = "Goodbye, {{ self.first }}!";
+//!   assert_eq!(context.reload(compatible_template).unwrap().to_string(), "Goodbye, Bob!");
+//!
+//!   // Try to reload an incompatible template with different code:
+//!   let incompatible_template = "Goodbye, {{self.id}}!";
+//!   assert_eq!(
+//!     context.reload(incompatible_template).err().unwrap().to_string(),
+//!     "template blocks are not compatible: {{self.id}} != {{self.first}}",
+//!   );
+//!
+//!   // Try to reload an incompatible template with a different number of code blocks:
+//!   let incompatible_template = "Goodbye, {{self.first}} {{self.last}}!";
+//!   assert_eq!(
+//!     context.reload(incompatible_template).err().unwrap().to_string(),
+//!     "new template has 5 blocks but old template has 3 blocks",
+//!   );
+//!
+//!   // Try to reload a template with invalid syntax:
+//!   let incompatible_template = "Goodbye, {{self.first";
+//!   assert_eq!(
+//!     context.reload(incompatible_template).err().unwrap().to_string(),
+//!     "failed to parse new template: unmatched `{{`",
+//!   );
+//! }
+//! ```
+//!
 //! Function-like Macro
 //! -------------------
 //!
@@ -500,4 +565,70 @@
 //! ");
 //! ```
 
+use core::fmt::{self, Formatter};
+
+#[cfg(feature = "reload")]
+pub use {
+  self::reload::{Error, Reload},
+  boilerplate_parser::Token,
+};
+
 pub use boilerplate_macros::{boilerplate, Boilerplate};
+
+#[cfg(feature = "reload")]
+mod reload;
+
+/// The boilerplate trait, automatically implemented by the `Boilerplate`
+/// derive macro.
+pub trait Boilerplate {
+  /// The parsed template's text blocks.
+  const TEXT: &'static [&'static str];
+
+  #[cfg(feature = "reload")]
+  /// The parsed template's tokens.
+  const TOKENS: &'static [Token<'static>];
+
+  /// Render the template.
+  ///
+  /// - `boilerplate_text` - The template's text blocks.
+  /// - `boilerplate_output` - The formatter to write to.
+  fn boilerplate(
+    &self,
+    boilerplate_text: &[impl AsRef<str>],
+    boilerplate_output: &mut Formatter,
+  ) -> fmt::Result;
+
+  #[cfg(feature = "reload")]
+  /// Reload the template from a new template string.
+  ///
+  /// The new template must be compatible with the original template. Templates
+  /// are compatible if all of their code blocks, i.e., blocks that contain
+  /// Rust code, like `{{ ... }}` are the same. Text blocks, i.e., blocks that
+  /// contain literal text, may be different.
+  ///
+  /// - `src` - The new template source text.
+  fn reload<'a>(&self, src: &'a str) -> Result<Reload<&Self>, Error<'a>> {
+    let tokens = Token::parse(src).map_err(Error::Parse)?;
+
+    let new = tokens.len();
+    let old = Self::TOKENS.len();
+    if new != old {
+      return Err(Error::Length { new, old });
+    }
+
+    for (&new, &old) in tokens.iter().zip(Self::TOKENS) {
+      if !new.is_compatible_with(&old) {
+        return Err(Error::Incompatible { new, old });
+      }
+    }
+
+    Ok(Reload {
+      inner: self,
+      text: tokens
+        .into_iter()
+        .filter_map(Token::text)
+        .map(ToOwned::to_owned)
+        .collect(),
+    })
+  }
+}

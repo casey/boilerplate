@@ -13,6 +13,7 @@ repository.workspace = true
 proc-macro = true
 
 [dependencies]
+boilerplate-parser = { version = "0.0.0", path = "../boilerplate-parser" }
 darling = "0.21.3"
 mime = "0.3.17"
 new_mime_guess = "4.0.1"
@@ -26,3 +27,7 @@ unindent = "0.2.3"
 
 [features]
 axum = []
+reload = []
+
+[lints]
+workspace = true

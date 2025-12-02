@@ -1,7 +1,8 @@
 use {
   self::{
-    block::Block, boilerplate::Boilerplate, source::Source, template::Template, token::Token,
+    boilerplate::Boilerplate, implementation::Implementation, source::Source, template::Template,
   },
+  boilerplate_parser::Token,
   darling::FromDeriveInput,
   new_mime_guess::Mime,
   proc_macro2::{Span, TokenStream},
@@ -10,35 +11,24 @@ use {
   syn::{parse_macro_input, DeriveInput, Generics, Ident, LitStr},
 };
 
-mod block;
 mod boilerplate;
+mod implementation;
 mod source;
 mod template;
-mod token;
-
-pub(crate) fn body(src: &str, escape: bool, function: bool) -> TokenStream {
-  Token::parse(src)
-    .iter()
-    .map(|token| token.line(escape, function))
-    .collect::<Vec<String>>()
-    .join("")
-    .parse()
-    .unwrap()
-}
 
 #[proc_macro]
 pub fn boilerplate(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
   let template = parse_macro_input!(input as LitStr);
-  let text = template.value();
+  let src = template.value();
 
-  let body = body(&text, false, true);
+  let Implementation { body, text, .. } = Implementation::parse(&src, false, true);
 
   quote! {
     {
-      use ::std::fmt::Write;
+      use ::core::fmt::Write;
 
-      let boilerplate_template = #template;
-      let mut boilerplate_output = String::new();
+      let boilerplate_text = &[ #(#text),* ];
+      let mut boilerplate_output = ::std::string::String::new();
 
       #body
 
