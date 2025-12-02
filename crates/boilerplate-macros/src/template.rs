@@ -61,11 +61,25 @@ impl Template {
       None
     };
 
+    let path = if cfg!(feature = "reload") {
+      if let Source::Path(path) = &self.source {
+        Some(quote!(const PATH: Option<&'static str> = Some(#path);))
+      } else {
+        Some(quote!(
+          const PATH: Option<&'static str> = None;
+        ))
+      }
+    } else {
+      None
+    };
+
     quote! {
       impl #impl_generics ::boilerplate::Boilerplate for #ident #ty_generics #where_clause {
         const TEXT: &'static [&'static str] = &[ #(#text),* ];
 
         #tokens
+
+        #path
 
         fn boilerplate(
           &self,
@@ -122,6 +136,14 @@ mod tests {
       None
     };
 
+    let path = if cfg!(feature = "reload") {
+      Some(quote!(
+        const PATH: Option<&'static str> = None;
+      ))
+    } else {
+      None
+    };
+
     assert_eq!(
       Template {
         ident: Ident::new("Foo", Span::call_site()),
@@ -137,6 +159,8 @@ mod tests {
             const TEXT: &'static [&'static str] = &[];
 
             #tokens
+
+            #path
 
             fn boilerplate(
               &self,

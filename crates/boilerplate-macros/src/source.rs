@@ -14,15 +14,3 @@ impl Source {
     }
   }
 }
-
-impl ToTokens for Source {
-  fn to_tokens(&self, tokens: &mut TokenStream) {
-    match self {
-      Self::Literal(literal) => tokens.append(literal.token()),
-      Self::Path(path) => {
-        let path = LitStr::new(path, Span::call_site());
-        tokens.append_all(quote!(include_str!(#path)));
-      }
-    }
-  }
-}

@@ -474,6 +474,49 @@
 //! }
 //! ```
 //!
+//! If a template was created from a file, you can call
+//! `Boilerplate::reload_from_path` to reload it from its original location:
+//!
+//! ```
+//! #[cfg(feature = "reload")]
+//! {
+//!   // import the `Boilerplate` trait for the `reload_from_path` method
+//!   use boilerplate::Boilerplate;
+//!
+//!   #[derive(boilerplate::Boilerplate)]
+//!   struct QuickStartTxt {
+//!     n: u32,
+//!   }
+//!   assert_eq!(QuickStartTxt { n: 10 }.to_string(), "Foo is 10!\n");
+//!   assert_eq!(
+//!     QuickStartTxt { n: 10 }.reload_from_path().unwrap().to_string(),
+//!     "Foo is 10!\n",
+//!   );
+//! }
+//! ```
+//!
+//! `Boilerplate::reload_from_path` will return `Error::Path` if the template was
+//! created from a string literal:
+//!
+//! ```
+//! #[cfg(feature = "reload")]
+//! {
+//!   // import the `Boilerplate` trait for the `reload_from_path` method
+//!   use boilerplate::Boilerplate;
+//!
+//!   #[derive(boilerplate::Boilerplate)]
+//!   #[boilerplate(text = "Foo is {{ self.n }}!\n")]
+//!   struct Context {
+//!     n: u32,
+//!   }
+//!   assert_eq!(Context { n: 10 }.to_string(), "Foo is 10!\n");
+//!   assert_eq!(
+//!     Context { n: 10 }.reload_from_path().err().unwrap().to_string(),
+//!     "template has no path",
+//!   );
+//! }
+//! ```
+//!
 //! Function-like Macro
 //! -------------------
 //!
@@ -595,6 +638,10 @@ pub trait Boilerplate {
   /// The parsed template's tokens.
   const TOKENS: &'static [Token<'static>];
 
+  #[cfg(feature = "reload")]
+  /// Path to the original template file.
+  const PATH: Option<&'static str>;
+
   /// Render the template.
   ///
   /// - `boilerplate_text` - The template's text blocks.
@@ -614,7 +661,7 @@ pub trait Boilerplate {
   /// contain literal text, may be different.
   ///
   /// - `src` - The new template source text.
-  fn reload<'a>(&self, src: &'a str) -> Result<Reload<&Self>, Error<'a>> {
+  fn reload(&self, src: &str) -> Result<Reload<&Self>, Error> {
     let tokens = Token::parse(src).map_err(Error::Parse)?;
 
     if tokens.len() != Self::TOKENS.len() {
@@ -626,7 +673,10 @@ pub trait Boilerplate {
 
     for (new, old) in tokens.iter().copied().zip(Self::TOKENS.iter().copied()) {
       if !new.is_compatible_with(old) {
-        return Err(Error::Incompatible { new, old });
+        return Err(Error::Incompatible {
+          new: new.to_string(),
+          old: old.to_string(),
+        });
       }
     }
 
@@ -638,5 +688,18 @@ pub trait Boilerplate {
         .map(ToOwned::to_owned)
         .collect(),
     })
+  }
+
+  #[cfg(feature = "reload")]
+  /// Reload the template from its original path. Cannot be used on templates
+  /// created from string literals.
+  fn reload_from_path(&self) -> Result<Reload<&Self>, Error> {
+    let Some(path) = Self::PATH else {
+      return Err(Error::Path);
+    };
+
+    let src = std::fs::read_to_string(path).map_err(|source| Error::Io { source, path })?;
+
+    self.reload(&src)
   }
 }
