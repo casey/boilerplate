@@ -650,6 +650,8 @@
 //! ");
 //! ```
 
+#![cfg_attr(not(feature = "reload"), no_std)]
+
 pub use {
   self::escape::{Escape, Trusted},
   boilerplate_macros::{boilerplate, Boilerplate},
