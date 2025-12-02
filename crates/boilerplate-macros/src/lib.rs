@@ -1,5 +1,5 @@
 use {
-  self::{body::Body, boilerplate::Boilerplate, source::Source, template::Template},
+  self::{body::Implementation, boilerplate::Boilerplate, source::Source, template::Template},
   boilerplate_parser::Token,
   darling::FromDeriveInput,
   new_mime_guess::Mime,
@@ -19,7 +19,7 @@ pub fn boilerplate(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
   let template = parse_macro_input!(input as LitStr);
   let src = template.value();
 
-  let Body { code, text, .. } = Body::parse(&src, false, true);
+  let Implementation { body, text, .. } = Implementation::parse(&src, false, true);
 
   quote! {
     {
@@ -28,7 +28,7 @@ pub fn boilerplate(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
       let boilerplate_text = &[ #(#text),* ];
       let mut boilerplate_output = String::new();
 
-      #code
+      #body
 
       boilerplate_output
     }

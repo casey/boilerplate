@@ -1,12 +1,12 @@
 use super::*;
 
-pub(crate) struct Body<'src> {
-  pub(crate) code: TokenStream,
+pub(crate) struct Implementation<'src> {
+  pub(crate) body: TokenStream,
   pub(crate) text: Vec<&'src str>,
   pub(crate) tokens: Vec<Token<'src>>,
 }
 
-impl<'src> Body<'src> {
+impl<'src> Implementation<'src> {
   fn line(token: Token, escape: bool, function: bool) -> String {
     let error_handler = if function { ".unwrap()" } else { "?" };
     match token {
@@ -41,13 +41,13 @@ impl<'src> Body<'src> {
 
     let text = tokens.iter().filter_map(|token| token.text()).collect();
 
-    let code = tokens
+    let body = tokens
       .iter()
-      .map(|token| Body::line(*token, escape, function))
+      .map(|token| Self::line(*token, escape, function))
       .collect::<String>()
       .parse()
       .unwrap();
 
-    Self { code, text, tokens }
+    Self { body, text, tokens }
   }
 }

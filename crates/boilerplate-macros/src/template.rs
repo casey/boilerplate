@@ -29,7 +29,7 @@ impl Template {
     let source = &self.source;
     let src = source.src();
 
-    let Body { code, text, tokens } = Body::parse(&src, self.escape, false);
+    let Implementation { body, text, tokens } = Implementation::parse(&src, self.escape, false);
 
     let (impl_generics, ty_generics, where_clause) = self.generics.split_for_impl();
 
@@ -73,7 +73,7 @@ impl Template {
           boilerplate_output: &mut core::fmt::Formatter,
         ) -> core::fmt::Result {
           use core::fmt::Write;
-          #code
+          #body
           Ok(())
         }
       }
@@ -164,7 +164,9 @@ mod tests {
 
   fn assert_display_body_eq(template: &str, expected: TokenStream) {
     assert_eq!(
-      Body::parse(template, false, false).code.to_string(),
+      Implementation::parse(template, false, false)
+        .body
+        .to_string(),
       expected.to_string(),
     );
   }

@@ -6,6 +6,7 @@ ci:
   cargo fmt --all -- --check
   cargo test --all
   cargo test --all --features axum
+  cargo test --all --features reload
 
 # publish current GitHub master branch
 publish:
