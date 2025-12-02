@@ -62,17 +62,23 @@ impl<'src> Token<'src> {
         before_close
       };
 
-      let previous_is_code = matches!(
-        tokens.last(),
-        Some(Token::Code { .. } | Token::CodeLine { .. }),
-      );
+      let emit_empty = if cfg!(feature = "reload") {
+        let previous_is_code = matches!(
+          tokens.last(),
+          Some(Token::Code { .. } | Token::CodeLine { .. }),
+        );
 
-      let current_is_code = matches! {
-        block,
-        Block::Code | Block::CodeLine,
+        let current_is_code = matches! {
+          block,
+          Block::Code | Block::CodeLine,
+        };
+
+        tokens.is_empty() || !(previous_is_code && current_is_code)
+      } else {
+        false
       };
 
-      if i != j || tokens.is_empty() || !(previous_is_code && current_is_code) {
+      if i != j || emit_empty {
         tokens.push(Self::Text {
           contents: &src[i..j],
           index,
@@ -86,7 +92,13 @@ impl<'src> Token<'src> {
       i = after_close;
     }
 
-    if i != j || tokens.is_empty() || !matches!(tokens.last(), Some(Token::Text { .. })) {
+    let emit_empty = if cfg!(feature = "reload") {
+      tokens.is_empty() || !matches!(tokens.last(), Some(Token::Text { .. }))
+    } else {
+      false
+    };
+
+    if i != j || emit_empty {
       tokens.push(Self::Text {
         contents: &src[i..j],
         index,
@@ -322,10 +334,13 @@ mod tests {
   fn empty() {
     assert_parse(
       "",
-      &[Text {
-        contents: "",
-        index: 0,
-      }],
+      &[
+        #[cfg(feature = "reload")]
+        Text {
+          contents: "",
+          index: 0,
+        },
+      ],
     );
   }
 
@@ -345,11 +360,13 @@ mod tests {
     assert_parse(
       "{% foo %}",
       &[
+        #[cfg(feature = "reload")]
         Text {
           contents: "",
           index: 0,
         },
         Code { contents: " foo " },
+        #[cfg(feature = "reload")]
         Text {
           contents: "",
           index: 1,
@@ -359,11 +376,13 @@ mod tests {
     assert_parse(
       "{%%}",
       &[
+        #[cfg(feature = "reload")]
         Text {
           contents: "",
           index: 0,
         },
         Code { contents: "" },
+        #[cfg(feature = "reload")]
         Text {
           contents: "",
           index: 1,
@@ -377,6 +396,7 @@ mod tests {
     assert_parse(
       "%% foo\n",
       &[
+        #[cfg(feature = "reload")]
         Text {
           contents: "",
           index: 0,
@@ -385,6 +405,7 @@ mod tests {
           contents: " foo",
           closed: true,
         },
+        #[cfg(feature = "reload")]
         Text {
           contents: "",
           index: 1,
@@ -394,6 +415,7 @@ mod tests {
     assert_parse(
       "%% foo",
       &[
+        #[cfg(feature = "reload")]
         Text {
           contents: "",
           index: 0,
@@ -402,6 +424,7 @@ mod tests {
           contents: " foo",
           closed: false,
         },
+        #[cfg(feature = "reload")]
         Text {
           contents: "",
           index: 1,
@@ -411,6 +434,7 @@ mod tests {
     assert_parse(
       "%%\n",
       &[
+        #[cfg(feature = "reload")]
         Text {
           contents: "",
           index: 0,
@@ -419,6 +443,7 @@ mod tests {
           contents: "",
           closed: true,
         },
+        #[cfg(feature = "reload")]
         Text {
           contents: "",
           index: 1,
@@ -428,6 +453,7 @@ mod tests {
     assert_parse(
       "%%",
       &[
+        #[cfg(feature = "reload")]
         Text {
           contents: "",
           index: 0,
@@ -436,6 +462,7 @@ mod tests {
           contents: "",
           closed: false,
         },
+        #[cfg(feature = "reload")]
         Text {
           contents: "",
           index: 1,
@@ -449,11 +476,13 @@ mod tests {
     assert_parse(
       "{{ foo }}",
       &[
+        #[cfg(feature = "reload")]
         Text {
           contents: "",
           index: 0,
         },
         Interpolation { contents: " foo " },
+        #[cfg(feature = "reload")]
         Text {
           contents: "",
           index: 1,
@@ -463,11 +492,13 @@ mod tests {
     assert_parse(
       "{{foo}}",
       &[
+        #[cfg(feature = "reload")]
         Text {
           contents: "",
           index: 0,
         },
         Interpolation { contents: "foo" },
+        #[cfg(feature = "reload")]
         Text {
           contents: "",
           index: 1,
@@ -477,11 +508,13 @@ mod tests {
     assert_parse(
       "{{ }}",
       &[
+        #[cfg(feature = "reload")]
         Text {
           contents: "",
           index: 0,
         },
         Interpolation { contents: " " },
+        #[cfg(feature = "reload")]
         Text {
           contents: "",
           index: 1,
@@ -491,11 +524,13 @@ mod tests {
     assert_parse(
       "{{}}",
       &[
+        #[cfg(feature = "reload")]
         Text {
           contents: "",
           index: 0,
         },
         Interpolation { contents: "" },
+        #[cfg(feature = "reload")]
         Text {
           contents: "",
           index: 1,
@@ -509,6 +544,7 @@ mod tests {
     assert_parse(
       "$$ foo\n",
       &[
+        #[cfg(feature = "reload")]
         Text {
           contents: "",
           index: 0,
@@ -517,6 +553,7 @@ mod tests {
           contents: " foo",
           closed: true,
         },
+        #[cfg(feature = "reload")]
         Text {
           contents: "",
           index: 1,
@@ -526,6 +563,7 @@ mod tests {
     assert_parse(
       "$$ foo",
       &[
+        #[cfg(feature = "reload")]
         Text {
           contents: "",
           index: 0,
@@ -534,6 +572,7 @@ mod tests {
           contents: " foo",
           closed: false,
         },
+        #[cfg(feature = "reload")]
         Text {
           contents: "",
           index: 1,
@@ -543,6 +582,7 @@ mod tests {
     assert_parse(
       "$$\n",
       &[
+        #[cfg(feature = "reload")]
         Text {
           contents: "",
           index: 0,
@@ -551,6 +591,7 @@ mod tests {
           contents: "",
           closed: true,
         },
+        #[cfg(feature = "reload")]
         Text {
           contents: "",
           index: 1,
@@ -560,6 +601,7 @@ mod tests {
     assert_parse(
       "$$",
       &[
+        #[cfg(feature = "reload")]
         Text {
           contents: "",
           index: 0,
@@ -568,6 +610,7 @@ mod tests {
           contents: "",
           closed: false,
         },
+        #[cfg(feature = "reload")]
         Text {
           contents: "",
           index: 1,
@@ -595,6 +638,7 @@ mod tests {
     assert_parse(
       "{{ foo }} bar {% baz %} bob",
       &[
+        #[cfg(feature = "reload")]
         Text {
           contents: "",
           index: 0,
@@ -602,12 +646,12 @@ mod tests {
         Interpolation { contents: " foo " },
         Text {
           contents: " bar ",
-          index: 1,
+          index: cfg!(feature = "reload").into(),
         },
         Code { contents: " baz " },
         Text {
           contents: " bob",
-          index: 2,
+          index: if cfg!(feature = "reload") { 2 } else { 1 },
         },
       ],
     );
@@ -648,21 +692,25 @@ mod tests {
     assert_parse(
       "{{ foo }}{{ bar }}{{ baz }}",
       &[
+        #[cfg(feature = "reload")]
         Text {
           contents: "",
           index: 0,
         },
         Interpolation { contents: " foo " },
+        #[cfg(feature = "reload")]
         Text {
           contents: "",
           index: 1,
         },
         Interpolation { contents: " bar " },
+        #[cfg(feature = "reload")]
         Text {
           contents: "",
           index: 2,
         },
         Interpolation { contents: " baz " },
+        #[cfg(feature = "reload")]
         Text {
           contents: "",
           index: 3,
@@ -755,6 +803,7 @@ mod tests {
           contents: " line",
           closed: true,
         },
+        #[cfg(feature = "reload")]
         Text {
           contents: "",
           index: 3,
@@ -765,7 +814,7 @@ mod tests {
         },
         Text {
           contents: "end",
-          index: 4,
+          index: if cfg!(feature = "reload") { 4 } else { 3 },
         },
       ],
     );
@@ -801,6 +850,7 @@ mod tests {
     assert_parse(
       "{{ foo {{ bar }}",
       &[
+        #[cfg(feature = "reload")]
         Text {
           contents: "",
           index: 0,
@@ -808,6 +858,7 @@ mod tests {
         Interpolation {
           contents: " foo {{ bar ",
         },
+        #[cfg(feature = "reload")]
         Text {
           contents: "",
           index: 1,
@@ -817,6 +868,7 @@ mod tests {
     assert_parse(
       "{% foo {% bar %}",
       &[
+        #[cfg(feature = "reload")]
         Text {
           contents: "",
           index: 0,
@@ -824,6 +876,7 @@ mod tests {
         Code {
           contents: " foo {% bar ",
         },
+        #[cfg(feature = "reload")]
         Text {
           contents: "",
           index: 1,
@@ -844,6 +897,7 @@ mod tests {
     assert_parse(
       "{{ 日本語 }}",
       &[
+        #[cfg(feature = "reload")]
         Text {
           contents: "",
           index: 0,
@@ -851,6 +905,7 @@ mod tests {
         Interpolation {
           contents: " 日本語 ",
         },
+        #[cfg(feature = "reload")]
         Text {
           contents: "",
           index: 1,
@@ -860,6 +915,7 @@ mod tests {
     assert_parse(
       "{% émoji 🚀 %}",
       &[
+        #[cfg(feature = "reload")]
         Text {
           contents: "",
           index: 0,
@@ -867,6 +923,7 @@ mod tests {
         Code {
           contents: " émoji 🚀 ",
         },
+        #[cfg(feature = "reload")]
         Text {
           contents: "",
           index: 1,
@@ -876,6 +933,7 @@ mod tests {
     assert_parse(
       "%% unicode line 中文\n",
       &[
+        #[cfg(feature = "reload")]
         Text {
           contents: "",
           index: 0,
@@ -884,6 +942,7 @@ mod tests {
           contents: " unicode line 中文",
           closed: true,
         },
+        #[cfg(feature = "reload")]
         Text {
           contents: "",
           index: 1,
@@ -893,6 +952,7 @@ mod tests {
     assert_parse(
       "$$ emoji 🎉\n",
       &[
+        #[cfg(feature = "reload")]
         Text {
           contents: "",
           index: 0,
@@ -901,6 +961,7 @@ mod tests {
           contents: " emoji 🎉",
           closed: true,
         },
+        #[cfg(feature = "reload")]
         Text {
           contents: "",
           index: 1,

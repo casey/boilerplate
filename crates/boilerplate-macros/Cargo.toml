@@ -27,7 +27,7 @@ unindent = "0.2.3"
 
 [features]
 axum = []
-reload = []
+reload = ["boilerplate-parser/reload"]
 
 [lints]
 workspace = true
