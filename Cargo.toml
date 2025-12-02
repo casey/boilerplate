@@ -19,7 +19,11 @@ html-escaper = { path = "crates/html-escaper" }
 
 [features]
 axum = ["boilerplate-macros/axum"]
-reload = ["boilerplate-macros/reload", "dep:boilerplate-parser"]
+reload = [
+  "boilerplate-macros/reload",
+  "boilerplate-parser/reload",
+  "dep:boilerplate-parser",
+]
 
 [lints]
 workspace = true

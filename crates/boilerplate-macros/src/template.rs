@@ -146,6 +146,18 @@ mod tests {
       None
     };
 
+    let text = if cfg!(feature = "reload") {
+      Some("")
+    } else {
+      None
+    };
+
+    let body = if cfg!(feature = "reload") {
+      Some(quote!(boilerplate_output.write_str(boilerplate_text[0].as_ref())?;))
+    } else {
+      None
+    };
+
     assert_eq!(
       Template {
         ident: Ident::new("Foo", Span::call_site()),
@@ -158,7 +170,7 @@ mod tests {
       .to_string(),
       quote!(
         impl ::boilerplate::Boilerplate for Foo {
-            const TEXT: &'static [&'static str] = &[""];
+            const TEXT: &'static [&'static str] = &[#text];
 
             #tokens
 
@@ -170,7 +182,7 @@ mod tests {
               boilerplate_output: &mut ::core::fmt::Formatter,
             ) -> ::core::fmt::Result {
               use ::core::fmt::Write;
-              boilerplate_output.write_str(boilerplate_text[0].as_ref())?;
+              #body
               Ok(())
             }
         }
@@ -200,64 +212,105 @@ mod tests {
 
   #[test]
   fn empty() {
-    assert_display_body_eq(
-      "",
-      quote!(
-        boilerplate_output.write_str(boilerplate_text[0].as_ref())?;
-      ),
-    );
+    if cfg!(feature = "reload") {
+      assert_display_body_eq(
+        "",
+        quote!(
+          boilerplate_output.write_str(boilerplate_text[0].as_ref())?;
+        ),
+      );
+    } else {
+      assert_display_body_eq("", quote!());
+    }
   }
 
   #[test]
   fn code() {
-    assert_display_body_eq(
-      "{% (); %}",
-      quote!(
-        boilerplate_output.write_str(boilerplate_text[0].as_ref())?;
-        ();
-        boilerplate_output.write_str(boilerplate_text[1].as_ref())?;
-      ),
-    );
+    if cfg!(feature = "reload") {
+      assert_display_body_eq(
+        "{% (); %}",
+        quote!(
+          boilerplate_output.write_str(boilerplate_text[0].as_ref())?;
+          ();
+          boilerplate_output.write_str(boilerplate_text[1].as_ref())?;
+        ),
+      );
+    } else {
+      assert_display_body_eq(
+        "{% (); %}",
+        quote!(
+          ();
+        ),
+      );
+    }
   }
 
   #[test]
   fn interpolation() {
-    assert_display_body_eq(
-      "{{ true }}",
-      quote!(
-        boilerplate_output.write_str(boilerplate_text[0].as_ref())?;
-        write!(boilerplate_output, "{}", true)?;
-        boilerplate_output.write_str(boilerplate_text[1].as_ref())?;
-      ),
-    );
+    if cfg!(feature = "reload") {
+      assert_display_body_eq(
+        "{{ true }}",
+        quote!(
+          boilerplate_output.write_str(boilerplate_text[0].as_ref())?;
+          write!(boilerplate_output, "{}", true)?;
+          boilerplate_output.write_str(boilerplate_text[1].as_ref())?;
+        ),
+      );
+    } else {
+      assert_display_body_eq(
+        "{{ true }}",
+        quote!(
+          write!(boilerplate_output, "{}", true)?;
+        ),
+      );
+    }
   }
 
   #[test]
   fn iteration() {
-    assert_display_body_eq(
-      "{% for i in 0..10 { %}{{ i }}{% } %}",
-      quote!(
-        boilerplate_output.write_str(boilerplate_text[0].as_ref())?;
-        for i in 0..10 {
-          boilerplate_output.write_str(boilerplate_text[1].as_ref())?;
+    if cfg!(feature = "reload") {
+      assert_display_body_eq(
+        "{% for i in 0..10 { %}{{ i }}{% } %}",
+        quote!(
+          boilerplate_output.write_str(boilerplate_text[0].as_ref())?;
+          for i in 0..10 {
+            boilerplate_output.write_str(boilerplate_text[1].as_ref())?;
+            write!(boilerplate_output, "{}", i)?;
+            boilerplate_output.write_str(boilerplate_text[2].as_ref())?;
+          }
+          boilerplate_output.write_str(boilerplate_text[3].as_ref())?;
+        ),
+      );
+    } else {
+      assert_display_body_eq(
+        "{% for i in 0..10 { %}{{ i }}{% } %}",
+        quote!(for i in 0..10 {
           write!(boilerplate_output, "{}", i)?;
-          boilerplate_output.write_str(boilerplate_text[2].as_ref())?;
-        }
-        boilerplate_output.write_str(boilerplate_text[3].as_ref())?;
-      ),
-    );
+        }),
+      );
+    }
   }
 
   #[test]
   fn non_trailing_text() {
-    assert_display_body_eq(
-      "foo {{ true }}",
-      quote!(
-        boilerplate_output.write_str(boilerplate_text[0].as_ref())?;
-        write!(boilerplate_output, "{}", true)?;
-        boilerplate_output.write_str(boilerplate_text[1].as_ref())?;
-      ),
-    );
+    if cfg!(feature = "reload") {
+      assert_display_body_eq(
+        "foo {{ true }}",
+        quote!(
+          boilerplate_output.write_str(boilerplate_text[0].as_ref())?;
+          write!(boilerplate_output, "{}", true)?;
+          boilerplate_output.write_str(boilerplate_text[1].as_ref())?;
+        ),
+      );
+    } else {
+      assert_display_body_eq(
+        "foo {{ true }}",
+        quote!(
+          boilerplate_output.write_str(boilerplate_text[0].as_ref())?;
+          write!(boilerplate_output, "{}", true)?;
+        ),
+      );
+    }
   }
 
   #[test]
