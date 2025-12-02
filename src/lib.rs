@@ -410,7 +410,7 @@
 //! Using `#[derive(Boilerplate]` derives both an implementation of `Display`,
 //! and an implementation of the `Boilerplate` trait. Normally the
 //! `Boilerplate` trait and its implementation can be ignored, but when the
-//! `reload` feature is enabled, The `Boilerplate` trait includes
+//! `reload` feature is enabled, the `Boilerplate` trait includes
 //! `Boilerplate::reload` which allows a template to be reloaded at runtime.
 //!
 //! Boilerplate templates contain Rust code which is compiled ahead of time.
