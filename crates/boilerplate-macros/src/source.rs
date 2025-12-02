@@ -13,16 +13,12 @@ impl Source {
         .unwrap_or_else(|err| panic!("Failed to read template `{path}`: {err}")),
     }
   }
-}
 
-impl ToTokens for Source {
-  fn to_tokens(&self, tokens: &mut TokenStream) {
-    match self {
-      Self::Literal(literal) => tokens.append(literal.token()),
-      Self::Path(path) => {
-        let path = LitStr::new(path, Span::call_site());
-        tokens.append_all(quote!(include_str!(#path)));
-      }
+  pub(crate) fn path(&self) -> Option<&str> {
+    if let Self::Path(path) = self {
+      Some(path)
+    } else {
+      None
     }
   }
 }
