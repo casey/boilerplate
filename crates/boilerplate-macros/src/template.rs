@@ -10,7 +10,7 @@ pub(crate) struct Template {
 
 impl Template {
   pub(crate) fn impls(self) -> TokenStream {
-    let display_impl = self.boilerplate_impl();
+    let display_impl = self.display_impl();
 
     let axum_into_response_impl = if cfg!(feature = "axum") {
       Some(self.axum_into_response_impl())
@@ -24,7 +24,7 @@ impl Template {
     }
   }
 
-  fn boilerplate_impl(&self) -> TokenStream {
+  fn display_impl(&self) -> TokenStream {
     let ident = &self.ident;
     let source = &self.source;
     let src = source.src();
@@ -113,7 +113,7 @@ mod tests {
   use {super::*, pretty_assertions::assert_eq, proc_macro2::Span};
 
   #[test]
-  fn boilerplate_impl() {
+  fn display_impl() {
     let tokens = if cfg!(feature = "reload") {
       Some(quote! {
         const TOKENS: &'static [boilerplate::Token<'static>] = &[];
@@ -130,7 +130,7 @@ mod tests {
         escape: false,
         generics: Generics::default(),
       }
-      .boilerplate_impl()
+      .display_impl()
       .to_string(),
       quote!(
         impl boilerplate::Boilerplate for Foo {
