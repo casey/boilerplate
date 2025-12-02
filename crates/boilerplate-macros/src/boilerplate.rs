@@ -26,7 +26,7 @@ impl Boilerplate {
       let path = path.to_str().unwrap_or_else(|| {
         panic!(
           "Path to template `{}` was not valid unicode",
-          path.display()
+          path.display(),
         )
       });
 
