@@ -134,7 +134,6 @@ impl<'src> Token<'src> {
     }
   }
 
-  // todo: can I replate this with call to contents?
   #[must_use]
   pub fn text(self) -> Option<&'src str> {
     if let Self::Text { contents, .. } = self {
