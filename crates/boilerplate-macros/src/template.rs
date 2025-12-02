@@ -130,7 +130,9 @@ mod tests {
   fn display_impl() {
     let tokens = if cfg!(feature = "reload") {
       Some(quote! {
-        const TOKENS: &'static [::boilerplate::Token<'static>] = &[];
+        const TOKENS: &'static [::boilerplate::Token<'static>] = &[
+          ::boilerplate::Token::Text { contents: "", index: 0usize }
+        ];
       })
     } else {
       None
@@ -156,7 +158,7 @@ mod tests {
       .to_string(),
       quote!(
         impl ::boilerplate::Boilerplate for Foo {
-            const TEXT: &'static [&'static str] = &[];
+            const TEXT: &'static [&'static str] = &[""];
 
             #tokens
 
@@ -168,6 +170,7 @@ mod tests {
               boilerplate_output: &mut ::core::fmt::Formatter,
             ) -> ::core::fmt::Result {
               use ::core::fmt::Write;
+              boilerplate_output.write_str(boilerplate_text[0].as_ref())?;
               Ok(())
             }
         }
@@ -197,19 +200,35 @@ mod tests {
 
   #[test]
   fn empty() {
-    assert_display_body_eq("", quote!());
+    assert_display_body_eq(
+      "",
+      quote!(
+        boilerplate_output.write_str(boilerplate_text[0].as_ref())?;
+      ),
+    );
   }
 
   #[test]
   fn code() {
-    assert_display_body_eq("{% () %}", quote!(()));
+    assert_display_body_eq(
+      "{% (); %}",
+      quote!(
+        boilerplate_output.write_str(boilerplate_text[0].as_ref())?;
+        ();
+        boilerplate_output.write_str(boilerplate_text[1].as_ref())?;
+      ),
+    );
   }
 
   #[test]
   fn interpolation() {
     assert_display_body_eq(
       "{{ true }}",
-      quote!(write!(boilerplate_output, "{}", true)?;),
+      quote!(
+        boilerplate_output.write_str(boilerplate_text[0].as_ref())?;
+        write!(boilerplate_output, "{}", true)?;
+        boilerplate_output.write_str(boilerplate_text[1].as_ref())?;
+      ),
     );
   }
 
@@ -217,9 +236,15 @@ mod tests {
   fn iteration() {
     assert_display_body_eq(
       "{% for i in 0..10 { %}{{ i }}{% } %}",
-      quote!(for i in 0..10 {
-        write!(boilerplate_output, "{}", i)?;
-      }),
+      quote!(
+        boilerplate_output.write_str(boilerplate_text[0].as_ref())?;
+        for i in 0..10 {
+          boilerplate_output.write_str(boilerplate_text[1].as_ref())?;
+          write!(boilerplate_output, "{}", i)?;
+          boilerplate_output.write_str(boilerplate_text[2].as_ref())?;
+        }
+        boilerplate_output.write_str(boilerplate_text[3].as_ref())?;
+      ),
     );
   }
 
@@ -230,6 +255,7 @@ mod tests {
       quote!(
         boilerplate_output.write_str(boilerplate_text[0].as_ref())?;
         write!(boilerplate_output, "{}", true)?;
+        boilerplate_output.write_str(boilerplate_text[1].as_ref())?;
       ),
     );
   }

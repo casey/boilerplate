@@ -418,8 +418,6 @@
 //! original template. If they do not, `Boilerplate::reload` will return an
 //! error.
 //!
-//! Template text outside of code blocks may be different.
-//!
 //! ```
 //! #[cfg(feature = "reload")]
 //! {
@@ -444,18 +442,18 @@
 //!   let compatible_template = "Goodbye, {{ self.first }}!";
 //!   assert_eq!(context.reload(compatible_template).unwrap().to_string(), "Goodbye, Bob!");
 //!
+//!   // Text blocks can be removed entirely:
+//!   let incompatible_template = "{{ self.first }}";
+//!   assert_eq!(
+//!     context.reload(incompatible_template).unwrap().to_string(),
+//!     "Bob",
+//!   );
+//!
 //!   // Try to reload an incompatible template with different code:
 //!   let incompatible_template = "Goodbye, {{self.id}}!";
 //!   assert_eq!(
 //!     context.reload(incompatible_template).err().unwrap().to_string(),
 //!     "template blocks are not compatible: {{self.id}} != {{self.first}}",
-//!   );
-//!
-//!   // Text blocks cannot be removed entirely:
-//!   let incompatible_template = "{{ self.first }}";
-//!   assert_eq!(
-//!     context.reload(incompatible_template).err().unwrap().to_string(),
-//!     "new template has 1 blocks but old template has 3 blocks",
 //!   );
 //!
 //!   // Try to reload an incompatible template with a different number of blocks:
@@ -471,6 +469,60 @@
 //!     context.reload(incompatible_template).err().unwrap().to_string(),
 //!     "failed to parse new template: unmatched `{{`",
 //!   );
+//! }
+//! ```
+//!
+//! Mostly, non-code template text can be added, deleted, and removed and still
+//! be reload-compatible with the original. The only limitation is that text
+//! blocks between `{% ... %}` and `%% ... \n` cannot be inserted or removed.
+//!
+//! ```
+//! #[cfg(feature = "reload")]
+//! {
+//!   // import the `Boilerplate` trait for the `reload` method
+//!   use boilerplate::Boilerplate;
+//!
+//!   #[derive(Boilerplate)]
+//!   #[boilerplate(text = "{% if self.condition { %}{% } %}")]
+//!   struct Context {
+//!     condition: bool,
+//!   }
+//!
+//!   let context = Context { condition: true };
+//!
+//!   // Reload a compatible template:
+//!   let compatible_template = "{% if self.condition { %}{% } %}";
+//!   assert_eq!(context.reload(compatible_template).unwrap().to_string(), "");
+//!
+//!   // Text between code blocks cannot be inserted:
+//!   let incompatible_template = "{% if self.condition { %} hello {% } %}";
+//!   assert_eq!(
+//!     context.reload(incompatible_template).err().unwrap().to_string(),
+//!     "new template has 5 blocks but old template has 4 blocks",
+//!   );
+//! }
+//! ```
+//!
+//! Text between code blocks can be changed:
+//!
+//! ```
+//! #[cfg(feature = "reload")]
+//! {
+//!   // import the `Boilerplate` trait for the `reload` method
+//!   use boilerplate::Boilerplate;
+//!
+//!   #[derive(Boilerplate)]
+//!   #[boilerplate(text = "{% if self.condition { %}Hello!{% } %}")]
+//!   struct Context {
+//!     condition: bool,
+//!   }
+//!
+//!   let context = Context { condition: true };
+//!   assert_eq!(context.to_string(), "Hello!");
+//!
+//!   // Reload a compatible template:
+//!   let compatible_template = "{% if self.condition { %}Goodbye!{% } %}";
+//!   assert_eq!(context.reload(compatible_template).unwrap().to_string(), "Goodbye!");
 //! }
 //! ```
 //!
