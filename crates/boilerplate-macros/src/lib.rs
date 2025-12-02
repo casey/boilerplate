@@ -1,5 +1,7 @@
 use {
-  self::{body::Implementation, boilerplate::Boilerplate, source::Source, template::Template},
+  self::{
+    boilerplate::Boilerplate, implementation::Implementation, source::Source, template::Template,
+  },
   boilerplate_parser::Token,
   darling::FromDeriveInput,
   new_mime_guess::Mime,
@@ -9,8 +11,8 @@ use {
   syn::{parse_macro_input, DeriveInput, Generics, Ident, LitStr},
 };
 
-mod body;
 mod boilerplate;
+mod implementation;
 mod source;
 mod template;
 
