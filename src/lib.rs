@@ -363,7 +363,7 @@
 //!       .headers()
 //!       .get("content-type")
 //!       .unwrap(),
-//!     "text/html; charset=utf-8",
+//!     "text/html;charset=utf-8",
 //!   );
 //! }
 //! ```
@@ -380,9 +380,36 @@
 //!       .headers()
 //!       .get("content-type")
 //!       .unwrap(),
-//!     "text/plain; charset=utf-8",
+//!     "text/plain;charset=utf-8",
 //!   );
 //! }
+//! ```
+//!
+//! The `axum` attribute can be used to suppress or force generation of
+//! `IntoResponse` implementations, regardless of whether the `axum` feature is
+//! enabled:
+//!
+//! ```
+//! use axum::response::IntoResponse;
+//! #[derive(boilerplate::Boilerplate)]
+//! #[boilerplate(axum = true)]
+//! struct GuessHtml {}
+//! assert_eq!(
+//!   GuessHtml {}
+//!     .into_response()
+//!     .headers()
+//!     .get("content-type")
+//!     .unwrap(),
+//!   "text/html;charset=utf-8",
+//! );
+//! ```
+//!
+//! ```rust,compile_fail
+//! use axum::response::IntoResponse;
+//! #[derive(boilerplate::Boilerplate)]
+//! #[boilerplate(axum = false)]
+//! struct GuessHtml {}
+//! GuessHtml {}.into_response();
 //! ```
 //!
 //! ### Reloading Templates

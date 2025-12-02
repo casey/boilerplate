@@ -92,6 +92,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "boilerplate-tests"
+version = "0.0.0"
+dependencies = [
+ "boilerplate",
+]
+
+[[package]]
 name = "bytes"
 version = "1.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"

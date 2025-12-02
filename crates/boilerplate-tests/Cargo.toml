@@ -1,0 +1,15 @@
+[package]
+name = "boilerplate-tests"
+version = "0.0.0"
+authors.workspace = true
+categories.workspace = true
+edition.workspace = true
+homepage.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+boilerplate = { path = "../../" }
+
+[lints]
+workspace = true
