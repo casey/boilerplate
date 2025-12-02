@@ -6,7 +6,7 @@ use {
   darling::FromDeriveInput,
   new_mime_guess::Mime,
   proc_macro2::{Span, TokenStream},
-  quote::quote,
+  quote::{quote, ToTokens, TokenStreamExt},
   std::path::Path,
   syn::{parse_macro_input, DeriveInput, Generics, Ident, LitStr},
 };
@@ -21,7 +21,7 @@ pub fn boilerplate(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
   let template = parse_macro_input!(input as LitStr);
   let src = template.value();
 
-  let Implementation { body, text, .. } = Implementation::parse(&src, false, true);
+  let Implementation { body, text } = Implementation::parse(&src, false, true);
 
   quote! {
     {

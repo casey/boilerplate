@@ -3,7 +3,6 @@ use super::*;
 pub(crate) struct Implementation<'src> {
   pub(crate) body: TokenStream,
   pub(crate) text: Vec<&'src str>,
-  pub(crate) tokens: Vec<Token<'src>>,
 }
 
 impl<'src> Implementation<'src> {
@@ -48,6 +47,6 @@ impl<'src> Implementation<'src> {
       .parse()
       .unwrap();
 
-    Self { body, text, tokens }
+    Self { body, text }
   }
 }

@@ -28,7 +28,9 @@ pub enum Error {
   /// New template does not have the same number of blocks.
   Length { new: usize, old: usize },
   /// Failed to parse new template.
-  Parse(boilerplate_parser::Error),
+  ParseNew(boilerplate_parser::Error),
+  /// Failed to parse old template.
+  ParseOld(boilerplate_parser::Error),
   /// Template has no path
   Path,
 }
@@ -44,7 +46,8 @@ impl Display for Error {
         f,
         "new template has {new} blocks but old template has {old} blocks",
       ),
-      Self::Parse(err) => write!(f, "failed to parse new template: {err}"),
+      Self::ParseNew(err) => write!(f, "failed to parse new template: {err}"),
+      Self::ParseOld(err) => write!(f, "failed to parse old template: {err}"),
       Self::Path => write!(f, "template has no path"),
     }
   }
