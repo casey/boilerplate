@@ -30,37 +30,9 @@ impl Template {
     let source = &self.source;
     let src = source.src();
 
-    let Implementation { body, text, tokens } = Implementation::parse(&src, self.escape, false);
+    let Implementation { body, text } = Implementation::parse(&src, self.escape, false);
 
     let (impl_generics, ty_generics, where_clause) = self.generics.split_for_impl();
-
-    let tokens = if cfg!(feature = "reload") {
-      let tokens = tokens
-        .into_iter()
-        .map(|token| match token {
-          Token::Code { contents } => quote!(::boilerplate::Token::Code { contents: #contents }),
-          Token::CodeLine { closed, contents } => {
-            quote!(::boilerplate::Token::CodeLine { closed: #closed, contents: #contents })
-          }
-          Token::Interpolation { contents } => {
-            quote!(::boilerplate::Token::Interpolation { contents: #contents })
-          }
-          Token::InterpolationLine { contents, closed } => {
-            quote!(::boilerplate::Token::InterpolationLine { closed: #closed, contents: #contents })
-          }
-          Token::Text { contents, index } => quote!(::boilerplate::Token::Text {
-            contents: #contents,
-            index: #index
-          }),
-        })
-        .collect::<Vec<TokenStream>>();
-
-      Some(quote! {
-        const TOKENS: &'static [::boilerplate::Token<'static>] = &[ #(#tokens),* ];
-      })
-    } else {
-      None
-    };
 
     let path = if cfg!(feature = "reload") {
       if let Source::Path(path) = &self.source {
@@ -76,9 +48,9 @@ impl Template {
 
     quote! {
       impl #impl_generics ::boilerplate::Boilerplate for #ident #ty_generics #where_clause {
-        const TEXT: &'static [&'static str] = &[ #(#text),* ];
+        const TEMPLATE: &'static str = #source;
 
-        #tokens
+        const TEXT: &'static [&'static str] = &[ #(#text),* ];
 
         #path
 
@@ -132,16 +104,6 @@ mod tests {
 
   #[test]
   fn display_impl() {
-    let tokens = if cfg!(feature = "reload") {
-      Some(quote! {
-        const TOKENS: &'static [::boilerplate::Token<'static>] = &[
-          ::boilerplate::Token::Text { contents: "", index: 0usize }
-        ];
-      })
-    } else {
-      None
-    };
-
     let path = if cfg!(feature = "reload") {
       Some(quote!(
         const PATH: Option<&'static str> = None;
@@ -175,9 +137,9 @@ mod tests {
       .to_string(),
       quote!(
         impl ::boilerplate::Boilerplate for Foo {
-            const TEXT: &'static [&'static str] = &[#text];
+            const TEMPLATE: &'static str = "";
 
-            #tokens
+            const TEXT: &'static [&'static str] = &[#text];
 
             #path
 

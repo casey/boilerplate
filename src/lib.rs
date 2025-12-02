@@ -703,15 +703,14 @@ mod reload;
 /// The boilerplate trait, automatically implemented by the `Boilerplate`
 /// derive macro.
 pub trait Boilerplate {
+  /// The original template.
+  const TEMPLATE: &'static str;
+
   /// The parsed template's text blocks.
   const TEXT: &'static [&'static str];
 
-  #[cfg(feature = "reload")]
-  /// The parsed template's tokens.
-  const TOKENS: &'static [Token<'static>];
-
-  #[cfg(feature = "reload")]
   /// Path to the original template file.
+  #[cfg(feature = "reload")]
   const PATH: Option<&'static str>;
 
   /// Render the template.
@@ -724,7 +723,6 @@ pub trait Boilerplate {
     boilerplate_output: &mut Formatter,
   ) -> fmt::Result;
 
-  #[cfg(feature = "reload")]
   /// Reload the template from a new template string.
   ///
   /// The new template must be compatible with the original template. Templates
@@ -733,17 +731,19 @@ pub trait Boilerplate {
   /// contain literal text, may be different.
   ///
   /// - `src` - The new template source text.
+  #[cfg(feature = "reload")]
   fn reload(&self, src: &str) -> Result<Reload<&Self>, Error> {
-    let tokens = Token::parse(src).map_err(Error::Parse)?;
+    let new = Token::parse(src).map_err(Error::ParseNew)?;
+    let old = Token::parse(Self::TEMPLATE).map_err(Error::ParseOld)?;
 
-    if tokens.len() != Self::TOKENS.len() {
+    if new.len() != old.len() {
       return Err(Error::Length {
-        new: tokens.len(),
-        old: Self::TOKENS.len(),
+        new: new.len(),
+        old: old.len(),
       });
     }
 
-    for (new, old) in tokens.iter().copied().zip(Self::TOKENS.iter().copied()) {
+    for (new, old) in new.iter().zip(old) {
       if !new.is_compatible_with(old) {
         return Err(Error::Incompatible {
           new: new.to_string(),
@@ -754,7 +754,7 @@ pub trait Boilerplate {
 
     Ok(Reload {
       inner: self,
-      text: tokens
+      text: new
         .into_iter()
         .filter_map(Token::text)
         .map(ToOwned::to_owned)
@@ -762,9 +762,9 @@ pub trait Boilerplate {
     })
   }
 
-  #[cfg(feature = "reload")]
   /// Reload the template from its original path. Cannot be used on templates
   /// created from string literals.
+  #[cfg(feature = "reload")]
   fn reload_from_path(&self) -> Result<Reload<&Self>, Error> {
     let Some(path) = Self::PATH else {
       return Err(Error::Path);

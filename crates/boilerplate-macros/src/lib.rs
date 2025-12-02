@@ -6,7 +6,7 @@ use {
   darling::FromDeriveInput,
   new_mime_guess::Mime,
   proc_macro2::{Span, TokenStream},
-  quote::quote,
+  quote::{quote, ToTokens, TokenStreamExt},
   std::path::Path,
   syn::{parse_macro_input, DeriveInput, Generics, Ident, LitStr},
 };
