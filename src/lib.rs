@@ -472,7 +472,7 @@
 //! }
 //! ```
 //!
-//! Mostly, non-code template text can be added, deleted, and removed and still
+//! Mostly, non-code template text can be added, changed, and removed and still
 //! be reload-compatible with the original. The only limitation is that text
 //! blocks between `{% ... %}` and `%% ... \n` cannot be inserted or removed.
 //!
