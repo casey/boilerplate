@@ -20,7 +20,7 @@ impl<T: Boilerplate> Display for Reload<&T> {
 pub enum Error {
   /// New template is not compatible with the old template.
   Incompatible { new: String, old: String },
-  /// I/O error loadin new template.
+  /// I/O error loading new template.
   Io {
     path: &'static str,
     source: io::Error,
