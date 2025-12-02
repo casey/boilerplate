@@ -411,8 +411,7 @@
 //! and an implementation of the `Boilerplate` trait. Normally the
 //! `Boilerplate` trait and its implementation can be ignored, but when the
 //! `reload` feature is enabled, The `Boilerplate` trait includes
-//! `Boilerplate::reload`, which takes a new template string to reload a
-//! template at runtime.
+//! `Boilerplate::reload` which allows a template to be reloaded at runtime.
 //!
 //! Boilerplate templates contain Rust code which is compiled ahead of time.
 //! Consequently, the new template's code blocks must match those of the
