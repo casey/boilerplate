@@ -62,7 +62,17 @@ impl<'src> Token<'src> {
         before_close
       };
 
-      if i != j {
+      let previous_is_code = matches!(
+        tokens.last(),
+        Some(Token::Code { .. } | Token::CodeLine { .. }),
+      );
+
+      let current_is_code = matches! {
+        block,
+        Block::Code | Block::CodeLine,
+      };
+
+      if i != j || tokens.is_empty() || !(previous_is_code && current_is_code) {
         tokens.push(Self::Text {
           contents: &src[i..j],
           index,
@@ -76,7 +86,7 @@ impl<'src> Token<'src> {
       i = after_close;
     }
 
-    if i != j {
+    if i != j || tokens.is_empty() || !matches!(tokens.last(), Some(Token::Text { .. })) {
       tokens.push(Self::Text {
         contents: &src[i..j],
         index,
@@ -310,7 +320,13 @@ mod tests {
 
   #[test]
   fn empty() {
-    assert_parse("", &[]);
+    assert_parse(
+      "",
+      &[Text {
+        contents: "",
+        index: 0,
+      }],
+    );
   }
 
   #[test]
@@ -326,79 +342,237 @@ mod tests {
 
   #[test]
   fn code() {
-    assert_parse("{% foo %}", &[Code { contents: " foo " }]);
-    assert_parse("{%%}", &[Code { contents: "" }]);
+    assert_parse(
+      "{% foo %}",
+      &[
+        Text {
+          contents: "",
+          index: 0,
+        },
+        Code { contents: " foo " },
+        Text {
+          contents: "",
+          index: 1,
+        },
+      ],
+    );
+    assert_parse(
+      "{%%}",
+      &[
+        Text {
+          contents: "",
+          index: 0,
+        },
+        Code { contents: "" },
+        Text {
+          contents: "",
+          index: 1,
+        },
+      ],
+    );
   }
 
   #[test]
   fn code_line() {
     assert_parse(
       "%% foo\n",
-      &[CodeLine {
-        contents: " foo",
-        closed: true,
-      }],
+      &[
+        Text {
+          contents: "",
+          index: 0,
+        },
+        CodeLine {
+          contents: " foo",
+          closed: true,
+        },
+        Text {
+          contents: "",
+          index: 1,
+        },
+      ],
     );
     assert_parse(
       "%% foo",
-      &[CodeLine {
-        contents: " foo",
-        closed: false,
-      }],
+      &[
+        Text {
+          contents: "",
+          index: 0,
+        },
+        CodeLine {
+          contents: " foo",
+          closed: false,
+        },
+        Text {
+          contents: "",
+          index: 1,
+        },
+      ],
     );
     assert_parse(
       "%%\n",
-      &[CodeLine {
-        contents: "",
-        closed: true,
-      }],
+      &[
+        Text {
+          contents: "",
+          index: 0,
+        },
+        CodeLine {
+          contents: "",
+          closed: true,
+        },
+        Text {
+          contents: "",
+          index: 1,
+        },
+      ],
     );
     assert_parse(
       "%%",
-      &[CodeLine {
-        contents: "",
-        closed: false,
-      }],
+      &[
+        Text {
+          contents: "",
+          index: 0,
+        },
+        CodeLine {
+          contents: "",
+          closed: false,
+        },
+        Text {
+          contents: "",
+          index: 1,
+        },
+      ],
     );
   }
 
   #[test]
   fn interpolation() {
-    assert_parse("{{ foo }}", &[Interpolation { contents: " foo " }]);
-    assert_parse("{{foo}}", &[Interpolation { contents: "foo" }]);
-    assert_parse("{{ }}", &[Interpolation { contents: " " }]);
-    assert_parse("{{}}", &[Interpolation { contents: "" }]);
+    assert_parse(
+      "{{ foo }}",
+      &[
+        Text {
+          contents: "",
+          index: 0,
+        },
+        Interpolation { contents: " foo " },
+        Text {
+          contents: "",
+          index: 1,
+        },
+      ],
+    );
+    assert_parse(
+      "{{foo}}",
+      &[
+        Text {
+          contents: "",
+          index: 0,
+        },
+        Interpolation { contents: "foo" },
+        Text {
+          contents: "",
+          index: 1,
+        },
+      ],
+    );
+    assert_parse(
+      "{{ }}",
+      &[
+        Text {
+          contents: "",
+          index: 0,
+        },
+        Interpolation { contents: " " },
+        Text {
+          contents: "",
+          index: 1,
+        },
+      ],
+    );
+    assert_parse(
+      "{{}}",
+      &[
+        Text {
+          contents: "",
+          index: 0,
+        },
+        Interpolation { contents: "" },
+        Text {
+          contents: "",
+          index: 1,
+        },
+      ],
+    );
   }
 
   #[test]
   fn interpolation_line() {
     assert_parse(
       "$$ foo\n",
-      &[InterpolationLine {
-        contents: " foo",
-        closed: true,
-      }],
+      &[
+        Text {
+          contents: "",
+          index: 0,
+        },
+        InterpolationLine {
+          contents: " foo",
+          closed: true,
+        },
+        Text {
+          contents: "",
+          index: 1,
+        },
+      ],
     );
     assert_parse(
       "$$ foo",
-      &[InterpolationLine {
-        contents: " foo",
-        closed: false,
-      }],
+      &[
+        Text {
+          contents: "",
+          index: 0,
+        },
+        InterpolationLine {
+          contents: " foo",
+          closed: false,
+        },
+        Text {
+          contents: "",
+          index: 1,
+        },
+      ],
     );
     assert_parse(
       "$$\n",
-      &[InterpolationLine {
-        contents: "",
-        closed: true,
-      }],
+      &[
+        Text {
+          contents: "",
+          index: 0,
+        },
+        InterpolationLine {
+          contents: "",
+          closed: true,
+        },
+        Text {
+          contents: "",
+          index: 1,
+        },
+      ],
     );
     assert_parse(
       "$$",
-      &[InterpolationLine {
-        contents: "",
-        closed: false,
-      }],
+      &[
+        Text {
+          contents: "",
+          index: 0,
+        },
+        InterpolationLine {
+          contents: "",
+          closed: false,
+        },
+        Text {
+          contents: "",
+          index: 1,
+        },
+      ],
     );
   }
 
@@ -421,15 +595,19 @@ mod tests {
     assert_parse(
       "{{ foo }} bar {% baz %} bob",
       &[
+        Text {
+          contents: "",
+          index: 0,
+        },
         Interpolation { contents: " foo " },
         Text {
           contents: " bar ",
-          index: 0,
+          index: 1,
         },
         Code { contents: " baz " },
         Text {
           contents: " bob",
-          index: 1,
+          index: 2,
         },
       ],
     );
@@ -470,9 +648,25 @@ mod tests {
     assert_parse(
       "{{ foo }}{{ bar }}{{ baz }}",
       &[
+        Text {
+          contents: "",
+          index: 0,
+        },
         Interpolation { contents: " foo " },
+        Text {
+          contents: "",
+          index: 1,
+        },
         Interpolation { contents: " bar " },
+        Text {
+          contents: "",
+          index: 2,
+        },
         Interpolation { contents: " baz " },
+        Text {
+          contents: "",
+          index: 3,
+        },
       ],
     );
     assert_parse(
@@ -561,13 +755,17 @@ mod tests {
           contents: " line",
           closed: true,
         },
+        Text {
+          contents: "",
+          index: 3,
+        },
         InterpolationLine {
           contents: " value",
           closed: true,
         },
         Text {
           contents: "end",
-          index: 3,
+          index: 4,
         },
       ],
     );
@@ -602,15 +800,35 @@ mod tests {
   fn nesting() {
     assert_parse(
       "{{ foo {{ bar }}",
-      &[Interpolation {
-        contents: " foo {{ bar ",
-      }],
+      &[
+        Text {
+          contents: "",
+          index: 0,
+        },
+        Interpolation {
+          contents: " foo {{ bar ",
+        },
+        Text {
+          contents: "",
+          index: 1,
+        },
+      ],
     );
     assert_parse(
       "{% foo {% bar %}",
-      &[Code {
-        contents: " foo {% bar ",
-      }],
+      &[
+        Text {
+          contents: "",
+          index: 0,
+        },
+        Code {
+          contents: " foo {% bar ",
+        },
+        Text {
+          contents: "",
+          index: 1,
+        },
+      ],
     );
   }
 
@@ -625,29 +843,69 @@ mod tests {
     );
     assert_parse(
       "{{ 日本語 }}",
-      &[Interpolation {
-        contents: " 日本語 ",
-      }],
+      &[
+        Text {
+          contents: "",
+          index: 0,
+        },
+        Interpolation {
+          contents: " 日本語 ",
+        },
+        Text {
+          contents: "",
+          index: 1,
+        },
+      ],
     );
     assert_parse(
       "{% émoji 🚀 %}",
-      &[Code {
-        contents: " émoji 🚀 ",
-      }],
+      &[
+        Text {
+          contents: "",
+          index: 0,
+        },
+        Code {
+          contents: " émoji 🚀 ",
+        },
+        Text {
+          contents: "",
+          index: 1,
+        },
+      ],
     );
     assert_parse(
       "%% unicode line 中文\n",
-      &[CodeLine {
-        contents: " unicode line 中文",
-        closed: true,
-      }],
+      &[
+        Text {
+          contents: "",
+          index: 0,
+        },
+        CodeLine {
+          contents: " unicode line 中文",
+          closed: true,
+        },
+        Text {
+          contents: "",
+          index: 1,
+        },
+      ],
     );
     assert_parse(
       "$$ emoji 🎉\n",
-      &[InterpolationLine {
-        contents: " emoji 🎉",
-        closed: true,
-      }],
+      &[
+        Text {
+          contents: "",
+          index: 0,
+        },
+        InterpolationLine {
+          contents: " emoji 🎉",
+          closed: true,
+        },
+        Text {
+          contents: "",
+          index: 1,
+        },
+      ],
     );
   }
 
