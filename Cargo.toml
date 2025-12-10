@@ -1,6 +1,6 @@
 [package]
 name = "boilerplate"
-version = "1.1.0"
+version = "1.1.1"
 description = "Minimal compile-time Rust template engine"
 authors.workspace = true
 categories.workspace = true
@@ -10,7 +10,7 @@ license.workspace = true
 repository.workspace = true
 
 [dependencies]
-boilerplate-macros = { version = "0.0.0", path = "crates/boilerplate-macros" }
+boilerplate-macros = { version = "0.0.1", path = "crates/boilerplate-macros" }
 boilerplate-parser = { version = "0.0.0", path = "crates/boilerplate-parser", optional = true }
 
 [dev-dependencies]
