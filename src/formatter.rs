@@ -1,11 +1,7 @@
 use super::*;
 
 /// A `core::fmt::Write` adapter that optionally HTML-escapes its input and
-/// optionally prepends `indent` after every internal `\n`.
-///
-/// Indent emission is lazy: when a `\n` is written, the indent is queued and
-/// only emitted before the next non-`\n` content. This means a trailing `\n`
-/// in the input does not produce a trailing indent.
+/// optionally append `indent` after every internal `\n`.
 pub struct Formatter<'a, 'b> {
   escape: bool,
   indent: &'static str,
