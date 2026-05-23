@@ -7,23 +7,23 @@ use super::*;
 /// only emitted before the next non-`\n` content. This means a trailing `\n`
 /// in the input does not produce a trailing indent.
 pub struct Formatter<'a, 'b> {
-  inner: &'a mut fmt::Formatter<'b>,
   escape: bool,
   indent: &'static str,
+  inner: &'a mut fmt::Formatter<'b>,
   pending_indent: bool,
 }
 
 impl<'a, 'b> Formatter<'a, 'b> {
   pub fn new(inner: &'a mut fmt::Formatter<'b>, escape: bool, indent: &'static str) -> Self {
     Self {
-      inner,
       escape,
       indent,
+      inner,
       pending_indent: false,
     }
   }
 
-  fn flush_pending_indent(&mut self) -> fmt::Result {
+  fn flush(&mut self) -> fmt::Result {
     if self.pending_indent {
       self.inner.write_str(self.indent)?;
       self.pending_indent = false;
@@ -55,12 +55,12 @@ impl Write for Formatter<'_, '_> {
       }
 
       if chunk_start < i {
-        self.flush_pending_indent()?;
+        self.flush()?;
         self.inner.write_str(&s[chunk_start..i])?;
       }
 
       if let Some(replacement) = replacement {
-        self.flush_pending_indent()?;
+        self.flush()?;
         self.inner.write_str(replacement)?;
       } else {
         self.inner.write_str("\n")?;
@@ -73,7 +73,7 @@ impl Write for Formatter<'_, '_> {
     }
 
     if chunk_start < s.len() {
-      self.flush_pending_indent()?;
+      self.flush()?;
       self.inner.write_str(&s[chunk_start..])?;
     }
 
