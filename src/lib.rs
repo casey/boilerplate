@@ -333,8 +333,7 @@
 //! ### Auto-indenting
 //!
 //! When an interpolation appears on a line preceeded only by whitespace, that
-//! whitespace is appended to every line of the interpolated content. This
-//! gives multi-line interpolated consistent indentation.
+//! whitespace is prepended to every line of the interpolated content:
 //!
 //! ```
 //! #[derive(boilerplate::Boilerplate)]
