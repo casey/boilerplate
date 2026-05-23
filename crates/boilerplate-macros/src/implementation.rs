@@ -6,7 +6,8 @@ pub(crate) struct Implementation<'src> {
 }
 
 impl<'src> Implementation<'src> {
-  fn line(token: Token, indent: &str, escape: bool, function: bool) -> String {
+  fn line(i: usize, tokens: &[Token<'src>], token: Token, escape: bool, function: bool) -> String {
+    let indent = detect_indent(i, tokens);
     let error_handler = if function { ".unwrap()" } else { "?" };
     match token {
       Token::Text { index, .. } => {
@@ -20,7 +21,8 @@ impl<'src> Implementation<'src> {
           format!("write!(boilerplate_output, \"{{}}\", {contents}){error_handler} ;")
         } else {
           format!(
-            "write!(::boilerplate::Formatter::new(boilerplate_output, false, \"{indent}\"), \"{{}}\", {contents}){error_handler} ;"
+            "write!(::boilerplate::Formatter::new(boilerplate_output, false, \"{indent}\"), \
+            \"{{}}\", {contents}){error_handler} ;"
           )
         }
       }
@@ -37,11 +39,13 @@ impl<'src> Implementation<'src> {
           }
         } else if closed {
           format!(
-            "write!(::boilerplate::Formatter::new(boilerplate_output, false, \"{indent}\"), \"{{}}\\n\", {contents}){error_handler} ;"
+            "write!(::boilerplate::Formatter::new(boilerplate_output, false, \"{indent}\"), \
+            \"{{}}\\n\", {contents}){error_handler} ;"
           )
         } else {
           format!(
-            "write!(::boilerplate::Formatter::new(boilerplate_output, false, \"{indent}\"), \"{{}}\", {contents}){error_handler} ;"
+            "write!(::boilerplate::Formatter::new(boilerplate_output, false, \"{indent}\"), \
+            \"{{}}\", {contents}){error_handler} ;"
           )
         }
       }
@@ -59,7 +63,7 @@ impl<'src> Implementation<'src> {
     let body = tokens
       .iter()
       .enumerate()
-      .map(|(i, token)| Self::line(*token, detect_indent(&tokens, i), escape, function))
+      .map(|(i, token)| Self::line(i, &tokens, *token, escape, function))
       .collect::<String>()
       .parse()
       .unwrap();
@@ -68,7 +72,7 @@ impl<'src> Implementation<'src> {
   }
 }
 
-fn detect_indent<'src>(tokens: &[Token<'src>], i: usize) -> &'src str {
+fn detect_indent<'src>(i: usize, tokens: &[Token<'src>]) -> &'src str {
   if i == 0 {
     return "";
   }
@@ -77,8 +81,8 @@ fn detect_indent<'src>(tokens: &[Token<'src>], i: usize) -> &'src str {
     return "";
   };
 
-  if let Some(nl) = contents.rfind('\n') {
-    let prefix = &contents[nl + 1..];
+  if let Some(newline) = contents.rfind('\n') {
+    let prefix = &contents[newline + 1..];
     return if is_indent(prefix) { prefix } else { "" };
   }
 
@@ -111,7 +115,7 @@ mod tests {
       .enumerate()
       .filter_map(|(i, token)| match token {
         Token::Interpolation { .. } | Token::InterpolationLine { .. } => {
-          Some(detect_indent(&tokens, i))
+          Some(detect_indent(i, &tokens))
         }
         _ => None,
       })

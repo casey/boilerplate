@@ -3,6 +3,8 @@ watch +args='lcheck --all':
 
 clippy: (watch 'lclippy --tests --all --all-targets -- --deny warnings')
 
+test: (watch 'ltest --all')
+
 ci:
   cargo clippy --all --all-targets -- --deny warnings
   cargo fmt --all -- --check
