@@ -330,12 +330,11 @@
 //! assert_eq!(ContextHtml("&").to_string(), "&\n");
 //! ```
 //!
-//! ### Auto-Indenting Interpolations
+//! ### Auto-indenting
 //!
-//! When an interpolation appears alone on an indented line — preceded only by
-//! whitespace — every internal newline in the interpolated value is followed
-//! by the same indent prefix. This lets multi-line interpolated content line
-//! up with the surrounding template:
+//! When an interpolation appears on a line preceeded only by whitespace, that
+//! whitespace is appended to every line of the interpolated content. This
+//! gives multi-line interpolated consistent indentation.
 //!
 //! ```
 //! #[derive(boilerplate::Boilerplate)]
@@ -354,9 +353,7 @@
 //! );
 //! ```
 //!
-//! Auto-indent applies to both `{{ ... }}` and `$$ ... \n` interpolations, in
-//! both escaped and unescaped templates. An interpolation that follows other
-//! content on its line is not auto-indented.
+//! Auto-indent applies to both `{{ ... }}` and `$$ ... \n` interpolations:
 //!
 //! ```
 //! #[derive(boilerplate::Boilerplate)]
@@ -374,12 +371,8 @@
 //! );
 //! ```
 //!
-//! Indent emission is lazy: a value whose final character is `\n` does not
-//! produce a trailing indent before the next character of template text.
-//!
-//! When the `reload` feature is enabled, the indent prefix for each
-//! interpolation is captured at compile time. Reloading a template can change
-//! text but not the indentation applied to interpolations.
+//! When the `reload` feature is enabled, hot-reloading a template does not
+//! change the indentation applied to interpolations.
 //!
 //! ### Generics
 //!
@@ -680,10 +673,6 @@
 //! This is especially useful when generating multiple HTML pages with unique
 //! content, but with headers and footers that are common to all pages. Note
 //! the use of `boilerplate::Trusted` to prevent escaping the inner HTML:
-//!
-//! When an interpolation sits alone on an indented line, its output is
-//! automatically indented so multi-line inner content lines up with the
-//! surrounding template. See the auto-indent section below for details.
 //!
 //! ```
 //! use {
