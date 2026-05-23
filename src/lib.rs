@@ -332,7 +332,7 @@
 //!
 //! ### Auto-indenting
 //!
-//! When an interpolation appears on a line preceeded only by whitespace, that
+//! When an interpolation appears on a line preceded only by whitespace, that
 //! whitespace is prepended to every line of the interpolated content:
 //!
 //! ```
@@ -730,9 +730,12 @@
 extern crate alloc;
 
 pub use {
-  self::format::{Format, Formatter, Trusted},
+  self::format::Trusted,
   boilerplate_macros::{boilerplate, Boilerplate},
 };
+
+#[doc(hidden)]
+pub use self::format::{Format, Formatter};
 
 #[cfg(feature = "reload")]
 pub use {
