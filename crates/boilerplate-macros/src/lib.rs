@@ -32,7 +32,10 @@ pub fn boilerplate(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
       let boilerplate_text = &[ #(#text),* ];
       let mut boilerplate_output = alloc::string::String::new();
 
-      #body
+      {
+        let boilerplate_output = &mut boilerplate_output;
+        #body
+      }
 
       boilerplate_output
     }

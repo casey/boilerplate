@@ -15,40 +15,38 @@ impl<'src> Implementation<'src> {
       }
       Token::Code { contents } | Token::CodeLine { contents, .. } => contents.into(),
       Token::Interpolation { contents } => {
-        if escape {
-          format!("({contents}).format(boilerplate_output, \"{indent}\", false){error_handler} ;")
-        } else if indent.is_empty() {
-          format!("write!(boilerplate_output, \"{{}}\", {contents}){error_handler} ;")
-        } else {
-          format!(
-            "write!(::boilerplate::Formatter::new(boilerplate_output, false, \"{indent}\"), \
-            \"{{}}\", {contents}){error_handler} ;"
-          )
-        }
+        let trim = followed_by_newline(i, tokens);
+        Self::interpolation(contents, indent, trim, false, escape, error_handler)
       }
       Token::InterpolationLine { contents, closed } => {
-        if escape {
-          format!(
-            "({contents}).format(boilerplate_output, \"{indent}\", {closed}){error_handler} ;"
-          )
-        } else if indent.is_empty() {
-          if closed {
-            format!("write!(boilerplate_output, \"{{}}\\n\", {contents}){error_handler} ;")
-          } else {
-            format!("write!(boilerplate_output, \"{{}}\", {contents}){error_handler} ;")
-          }
-        } else if closed {
-          format!(
-            "write!(::boilerplate::Formatter::new(boilerplate_output, false, \"{indent}\"), \
-            \"{{}}\\n\", {contents}){error_handler} ;"
-          )
-        } else {
-          format!(
-            "write!(::boilerplate::Formatter::new(boilerplate_output, false, \"{indent}\"), \
-            \"{{}}\", {contents}){error_handler} ;"
-          )
-        }
+        let trim = closed || followed_by_newline(i, tokens);
+        Self::interpolation(contents, indent, trim, closed, escape, error_handler)
       }
+    }
+  }
+
+  fn interpolation(
+    contents: &str,
+    indent: &str,
+    trim: bool,
+    append_newline: bool,
+    escape: bool,
+    error_handler: &str,
+  ) -> String {
+    let write = if escape {
+      format!("({contents}).format(boilerplate_output, \"{indent}\", {trim}){error_handler} ;")
+    } else if indent.is_empty() && !trim {
+      format!("write!(boilerplate_output, \"{{}}\", {contents}){error_handler} ;")
+    } else {
+      format!(
+        "write!(::boilerplate::Formatter::new(boilerplate_output, false, \"{indent}\", {trim}), \
+        \"{{}}\", {contents}){error_handler} ;"
+      )
+    };
+    if append_newline {
+      format!("{write} boilerplate_output.write_str(\"\\n\"){error_handler} ;")
+    } else {
+      write
     }
   }
 
@@ -70,6 +68,13 @@ impl<'src> Implementation<'src> {
 
     Self { body, text }
   }
+}
+
+fn followed_by_newline(i: usize, tokens: &[Token]) -> bool {
+  matches!(
+    tokens.get(i + 1),
+    Some(Token::Text { contents, .. }) if contents.starts_with('\n'),
+  )
 }
 
 fn indent<'src>(i: usize, tokens: &[Token<'src>]) -> Option<&'src str> {

@@ -349,7 +349,7 @@ mod tests {
         quote!(
           boilerplate_output.write_str(boilerplate_text[0].as_ref())?;
           write!(
-            ::boilerplate::Formatter::new(boilerplate_output, false, "    "),
+            ::boilerplate::Formatter::new(boilerplate_output, false, "    ", false),
             "{}",
             true
           )?;
@@ -362,7 +362,7 @@ mod tests {
         quote!(
           boilerplate_output.write_str(boilerplate_text[0].as_ref())?;
           write!(
-            ::boilerplate::Formatter::new(boilerplate_output, false, "    "),
+            ::boilerplate::Formatter::new(boilerplate_output, false, "    ", false),
             "{}",
             true
           )?;
@@ -379,10 +379,11 @@ mod tests {
         quote!(
           boilerplate_output.write_str(boilerplate_text[0].as_ref())?;
           write!(
-            ::boilerplate::Formatter::new(boilerplate_output, false, "    "),
-            "{}\n",
+            ::boilerplate::Formatter::new(boilerplate_output, false, "    ", true),
+            "{}",
             true
           )?;
+          boilerplate_output.write_str("\n")?;
           boilerplate_output.write_str(boilerplate_text[1].as_ref())?;
         ),
       );
@@ -392,10 +393,11 @@ mod tests {
         quote!(
           boilerplate_output.write_str(boilerplate_text[0].as_ref())?;
           write!(
-            ::boilerplate::Formatter::new(boilerplate_output, false, "    "),
-            "{}\n",
+            ::boilerplate::Formatter::new(boilerplate_output, false, "    ", true),
+            "{}",
             true
           )?;
+          boilerplate_output.write_str("\n")?;
         ),
       );
     }
@@ -409,6 +411,7 @@ mod tests {
         quote!(
           boilerplate_output.write_str(boilerplate_text[0].as_ref())?;
           (true).format(boilerplate_output, "    ", true)?;
+          boilerplate_output.write_str("\n")?;
           boilerplate_output.write_str(boilerplate_text[1].as_ref())?;
         ),
       );
@@ -418,6 +421,7 @@ mod tests {
         quote!(
           boilerplate_output.write_str(boilerplate_text[0].as_ref())?;
           (true).format(boilerplate_output, "    ", true)?;
+          boilerplate_output.write_str("\n")?;
         ),
       );
     }
