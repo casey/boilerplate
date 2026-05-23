@@ -7,7 +7,7 @@ pub(crate) struct Implementation<'src> {
 
 impl<'src> Implementation<'src> {
   fn line(i: usize, tokens: &[Token<'src>], token: Token, escape: bool, function: bool) -> String {
-    let indent = indent(i, tokens);
+    let indent = indent(i, tokens).unwrap_or("");
     let error_handler = if function { ".unwrap()" } else { "?" };
     match token {
       Token::Text { index, .. } => {
@@ -72,18 +72,22 @@ impl<'src> Implementation<'src> {
   }
 }
 
-fn indent<'src>(i: usize, tokens: &[Token<'src>]) -> &'src str {
+fn indent<'src>(i: usize, tokens: &[Token<'src>]) -> Option<&'src str> {
+  fn is_blank(s: &str) -> bool {
+    s.chars().all(|c| c == ' ' || c == '\t')
+  }
+
   if i == 0 {
-    return "";
+    return None;
   }
 
   let Token::Text { contents, .. } = tokens[i - 1] else {
-    return "";
+    return None;
   };
 
   if let Some(newline) = contents.rfind('\n') {
     let prefix = &contents[newline + 1..];
-    return if is_indent(prefix) { prefix } else { "" };
+    return is_blank(prefix).then_some(prefix);
   }
 
   let at_line_start = i < 2
@@ -92,15 +96,11 @@ fn indent<'src>(i: usize, tokens: &[Token<'src>]) -> &'src str {
       Token::CodeLine { closed: true, .. } | Token::InterpolationLine { closed: true, .. }
     );
 
-  if at_line_start && is_indent(contents) {
-    contents
-  } else {
-    ""
+  if !at_line_start {
+    return None;
   }
-}
 
-fn is_indent(s: &str) -> bool {
-  s.bytes().all(|b| b == b' ' || b == b'\t')
+  is_blank(contents).then_some(contents)
 }
 
 #[cfg(test)]
@@ -114,7 +114,9 @@ mod tests {
       .iter()
       .enumerate()
       .filter_map(|(i, token)| match token {
-        Token::Interpolation { .. } | Token::InterpolationLine { .. } => Some(indent(i, &tokens)),
+        Token::Interpolation { .. } | Token::InterpolationLine { .. } => {
+          Some(indent(i, &tokens).unwrap_or(""))
+        }
         _ => None,
       })
       .collect::<Vec<&str>>();
