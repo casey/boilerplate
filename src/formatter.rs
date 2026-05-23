@@ -3,6 +3,7 @@ use super::*;
 /// A `core::fmt::Write` adapter that optionally HTML-escapes its input,
 /// optionally appends `indent` after every internal `\n`, and optionally
 /// buffers a trailing `\n` so that it can be silently dropped on `Drop`.
+#[allow(clippy::struct_excessive_bools)]
 pub struct Formatter<'a, W: ?Sized> {
   escape: bool,
   indent: &'static str,

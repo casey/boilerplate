@@ -128,6 +128,35 @@ mod tests {
     assert_eq!(actual, expected);
   }
 
+  #[track_caller]
+  fn followed_case(src: &str, expected: &[bool]) {
+    let tokens = Token::parse(src).unwrap();
+    let actual = tokens
+      .iter()
+      .enumerate()
+      .filter_map(|(i, token)| match token {
+        Token::Interpolation { .. } | Token::InterpolationLine { .. } => {
+          Some(followed_by_newline(i, &tokens))
+        }
+        _ => None,
+      })
+      .collect::<Vec<bool>>();
+    assert_eq!(actual, expected);
+  }
+
+  #[test]
+  fn followed_by_newline_detection() {
+    followed_case("{{ x }}", &[false]);
+    followed_case("{{ x }}\n", &[true]);
+    followed_case("{{ x }}foo", &[false]);
+    followed_case("{{ x }}\nfoo", &[true]);
+    followed_case("{{ x }}{{ y }}", &[false, false]);
+    followed_case("{{ x }}{{ y }}\n", &[false, true]);
+    followed_case("$$ x", &[false]);
+    followed_case("$$ x\n", &[false]);
+    followed_case("foo\n{{ x }}", &[false]);
+  }
+
   #[test]
   fn no_preceding_text() {
     case("{{ x }}", &[""]);
