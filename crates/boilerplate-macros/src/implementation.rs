@@ -7,7 +7,7 @@ pub(crate) struct Implementation<'src> {
 
 impl<'src> Implementation<'src> {
   fn line(i: usize, tokens: &[Token<'src>], token: Token, escape: bool, function: bool) -> String {
-    let indent = detect_indent(i, tokens);
+    let indent = indent(i, tokens);
     let error_handler = if function { ".unwrap()" } else { "?" };
     match token {
       Token::Text { index, .. } => {
@@ -72,7 +72,7 @@ impl<'src> Implementation<'src> {
   }
 }
 
-fn detect_indent<'src>(i: usize, tokens: &[Token<'src>]) -> &'src str {
+fn indent<'src>(i: usize, tokens: &[Token<'src>]) -> &'src str {
   if i == 0 {
     return "";
   }
@@ -114,9 +114,7 @@ mod tests {
       .iter()
       .enumerate()
       .filter_map(|(i, token)| match token {
-        Token::Interpolation { .. } | Token::InterpolationLine { .. } => {
-          Some(detect_indent(i, &tokens))
-        }
+        Token::Interpolation { .. } | Token::InterpolationLine { .. } => Some(indent(i, &tokens)),
         _ => None,
       })
       .collect::<Vec<&str>>();
