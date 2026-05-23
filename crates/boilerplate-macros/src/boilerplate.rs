@@ -1,3 +1,5 @@
+#![expect(clippy::needless_continue)]
+
 use super::*;
 
 #[derive(FromDeriveInput)]

@@ -6,27 +6,47 @@ pub(crate) struct Implementation<'src> {
 }
 
 impl<'src> Implementation<'src> {
-  fn line(token: Token, escape: bool, function: bool) -> String {
+  fn line(i: usize, tokens: &[Token<'src>], token: Token, escape: bool, function: bool) -> String {
+    let indent = indent(i, tokens).unwrap_or("");
     let error_handler = if function { ".unwrap()" } else { "?" };
     match token {
       Token::Text { index, .. } => {
-        format!("boilerplate_output.write_str(boilerplate_text[{index}].as_ref()){error_handler} ;",)
+        format!("boilerplate_output.write_str(boilerplate_text[{index}].as_ref()){error_handler} ;")
       }
       Token::Code { contents } | Token::CodeLine { contents, .. } => contents.into(),
       Token::Interpolation { contents } => {
         if escape {
-          format!("({contents}).escape(boilerplate_output, false){error_handler} ;")
-        } else {
+          format!("({contents}).format(boilerplate_output, \"{indent}\", false){error_handler} ;")
+        } else if indent.is_empty() {
           format!("write!(boilerplate_output, \"{{}}\", {contents}){error_handler} ;")
+        } else {
+          format!(
+            "write!(::boilerplate::Formatter::new(boilerplate_output, false, \"{indent}\"), \
+            \"{{}}\", {contents}){error_handler} ;"
+          )
         }
       }
       Token::InterpolationLine { contents, closed } => {
         if escape {
-          format!("({contents}).escape(boilerplate_output, {closed}){error_handler} ;")
+          format!(
+            "({contents}).format(boilerplate_output, \"{indent}\", {closed}){error_handler} ;"
+          )
+        } else if indent.is_empty() {
+          if closed {
+            format!("write!(boilerplate_output, \"{{}}\\n\", {contents}){error_handler} ;")
+          } else {
+            format!("write!(boilerplate_output, \"{{}}\", {contents}){error_handler} ;")
+          }
         } else if closed {
-          format!("write!(boilerplate_output, \"{{}}\\n\", {contents}){error_handler} ;")
+          format!(
+            "write!(::boilerplate::Formatter::new(boilerplate_output, false, \"{indent}\"), \
+            \"{{}}\\n\", {contents}){error_handler} ;"
+          )
         } else {
-          format!("write!(boilerplate_output, \"{{}}\", {contents}){error_handler} ;")
+          format!(
+            "write!(::boilerplate::Formatter::new(boilerplate_output, false, \"{indent}\"), \
+            \"{{}}\", {contents}){error_handler} ;"
+          )
         }
       }
     }
@@ -42,11 +62,123 @@ impl<'src> Implementation<'src> {
 
     let body = tokens
       .iter()
-      .map(|token| Self::line(*token, escape, function))
+      .enumerate()
+      .map(|(i, token)| Self::line(i, &tokens, *token, escape, function))
       .collect::<String>()
       .parse()
       .unwrap();
 
     Self { body, text }
+  }
+}
+
+fn indent<'src>(i: usize, tokens: &[Token<'src>]) -> Option<&'src str> {
+  fn is_blank(s: &str) -> bool {
+    s.chars().all(|c| c == ' ' || c == '\t')
+  }
+
+  if i == 0 {
+    return None;
+  }
+
+  let Token::Text { contents, .. } = tokens[i - 1] else {
+    return None;
+  };
+
+  if let Some(newline) = contents.rfind('\n') {
+    let prefix = &contents[newline + 1..];
+    return is_blank(prefix).then_some(prefix);
+  }
+
+  let at_line_start = i < 2
+    || matches!(
+      tokens[i - 2],
+      Token::CodeLine { closed: true, .. } | Token::InterpolationLine { closed: true, .. }
+    );
+
+  if !at_line_start {
+    return None;
+  }
+
+  is_blank(contents).then_some(contents)
+}
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+
+  #[track_caller]
+  fn case(src: &str, expected: &[&str]) {
+    let tokens = Token::parse(src).unwrap();
+    let actual = tokens
+      .iter()
+      .enumerate()
+      .filter_map(|(i, token)| match token {
+        Token::Interpolation { .. } | Token::InterpolationLine { .. } => {
+          Some(indent(i, &tokens).unwrap_or(""))
+        }
+        _ => None,
+      })
+      .collect::<Vec<&str>>();
+    assert_eq!(actual, expected);
+  }
+
+  #[test]
+  fn no_preceding_text() {
+    case("{{ x }}", &[""]);
+    case("$$ x", &[""]);
+  }
+
+  #[test]
+  fn indented_alone_on_first_line() {
+    case("    {{ x }}", &["    "]);
+    case("    $$ x", &["    "]);
+  }
+
+  #[test]
+  fn tab_indent() {
+    case("\t{{ x }}", &["\t"]);
+  }
+
+  #[test]
+  fn indented_after_newline() {
+    case("foo\n    {{ x }}", &["    "]);
+    case("foo\n    $$ x", &["    "]);
+  }
+
+  #[test]
+  fn no_indent_when_text_on_line() {
+    case("prefix {{ x }}", &[""]);
+    case("foo\nprefix {{ x }}", &[""]);
+  }
+
+  #[test]
+  fn indented_after_closed_code_line() {
+    case("%% if c {\n    {{ x }}\n%% }\n", &["    "]);
+  }
+
+  #[test]
+  fn indented_after_closed_interpolation_line() {
+    case("$$ y\n    {{ x }}", &["", "    "]);
+  }
+
+  #[test]
+  fn no_indent_when_preceded_by_code_block() {
+    case("    {% if c { %}{{ x }}{% } %}", &[""]);
+  }
+
+  #[test]
+  fn no_indent_when_preceded_by_interpolation() {
+    case("    {{ a }}{{ b }}", &["    ", ""]);
+  }
+
+  #[test]
+  fn multiple_interpolations() {
+    case("<body>\n  {{ a }}\n  {{ b }}\n</body>", &["  ", "  "]);
+  }
+
+  #[test]
+  fn empty_template() {
+    case("", &[]);
   }
 }
