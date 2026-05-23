@@ -730,12 +730,12 @@
 extern crate alloc;
 
 pub use {
-  self::format::Trusted,
+  self::trusted::Trusted,
   boilerplate_macros::{boilerplate, Boilerplate},
 };
 
 #[doc(hidden)]
-pub use self::format::{Format, Formatter};
+pub use self::{format::Format, formatter::Formatter};
 
 #[cfg(feature = "reload")]
 pub use {
@@ -743,9 +743,11 @@ pub use {
   boilerplate_parser::Token,
 };
 
-use core::fmt;
+use core::fmt::{self, Display, Write};
 
 mod format;
+mod formatter;
+mod trusted;
 
 #[cfg(feature = "reload")]
 mod reload;
