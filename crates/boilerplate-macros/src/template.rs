@@ -60,7 +60,7 @@ impl Template {
           boilerplate_output: &mut ::core::fmt::Formatter,
         ) -> ::core::fmt::Result {
           use ::core::fmt::Write;
-          use ::boilerplate::Escape;
+          use ::boilerplate::Format;
           #body
           Ok(())
         }
@@ -149,7 +149,7 @@ mod tests {
               boilerplate_output: &mut ::core::fmt::Formatter,
             ) -> ::core::fmt::Result {
               use ::core::fmt::Write;
-              use ::boilerplate::Escape;
+              use ::boilerplate::Format;
               #body
               Ok(())
             }
@@ -172,6 +172,15 @@ mod tests {
   fn assert_display_body_eq(template: &str, expected: TokenStream) {
     assert_eq!(
       Implementation::parse(template, false, false)
+        .body
+        .to_string(),
+      expected.to_string(),
+    );
+  }
+
+  fn assert_escape_body_eq(template: &str, expected: TokenStream) {
+    assert_eq!(
+      Implementation::parse(template, true, false)
         .body
         .to_string(),
       expected.to_string(),
@@ -287,6 +296,131 @@ mod tests {
       "foo",
       quote!(boilerplate_output.write_str(boilerplate_text[0].as_ref())?;),
     );
+  }
+
+  #[test]
+  fn escape_interpolation() {
+    if cfg!(feature = "reload") {
+      assert_escape_body_eq(
+        "{{ true }}",
+        quote!(
+          boilerplate_output.write_str(boilerplate_text[0].as_ref())?;
+          (true).format(boilerplate_output, "", false)?;
+          boilerplate_output.write_str(boilerplate_text[1].as_ref())?;
+        ),
+      );
+    } else {
+      assert_escape_body_eq(
+        "{{ true }}",
+        quote!(
+          (true).format(boilerplate_output, "", false)?;
+        ),
+      );
+    }
+  }
+
+  #[test]
+  fn escape_interpolation_auto_indent() {
+    if cfg!(feature = "reload") {
+      assert_escape_body_eq(
+        "    {{ true }}",
+        quote!(
+          boilerplate_output.write_str(boilerplate_text[0].as_ref())?;
+          (true).format(boilerplate_output, "    ", false)?;
+          boilerplate_output.write_str(boilerplate_text[1].as_ref())?;
+        ),
+      );
+    } else {
+      assert_escape_body_eq(
+        "    {{ true }}",
+        quote!(
+          boilerplate_output.write_str(boilerplate_text[0].as_ref())?;
+          (true).format(boilerplate_output, "    ", false)?;
+        ),
+      );
+    }
+  }
+
+  #[test]
+  fn no_escape_interpolation_auto_indent() {
+    if cfg!(feature = "reload") {
+      assert_display_body_eq(
+        "    {{ true }}",
+        quote!(
+          boilerplate_output.write_str(boilerplate_text[0].as_ref())?;
+          write!(
+            ::boilerplate::Formatter::new(boilerplate_output, false, "    "),
+            "{}",
+            true
+          )?;
+          boilerplate_output.write_str(boilerplate_text[1].as_ref())?;
+        ),
+      );
+    } else {
+      assert_display_body_eq(
+        "    {{ true }}",
+        quote!(
+          boilerplate_output.write_str(boilerplate_text[0].as_ref())?;
+          write!(
+            ::boilerplate::Formatter::new(boilerplate_output, false, "    "),
+            "{}",
+            true
+          )?;
+        ),
+      );
+    }
+  }
+
+  #[test]
+  fn no_escape_interpolation_line_auto_indent() {
+    if cfg!(feature = "reload") {
+      assert_display_body_eq(
+        "    $$ true\n",
+        quote!(
+          boilerplate_output.write_str(boilerplate_text[0].as_ref())?;
+          write!(
+            ::boilerplate::Formatter::new(boilerplate_output, false, "    "),
+            "{}\n",
+            true
+          )?;
+          boilerplate_output.write_str(boilerplate_text[1].as_ref())?;
+        ),
+      );
+    } else {
+      assert_display_body_eq(
+        "    $$ true\n",
+        quote!(
+          boilerplate_output.write_str(boilerplate_text[0].as_ref())?;
+          write!(
+            ::boilerplate::Formatter::new(boilerplate_output, false, "    "),
+            "{}\n",
+            true
+          )?;
+        ),
+      );
+    }
+  }
+
+  #[test]
+  fn escape_interpolation_line_auto_indent() {
+    if cfg!(feature = "reload") {
+      assert_escape_body_eq(
+        "    $$ true\n",
+        quote!(
+          boilerplate_output.write_str(boilerplate_text[0].as_ref())?;
+          (true).format(boilerplate_output, "    ", true)?;
+          boilerplate_output.write_str(boilerplate_text[1].as_ref())?;
+        ),
+      );
+    } else {
+      assert_escape_body_eq(
+        "    $$ true\n",
+        quote!(
+          boilerplate_output.write_str(boilerplate_text[0].as_ref())?;
+          (true).format(boilerplate_output, "    ", true)?;
+        ),
+      );
+    }
   }
 
   #[test]

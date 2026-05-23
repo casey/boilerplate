@@ -1,5 +1,7 @@
-watch +args='check --all':
+watch +args='lcheck --all':
   cargo watch --clear --exec '{{args}}'
+
+clippy: (watch 'lclippy --tests --all --all-targets -- --deny warnings')
 
 ci:
   cargo clippy --all --all-targets -- --deny warnings

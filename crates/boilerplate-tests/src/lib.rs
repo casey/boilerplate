@@ -8,6 +8,19 @@ struct Context {
 }
 
 #[allow(unused)]
+#[derive(boilerplate::Boilerplate)]
+#[boilerplate(
+  axum = false,
+  text = "<body>
+    {{ self.inner }}
+</body>
+"
+)]
+struct AutoIndentContext {
+  inner: &'static str,
+}
+
+#[allow(unused)]
 fn foo() {
   boilerplate::boilerplate!("Hello!");
 }

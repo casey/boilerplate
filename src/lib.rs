@@ -330,6 +330,57 @@
 //! assert_eq!(ContextHtml("&").to_string(), "&\n");
 //! ```
 //!
+//! ### Auto-Indenting Interpolations
+//!
+//! When an interpolation appears alone on an indented line — preceded only by
+//! whitespace — every internal newline in the interpolated value is followed
+//! by the same indent prefix. This lets multi-line interpolated content line
+//! up with the surrounding template:
+//!
+//! ```
+//! #[derive(boilerplate::Boilerplate)]
+//! #[boilerplate(text = "<body>
+//!     {{ self.0 }}
+//! </body>")]
+//! struct Page(&'static str);
+//!
+//! assert_eq!(
+//!   Page("line one\nline two\nline three").to_string(),
+//!   "<body>
+//!     line one
+//!     line two
+//!     line three
+//! </body>",
+//! );
+//! ```
+//!
+//! Auto-indent applies to both `{{ ... }}` and `$$ ... \n` interpolations, in
+//! both escaped and unescaped templates. An interpolation that follows other
+//! content on its line is not auto-indented.
+//!
+//! ```
+//! #[derive(boilerplate::Boilerplate)]
+//! #[boilerplate(text = "<body>
+//!     $$ self.0
+//! </body>")]
+//! struct Page(&'static str);
+//!
+//! assert_eq!(
+//!   Page("line one\nline two").to_string(),
+//!   "<body>
+//!     line one
+//!     line two
+//! </body>",
+//! );
+//! ```
+//!
+//! Indent emission is lazy: a value whose final character is `\n` does not
+//! produce a trailing indent before the next character of template text.
+//!
+//! When the `reload` feature is enabled, the indent prefix for each
+//! interpolation is captured at compile time. Reloading a template can change
+//! text but not the indentation applied to interpolations.
+//!
 //! ### Generics
 //!
 //! Context types may have lifetimes and generics;
@@ -630,6 +681,10 @@
 //! content, but with headers and footers that are common to all pages. Note
 //! the use of `boilerplate::Trusted` to prevent escaping the inner HTML:
 //!
+//! When an interpolation sits alone on an indented line, its output is
+//! automatically indented so multi-line inner content lines up with the
+//! surrounding template. See the auto-indent section below for details.
+//!
 //! ```
 //! use {
 //!   boilerplate::Trusted,
@@ -654,7 +709,9 @@
 //! struct OuterHtml<T: Page>(T);
 //!
 //! #[derive(boilerplate::Boilerplate)]
-//! #[boilerplate(text = "<div>{{ self.0 }}</div>")]
+//! #[boilerplate(text = "<div>
+//!   {{ self.0 }}
+//! </div>")]
 //! struct InnerHtml(&'static str);
 //!
 //! impl Page for InnerHtml {
@@ -671,7 +728,9 @@
 //!     <title>awesome page</title>
 //!   </head>
 //!   <body>
-//!     <div>awesome content</div>
+//!     <div>
+//!       awesome content
+//!     </div>
 //!   </body>
 //! </html>
 //! ");
@@ -683,7 +742,7 @@
 extern crate alloc;
 
 pub use {
-  self::escape::{Escape, Trusted},
+  self::format::{Format, Formatter, Trusted},
   boilerplate_macros::{boilerplate, Boilerplate},
 };
 
@@ -693,9 +752,9 @@ pub use {
   boilerplate_parser::Token,
 };
 
-use core::fmt::{self, Formatter};
+use core::fmt;
 
-mod escape;
+mod format;
 
 #[cfg(feature = "reload")]
 mod reload;
@@ -720,7 +779,7 @@ pub trait Boilerplate {
   fn boilerplate(
     &self,
     boilerplate_text: &[impl AsRef<str>],
-    boilerplate_output: &mut Formatter,
+    boilerplate_output: &mut fmt::Formatter,
   ) -> fmt::Result;
 
   #[cfg(feature = "reload")]

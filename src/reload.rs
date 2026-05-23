@@ -10,7 +10,7 @@ pub struct Reload<T> {
 }
 
 impl<T: Boilerplate> Display for Reload<&T> {
-  fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+  fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
     self.inner.boilerplate(&self.text, f)
   }
 }
@@ -36,7 +36,7 @@ pub enum Error {
 }
 
 impl Display for Error {
-  fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+  fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
     match self {
       Self::Incompatible { new, old } => {
         write!(f, "template blocks are not compatible: {new} != {old}")
