@@ -60,9 +60,7 @@ impl Write for Formatter<'_, '_> {
         self.inner.write_str(replacement)?;
       } else {
         self.inner.write_str("\n")?;
-        if !self.indent.is_empty() {
-          self.pending_indent = true;
-        }
+        self.pending_indent = true;
       }
 
       chunk_start = i + 1;
