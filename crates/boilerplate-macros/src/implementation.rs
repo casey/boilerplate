@@ -145,33 +145,33 @@ mod tests {
     assert_eq!(actual, expected);
   }
 
-  #[track_caller]
-  fn trailing_newlines(src: &str, expected: &[bool]) {
-    let tokens = Token::parse(src).unwrap();
-    let actual = tokens
-      .iter()
-      .enumerate()
-      .filter_map(|(i, token)| match token {
-        Token::Interpolation { .. } | Token::InterpolationLine { .. } => {
-          Some(has_trailing_newline(i, &tokens))
-        }
-        _ => None,
-      })
-      .collect::<Vec<bool>>();
-    assert_eq!(actual, expected);
-  }
-
   #[test]
   fn trailing_newline() {
-    trailing_newlines("{{ x }}", &[false]);
-    trailing_newlines("{{ x }}\n", &[true]);
-    trailing_newlines("{{ x }}foo", &[false]);
-    trailing_newlines("{{ x }}\nfoo", &[true]);
-    trailing_newlines("{{ x }}{{ y }}", &[false, false]);
-    trailing_newlines("{{ x }}{{ y }}\n", &[false, true]);
-    trailing_newlines("$$ x", &[false]);
-    trailing_newlines("$$ x\n", &[false]);
-    trailing_newlines("foo\n{{ x }}", &[false]);
+    #[track_caller]
+    fn case(src: &str, expected: &[bool]) {
+      let tokens = Token::parse(src).unwrap();
+      let actual = tokens
+        .iter()
+        .enumerate()
+        .filter_map(|(i, token)| match token {
+          Token::Interpolation { .. } | Token::InterpolationLine { .. } => {
+            Some(has_trailing_newline(i, &tokens))
+          }
+          _ => None,
+        })
+        .collect::<Vec<bool>>();
+      assert_eq!(actual, expected);
+    }
+
+    case("{{ x }}", &[false]);
+    case("{{ x }}\n", &[true]);
+    case("{{ x }}foo", &[false]);
+    case("{{ x }}\nfoo", &[true]);
+    case("{{ x }}{{ y }}", &[false, false]);
+    case("{{ x }}{{ y }}\n", &[false, true]);
+    case("$$ x", &[false]);
+    case("$$ x\n", &[false]);
+    case("foo\n{{ x }}", &[false]);
   }
 
   #[test]
