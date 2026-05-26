@@ -114,7 +114,7 @@ mod tests {
   use super::*;
 
   #[track_caller]
-  fn case(src: &str, expected: &[&str]) {
+  fn indentation(src: &str, expected: &[&str]) {
     let tokens = Token::parse(src).unwrap();
     let actual = tokens
       .iter()
@@ -160,60 +160,60 @@ mod tests {
 
   #[test]
   fn no_preceding_text() {
-    case("{{ x }}", &[""]);
-    case("$$ x", &[""]);
+    indentation("{{ x }}", &[""]);
+    indentation("$$ x", &[""]);
   }
 
   #[test]
   fn indented_alone_on_first_line() {
-    case("    {{ x }}", &["    "]);
-    case("    $$ x", &["    "]);
+    indentation("    {{ x }}", &["    "]);
+    indentation("    $$ x", &["    "]);
   }
 
   #[test]
   fn tab_indent() {
-    case("\t{{ x }}", &["\t"]);
+    indentation("\t{{ x }}", &["\t"]);
   }
 
   #[test]
   fn indented_after_newline() {
-    case("foo\n    {{ x }}", &["    "]);
-    case("foo\n    $$ x", &["    "]);
+    indentation("foo\n    {{ x }}", &["    "]);
+    indentation("foo\n    $$ x", &["    "]);
   }
 
   #[test]
   fn no_indent_when_text_on_line() {
-    case("prefix {{ x }}", &[""]);
-    case("foo\nprefix {{ x }}", &[""]);
+    indentation("prefix {{ x }}", &[""]);
+    indentation("foo\nprefix {{ x }}", &[""]);
   }
 
   #[test]
   fn indented_after_closed_code_line() {
-    case("%% if c {\n    {{ x }}\n%% }\n", &["    "]);
+    indentation("%% if c {\n    {{ x }}\n%% }\n", &["    "]);
   }
 
   #[test]
   fn indented_after_closed_interpolation_line() {
-    case("$$ y\n    {{ x }}", &["", "    "]);
+    indentation("$$ y\n    {{ x }}", &["", "    "]);
   }
 
   #[test]
   fn no_indent_when_preceded_by_code_block() {
-    case("    {% if c { %}{{ x }}{% } %}", &[""]);
+    indentation("    {% if c { %}{{ x }}{% } %}", &[""]);
   }
 
   #[test]
   fn no_indent_when_preceded_by_interpolation() {
-    case("    {{ a }}{{ b }}", &["    ", ""]);
+    indentation("    {{ a }}{{ b }}", &["    ", ""]);
   }
 
   #[test]
   fn multiple_interpolations() {
-    case("<body>\n  {{ a }}\n  {{ b }}\n</body>", &["  ", "  "]);
+    indentation("<body>\n  {{ a }}\n  {{ b }}\n</body>", &["  ", "  "]);
   }
 
   #[test]
   fn empty_template() {
-    case("", &[]);
+    indentation("", &[]);
   }
 }
