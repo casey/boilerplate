@@ -373,6 +373,26 @@
 //! When the `reload` feature is enabled, hot-reloading a template does not
 //! change the indentation applied to interpolations.
 //!
+//! When an interpolation is followed by `\n`, a single trailing `\n` is
+//! stripped from the value, so that a value that already ends with a newline
+//! does not produce a blank line:
+//!
+//! ```
+//! #[derive(boilerplate::Boilerplate)]
+//! #[boilerplate(text = "<body>
+//!     {{ self.0 }}
+//! </body>")]
+//! struct Page(&'static str);
+//!
+//! assert_eq!(
+//!   Page("line one\nline two\n").to_string(),
+//!   "<body>
+//!     line one
+//!     line two
+//! </body>",
+//! );
+//! ```
+//!
 //! ### Generics
 //!
 //! Context types may have lifetimes and generics;

@@ -24,3 +24,45 @@ struct AutoIndentContext {
 fn foo() {
   boilerplate::boilerplate!("Hello!");
 }
+
+#[cfg(test)]
+mod tests {
+  extern crate alloc;
+
+  use alloc::string::ToString;
+
+  #[derive(boilerplate::Boilerplate)]
+  #[boilerplate(
+    axum = false,
+    text = "<div>
+  {{ self.0 }}
+</div>
+"
+  )]
+  struct Block(&'static str);
+
+  #[derive(boilerplate::Boilerplate)]
+  #[boilerplate(
+    axum = false,
+    text = "<div>
+  $$ self.0
+</div>
+"
+  )]
+  struct Line(&'static str);
+
+  #[test]
+  fn block_and_line_are_equivalent() {
+    #[track_caller]
+    fn case(content: &'static str) {
+      assert_eq!(Block(content).to_string(), Line(content).to_string());
+    }
+
+    case("");
+    case("foo");
+    case("foo\n");
+    case("foo\nbar");
+    case("foo\nbar\n");
+    case("foo\nbar\nbaz\n");
+  }
+}

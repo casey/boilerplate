@@ -1,34 +1,55 @@
 use super::*;
 
-/// A `core::fmt::Write` adapter that optionally HTML-escapes its input and
-/// optionally append `indent` after every internal `\n`.
-pub struct Formatter<'a, 'b> {
+/// A `core::fmt::Write` adapter that optionally HTML-escapes its input,
+/// optionally appends `indent` after every internal `\n`, and optionally
+/// buffers a trailing `\n` so that it can be silently dropped on `Drop`.
+#[allow(clippy::struct_excessive_bools)]
+pub struct Formatter<'a, W: ?Sized> {
   escape: bool,
   indent: &'static str,
-  inner: &'a mut fmt::Formatter<'b>,
+  inner: &'a mut W,
   pending_indent: bool,
+  pending_newline: bool,
+  trim: bool,
 }
 
-impl<'a, 'b> Formatter<'a, 'b> {
-  pub fn new(inner: &'a mut fmt::Formatter<'b>, escape: bool, indent: &'static str) -> Self {
+impl<'a, W: Write + ?Sized> Formatter<'a, W> {
+  pub fn new(inner: &'a mut W, escape: bool, indent: &'static str, trim: bool) -> Self {
     Self {
       escape,
       indent,
       inner,
       pending_indent: false,
+      pending_newline: false,
+      trim,
     }
   }
 
-  fn flush(&mut self) -> fmt::Result {
+  fn flush_newline(&mut self) -> fmt::Result {
+    if self.pending_newline {
+      self.inner.write_str("\n")?;
+      self.pending_indent = true;
+      self.pending_newline = false;
+    }
+    Ok(())
+  }
+
+  fn flush_indent(&mut self) -> fmt::Result {
     if self.pending_indent {
       self.inner.write_str(self.indent)?;
       self.pending_indent = false;
     }
     Ok(())
   }
+
+  fn flush(&mut self) -> fmt::Result {
+    self.flush_newline()?;
+    self.flush_indent()?;
+    Ok(())
+  }
 }
 
-impl Write for Formatter<'_, '_> {
+impl<W: Write + ?Sized> Write for Formatter<'_, W> {
   fn write_str(&mut self, s: &str) -> fmt::Result {
     let mut chunk_start = 0;
 
@@ -58,6 +79,9 @@ impl Write for Formatter<'_, '_> {
       if let Some(replacement) = replacement {
         self.flush()?;
         self.inner.write_str(replacement)?;
+      } else if self.trim {
+        self.flush_newline()?;
+        self.pending_newline = true;
       } else {
         self.inner.write_str("\n")?;
         self.pending_indent = true;
@@ -88,12 +112,13 @@ mod tests {
   struct Wrapper {
     escape: bool,
     indent: &'static str,
+    trim: bool,
     value: &'static str,
   }
 
   impl Display for Wrapper {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-      let mut f = Formatter::new(f, self.escape, self.indent);
+      let mut f = Formatter::new(f, self.escape, self.indent, self.trim);
       f.write_str(self.value)
     }
   }
@@ -103,6 +128,19 @@ mod tests {
     let actual = Wrapper {
       escape,
       indent,
+      trim: false,
+      value,
+    }
+    .to_string();
+    assert_eq!(actual, expected);
+  }
+
+  #[track_caller]
+  fn trim_case(escape: bool, indent: &'static str, value: &'static str, expected: &str) {
+    let actual = Wrapper {
+      escape,
+      indent,
+      trim: true,
       value,
     }
     .to_string();
@@ -178,7 +216,7 @@ mod tests {
 
     impl Display for Sink {
       fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let mut f = Formatter::new(f, false, "  ");
+        let mut f = Formatter::new(f, false, "  ", false);
         f.write_str("a\n")?;
         f.write_str("b")?;
         f.write_str("\nc\n")?;
@@ -195,9 +233,53 @@ mod tests {
 
     impl Display for Sink {
       fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let mut f = Formatter::new(f, false, "  ");
+        let mut f = Formatter::new(f, false, "  ", false);
         f.write_str("a\n")?;
         f.write_str("b")?;
+        Ok(())
+      }
+    }
+
+    assert_eq!(Sink.to_string(), "a\n  b");
+  }
+
+  #[test]
+  fn trim_drops_trailing_newline() {
+    trim_case(false, "", "a\n", "a");
+    trim_case(false, "", "a", "a");
+    trim_case(false, "", "", "");
+    trim_case(false, "", "a\nb\n", "a\nb");
+    trim_case(false, "", "a\nb", "a\nb");
+  }
+
+  #[test]
+  fn trim_drops_only_final_newline() {
+    trim_case(false, "", "a\n\n", "a\n");
+    trim_case(false, "", "\n\n\n", "\n\n");
+  }
+
+  #[test]
+  fn trim_with_indent() {
+    trim_case(false, "  ", "a\nb\n", "a\n  b");
+    trim_case(false, "  ", "a\nb", "a\n  b");
+    trim_case(false, "  ", "a\n", "a");
+  }
+
+  #[test]
+  fn trim_with_escape() {
+    trim_case(true, "", "&\n", "&amp;");
+    trim_case(true, "  ", "a&b\n<c>\n", "a&amp;b\n  &lt;c&gt;");
+  }
+
+  #[test]
+  fn trim_split_writes() {
+    struct Sink;
+
+    impl Display for Sink {
+      fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let mut f = Formatter::new(f, false, "  ", true);
+        f.write_str("a\n")?;
+        f.write_str("b\n")?;
         Ok(())
       }
     }
