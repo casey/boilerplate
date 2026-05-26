@@ -16,22 +16,22 @@ impl<'src> Implementation<'src> {
       Token::Code { contents } | Token::CodeLine { contents, .. } => contents.into(),
       Token::Interpolation { contents } => {
         let trim = has_trailing_newline(i, tokens);
-        Self::interpolation(contents, indent, trim, false, escape, error_handler)
+        Self::interpolation(false, contents, error_handler, escape, indent, trim)
       }
       Token::InterpolationLine { contents, closed } => {
         let trim = closed || has_trailing_newline(i, tokens);
-        Self::interpolation(contents, indent, trim, closed, escape, error_handler)
+        Self::interpolation(closed, contents, error_handler, escape, indent, trim)
       }
     }
   }
 
   fn interpolation(
+    append_newline: bool,
     contents: &str,
+    error_handler: &str,
+    escape: bool,
     indent: &str,
     trim: bool,
-    append_newline: bool,
-    escape: bool,
-    error_handler: &str,
   ) -> String {
     let write = if escape {
       format!("({contents}).format(boilerplate_output, \"{indent}\", {trim}){error_handler} ;")
@@ -43,6 +43,7 @@ impl<'src> Implementation<'src> {
         \"{{}}\", {contents}){error_handler} ;"
       )
     };
+
     if append_newline {
       format!("{write} boilerplate_output.write_str(\"\\n\"){error_handler} ;")
     } else {
