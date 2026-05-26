@@ -15,11 +15,11 @@ impl<'src> Implementation<'src> {
       }
       Token::Code { contents } | Token::CodeLine { contents, .. } => contents.into(),
       Token::Interpolation { contents } => {
-        let trim = followed_by_newline(i, tokens);
+        let trim = has_trailing_newline(i, tokens);
         Self::interpolation(contents, indent, trim, false, escape, error_handler)
       }
       Token::InterpolationLine { contents, closed } => {
-        let trim = closed || followed_by_newline(i, tokens);
+        let trim = closed || has_trailing_newline(i, tokens);
         Self::interpolation(contents, indent, trim, closed, escape, error_handler)
       }
     }
@@ -70,7 +70,7 @@ impl<'src> Implementation<'src> {
   }
 }
 
-fn followed_by_newline(i: usize, tokens: &[Token]) -> bool {
+fn has_trailing_newline(i: usize, tokens: &[Token]) -> bool {
   matches!(
     tokens.get(i + 1),
     Some(Token::Text { contents, .. }) if contents.starts_with('\n'),
@@ -136,7 +136,7 @@ mod tests {
       .enumerate()
       .filter_map(|(i, token)| match token {
         Token::Interpolation { .. } | Token::InterpolationLine { .. } => {
-          Some(followed_by_newline(i, &tokens))
+          Some(has_trailing_newline(i, &tokens))
         }
         _ => None,
       })
