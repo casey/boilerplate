@@ -373,9 +373,9 @@
 //! When the `reload` feature is enabled, hot-reloading a template does not
 //! change the indentation applied to interpolations.
 //!
-//! When an interpolation is followed by `\n` in the template, a single
-//! trailing `\n` is stripped from the interpolated value, so that a value
-//! that already ends with a newline does not produce a blank line:
+//! When an interpolation is followed by `\n`, a single trailing `\n` is
+//! stripped from the value, so that a value that already ends with a newline
+//! does not produce a blank line:
 //!
 //! ```
 //! #[derive(boilerplate::Boilerplate)]
