@@ -52,17 +52,17 @@ mod tests {
   struct Line(&'static str);
 
   #[track_caller]
-  fn equivalent(content: &'static str) {
+  fn case(content: &'static str) {
     assert_eq!(Block(content).to_string(), Line(content).to_string());
   }
 
   #[test]
   fn block_and_line_are_equivalent() {
-    equivalent("");
-    equivalent("foo");
-    equivalent("foo\n");
-    equivalent("foo\nbar");
-    equivalent("foo\nbar\n");
-    equivalent("foo\nbar\nbaz\n");
+    case("");
+    case("foo");
+    case("foo\n");
+    case("foo\nbar");
+    case("foo\nbar\n");
+    case("foo\nbar\nbaz\n");
   }
 }
