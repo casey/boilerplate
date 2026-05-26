@@ -33,22 +33,38 @@ impl<'src> Implementation<'src> {
     indent: &str,
     trim: bool,
   ) -> String {
-    let write = if escape {
-      format!("({contents}).format(boilerplate_output, \"{indent}\", {trim}){error_handler} ;")
-    } else if indent.is_empty() && !trim {
-      format!("write!(boilerplate_output, \"{{}}\", {contents}){error_handler} ;")
-    } else {
-      format!(
-        "write!(::boilerplate::Formatter::new(boilerplate_output, false, \"{indent}\", {trim}), \
-        \"{{}}\", {contents}){error_handler} ;"
+    use std::fmt::Write;
+
+    let mut output = String::new();
+
+    if escape {
+      write!(
+        output,
+        "({contents}).format(boilerplate_output, \"{indent}\", {trim})"
       )
-    };
+      .unwrap();
+    } else if indent.is_empty() && !trim {
+      write!(output, "write!(boilerplate_output, \"{{}}\", {contents})").unwrap();
+    } else {
+      write!(
+        output,
+        "write!(::boilerplate::Formatter::new(boilerplate_output, false, \"{indent}\", {trim}), \
+        \"{{}}\", {contents})"
+      )
+      .unwrap();
+    }
+
+    write!(output, "{error_handler} ;").unwrap();
 
     if append_newline {
-      format!("{write} boilerplate_output.write_str(\"\\n\"){error_handler} ;")
-    } else {
-      write
+      write!(
+        output,
+        " boilerplate_output.write_str(\"\\n\"){error_handler} ;"
+      )
+      .unwrap();
     }
+
+    output
   }
 
   pub(crate) fn parse(src: &'src str, escape: bool, function: bool) -> Self {
