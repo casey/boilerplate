@@ -51,13 +51,13 @@ mod tests {
   )]
   struct Line(&'static str);
 
-  #[track_caller]
-  fn case(content: &'static str) {
-    assert_eq!(Block(content).to_string(), Line(content).to_string());
-  }
-
   #[test]
   fn block_and_line_are_equivalent() {
+    #[track_caller]
+    fn case(content: &'static str) {
+      assert_eq!(Block(content).to_string(), Line(content).to_string());
+    }
+
     case("");
     case("foo");
     case("foo\n");
