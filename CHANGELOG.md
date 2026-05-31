@@ -1,6 +1,18 @@
 Changelog
 =========
 
+[1.2.0](https://github.com/casey/boilerplate/releases/tag/1.2.0) - 2026-05-31
+-----------------------------------------------------------------------------
+
+### Changed
+
+- Strip trailing newline from interpolations ([#69](https://github.com/casey/filepack/pull/69) by [casey](https://github.com/casey))
+- Auto-indent interpolations ([#68](https://github.com/casey/filepack/pull/68) by [casey](https://github.com/casey))
+
+### Misc
+
+- Add changelog ([#70](https://github.com/casey/filepack/pull/70) by [casey](https://github.com/casey))
+
 [1.1.1](https://github.com/casey/boilerplate/releases/tag/1.1.1) - 2025-12-10
 -----------------------------------------------------------------------------
 
