@@ -37,3 +37,6 @@ unused:
 update-changelog:
   echo >> CHANGELOG.md
   git log --pretty='format:- %s' >> CHANGELOG.md
+
+update-contributors:
+  cargo run --release --package update-contributors
