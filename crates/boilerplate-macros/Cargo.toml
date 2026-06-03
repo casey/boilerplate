@@ -1,6 +1,6 @@
 [package]
 name = "boilerplate-macros"
-version = "0.0.2"
+version = "0.0.3"
 description = "Minimal compile-time Rust template engine macros"
 authors.workspace = true
 categories.workspace = true
