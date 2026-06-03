@@ -133,12 +133,13 @@ See [the docs](https://docs.rs/boilerplate/latest/boilerplate/) for more informa
 Syntax Highlighting
 -------------------
 
-This repository contains a Vim plugin for boilerplate syntax highlighting.
+This repository contains a Vim plugin for boilerplate syntax highlighting, in
+the `vim` subdirectory.
 
 To install it with `vim-plug`:
 
 ```vim
-Plug 'casey/boilerplate'
+Plug 'casey/boilerplate', { 'rtp': 'vim' }
 ```
 
 Highlighting is enabled with the `:Boilerplate` command, rather than
