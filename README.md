@@ -129,3 +129,19 @@ Examples
 --------
 
 See [the docs](https://docs.rs/boilerplate/latest/boilerplate/) for more information and examples.
+
+Syntax Highlighting
+-------------------
+
+This repository contains a Vim plugin for boilerplate syntax highlighting.
+
+To install it with `vim-plug`:
+
+```vim
+Plug 'casey/boilerplate'
+```
+
+Highlighting is enabled with the `:Boilerplate` command, rather than
+automatically, since boilerplate templates do not have a unique extension.
+
+See `:help boilerplate` for more information.

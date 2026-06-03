@@ -5,6 +5,9 @@ clippy: (watch 'lclippy --tests --all --all-targets -- --deny warnings')
 
 test: (watch 'ltest --all')
 
+vim-test:
+  nvim --headless -u doc/test.vim
+
 ci:
   cargo clippy --all --all-targets -- --deny warnings
   cargo fmt --all -- --check
