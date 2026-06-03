@@ -1,12 +1,15 @@
 watch +args='lcheck --all':
-  cargo watch --clear --exec '{{args}}'
+  cargo watch --clear --exec '{{ args }}'
 
 clippy: (watch 'lclippy --tests --all --all-targets -- --deny warnings')
 
 test: (watch 'ltest --all')
 
 vim-test:
-  nvim --headless -u doc/test.vim
+  nvim --headless -u vim/test/highlight.vim
+
+vim-demo:
+  nvim --cmd 'set rtp^={{ justfile_directory() }}/vim' -c Boilerplate vim/test/demo.html
 
 ci:
   cargo clippy --all --all-targets -- --deny warnings
@@ -17,7 +20,6 @@ ci:
   cargo build --target thumbv6m-none-eabi --package boilerplate
   cargo build --target thumbv6m-none-eabi --package boilerplate-tests
 
-# publish current GitHub master branch
 publish:
   #!/usr/bin/env bash
   set -euxo pipefail

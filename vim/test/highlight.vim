@@ -2,12 +2,12 @@
 "
 " Run headless:
 "
-"   nvim --headless -u doc/test.vim
+"   nvim --headless -u vim/test/highlight.vim
 "
 " Exits 0 on success, 1 on failure, printing any failures.
 
 set nocompatible
-execute 'set runtimepath^=' . getcwd()
+execute 'set runtimepath^=' . expand('<sfile>:p:h:h')
 syntax on
 runtime plugin/boilerplate.vim
 
