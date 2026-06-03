@@ -751,7 +751,7 @@ extern crate alloc;
 
 pub use {
   self::{boilerplate::Boilerplate, trusted::Trusted},
-  boilerplate_macros::{boilerplate, Boilerplate},
+  boilerplate_macros::{Boilerplate, boilerplate},
 };
 
 #[cfg(feature = "reload")]

@@ -152,12 +152,11 @@ impl<'src> Token<'src> {
       }
     }
 
-    if let Self::InterpolationLine { closed, .. } = self {
-      if let Self::InterpolationLine { closed: other, .. } = other {
-        if closed != other {
-          return false;
-        }
-      }
+    if let Self::InterpolationLine { closed, .. } = self
+      && let Self::InterpolationLine { closed: other, .. } = other
+      && closed != other
+    {
+      return false;
     }
 
     true
@@ -175,7 +174,7 @@ impl<'src> Token<'src> {
 
 #[cfg(test)]
 mod tests {
-  use {super::*, pretty_assertions::assert_eq, Token::*};
+  use {super::*, Token::*, pretty_assertions::assert_eq};
 
   #[test]
   fn compatibility() {
