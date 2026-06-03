@@ -69,6 +69,13 @@ call assert_match('^rust', s:name(4, 6), 'let is rust inside code line')
 call assert_true(s:has(s:stack(5, 11), 'boilerplateInterpolationLine'), 'interpolation line region')
 call assert_match('^rust', s:name(5, 11), 'self is rust inside interpolation line')
 
+" blocks are italicized with a background by default (Neovim only)
+if has('nvim')
+  let s:hl = nvim_get_hl(0, {'name': 'boilerplateInterpolation'})
+  call assert_equal(v:true, get(s:hl, 'italic', v:false), 'blocks italic by default')
+  call assert_true(has_key(s:hl, 'bg'), 'blocks have a background by default')
+endif
+
 " toggling off restores the host syntax.
 Boilerplate
 call assert_equal('html', &syntax, 'syntax restored to host after toggle off')

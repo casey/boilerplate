@@ -16,10 +16,23 @@ function! s:boilerplate(host) abort
   if &l:syntax ==# 'boilerplate'
     unlet! b:boilerplate_subtype
     let &l:syntax = &l:filetype
+    if has('nvim')
+      lua require('boilerplate').unstyle()
+    endif
   else
     let b:boilerplate_subtype = a:host !=# '' ? a:host : &l:filetype
     setlocal syntax=boilerplate
+    if has('nvim')
+      lua require('boilerplate').style()
+    endif
   endif
 endfunction
 
 command! -nargs=? -complete=syntax Boilerplate call s:boilerplate(<q-args>)
+
+if has('nvim')
+  augroup boilerplate
+    autocmd!
+    autocmd ColorScheme * lua require('boilerplate').restyle()
+  augroup END
+endif
