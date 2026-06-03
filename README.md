@@ -144,4 +144,4 @@ Plug 'casey/boilerplate'
 Highlighting is enabled with the `:Boilerplate` command, rather than
 automatically, since boilerplate templates do not have a unique extension.
 
-See `:help boilerplate` for usage.
+See `:help boilerplate` for more information.

@@ -8,7 +8,7 @@ edition.workspace = true
 homepage.workspace = true
 license.workspace = true
 repository.workspace = true
-exclude = ["/doc", "/plugin", "/syntax", "/test"]
+exclude = ["/doc", "/plugin", "/syntax"]
 
 [dependencies]
 boilerplate-macros = { version = "0.0.3", path = "crates/boilerplate-macros" }

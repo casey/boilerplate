@@ -2,7 +2,7 @@
 "
 " Run headless:
 "
-"   nvim --headless -u test/highlight.vim
+"   nvim --headless -u doc/test.vim
 "
 " Exits 0 on success, 1 on failure, printing any failures.
 
