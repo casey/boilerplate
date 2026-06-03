@@ -80,7 +80,7 @@ dependencies = [
 
 [[package]]
 name = "boilerplate-macros"
-version = "0.0.2"
+version = "0.0.3"
 dependencies = [
  "boilerplate-parser",
  "darling",
@@ -95,7 +95,7 @@ dependencies = [
 
 [[package]]
 name = "boilerplate-parser"
-version = "0.0.0"
+version = "0.0.1"
 dependencies = [
  "pretty_assertions",
 ]
