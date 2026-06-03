@@ -14,6 +14,7 @@ exclude = [
   "/bin",
   "/doc",
   "/justfile",
+  "/lua",
   "/plugin",
   "/rustfmt.toml",
   "/syntax",
