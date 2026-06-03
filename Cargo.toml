@@ -1,6 +1,6 @@
 [package]
 name = "boilerplate"
-version = "1.2.0"
+version = "1.2.1"
 description = "Minimal compile-time Rust template engine"
 authors.workspace = true
 categories.workspace = true
