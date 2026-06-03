@@ -1,6 +1,11 @@
 Changelog
 =========
 
+[1.2.1](https://github.com/casey/boilerplate/releases/tag/1.2.1) - 2026-06-02
+-----------------------------------------------------------------------------
+
+- Bump Rust edition to 2024 ([#72](https://github.com/casey/filepack/pull/72) by [casey](https://github.com/casey))
+
 [1.2.0](https://github.com/casey/boilerplate/releases/tag/1.2.0) - 2026-05-31
 -----------------------------------------------------------------------------
 
