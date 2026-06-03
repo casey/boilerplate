@@ -48,7 +48,7 @@ mismatched-lifetime-syntaxes = "allow"
 [workspace.package]
 authors = ["Casey Rodarmor <casey@rodarmor.com>"]
 categories = ["template-engine", "no-std"]
-edition = "2021"
+edition = "2024"
 homepage = "https://github.com/casey/boilerplate"
 license = "CC0-1.0"
 repository = "https://github.com/casey/boilerplate"
