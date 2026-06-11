@@ -44,4 +44,4 @@ update-changelog:
   git log --pretty='format:- %s' >> CHANGELOG.md
 
 update-contributors:
-  cargo run --release --package update-contributors
+  changeling update-contributors
