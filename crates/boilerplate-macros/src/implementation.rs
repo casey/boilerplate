@@ -40,7 +40,7 @@ impl<'src> Implementation<'src> {
     if escape {
       write!(
         output,
-        "({contents}).format(boilerplate_output, \"{indent}\", {trim})"
+        " ::boilerplate::Format::format(&({contents}), boilerplate_output, \"{indent}\", {trim})"
       )
       .unwrap();
     } else if indent.is_empty() && !trim {

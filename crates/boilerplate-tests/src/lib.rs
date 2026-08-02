@@ -52,6 +52,32 @@ mod tests {
   struct Line(&'static str);
 
   #[test]
+  fn inherent_format_method_does_not_shadow_escaped_interpolation() {
+    use core::fmt::{self, Display};
+
+    struct Foo;
+
+    impl Foo {
+      #[allow(unused, clippy::unused_self)]
+      fn format(&self, _: &str) {
+        unreachable!()
+      }
+    }
+
+    impl Display for Foo {
+      fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "&")
+      }
+    }
+
+    #[derive(boilerplate::Boilerplate)]
+    #[boilerplate(axum = false, text = "{{ self.0 }}")]
+    struct ContextHtml(Foo);
+
+    assert_eq!(ContextHtml(Foo).to_string(), "&amp;");
+  }
+
+  #[test]
   fn block_and_line_are_equivalent() {
     #[track_caller]
     fn case(content: &'static str) {

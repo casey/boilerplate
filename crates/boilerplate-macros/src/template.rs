@@ -305,7 +305,7 @@ mod tests {
         "{{ true }}",
         quote!(
           boilerplate_output.write_str(boilerplate_text[0].as_ref())?;
-          (true).format(boilerplate_output, "", false)?;
+          ::boilerplate::Format::format(&(true), boilerplate_output, "", false)?;
           boilerplate_output.write_str(boilerplate_text[1].as_ref())?;
         ),
       );
@@ -313,7 +313,7 @@ mod tests {
       assert_escape_body_eq(
         "{{ true }}",
         quote!(
-          (true).format(boilerplate_output, "", false)?;
+          ::boilerplate::Format::format(&(true), boilerplate_output, "", false)?;
         ),
       );
     }
@@ -326,7 +326,7 @@ mod tests {
         "    {{ true }}",
         quote!(
           boilerplate_output.write_str(boilerplate_text[0].as_ref())?;
-          (true).format(boilerplate_output, "    ", false)?;
+          ::boilerplate::Format::format(&(true), boilerplate_output, "    ", false)?;
           boilerplate_output.write_str(boilerplate_text[1].as_ref())?;
         ),
       );
@@ -335,7 +335,7 @@ mod tests {
         "    {{ true }}",
         quote!(
           boilerplate_output.write_str(boilerplate_text[0].as_ref())?;
-          (true).format(boilerplate_output, "    ", false)?;
+          ::boilerplate::Format::format(&(true), boilerplate_output, "    ", false)?;
         ),
       );
     }
@@ -410,7 +410,7 @@ mod tests {
         "    $$ true\n",
         quote!(
           boilerplate_output.write_str(boilerplate_text[0].as_ref())?;
-          (true).format(boilerplate_output, "    ", true)?;
+          ::boilerplate::Format::format(&(true), boilerplate_output, "    ", true)?;
           boilerplate_output.write_str("\n")?;
           boilerplate_output.write_str(boilerplate_text[1].as_ref())?;
         ),
@@ -420,7 +420,7 @@ mod tests {
         "    $$ true\n",
         quote!(
           boilerplate_output.write_str(boilerplate_text[0].as_ref())?;
-          (true).format(boilerplate_output, "    ", true)?;
+          ::boilerplate::Format::format(&(true), boilerplate_output, "    ", true)?;
           boilerplate_output.write_str("\n")?;
         ),
       );
