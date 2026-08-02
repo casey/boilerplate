@@ -1,6 +1,6 @@
 [package]
 name = "boilerplate"
-version = "1.2.1"
+version = "1.2.2"
 description = "Minimal compile-time Rust template engine"
 authors.workspace = true
 categories.workspace = true
@@ -18,7 +18,7 @@ exclude = [
 ]
 
 [dependencies]
-boilerplate-macros = { version = "0.0.3", path = "crates/boilerplate-macros" }
+boilerplate-macros = { version = "0.0.4", path = "crates/boilerplate-macros" }
 boilerplate-parser = { version = "0.0.1", path = "crates/boilerplate-parser", optional = true }
 
 [dev-dependencies]

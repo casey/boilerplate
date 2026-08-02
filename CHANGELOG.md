@@ -1,6 +1,23 @@
 Changelog
 =========
 
+[1.2.2](https://github.com/casey/boilerplate/releases/tag/1.2.2) - 2026-08-02
+-----------------------------------------------------------------------------
+
+### Fixed
+- Call `Format::format()` in UFCS form ([#79](https://github.com/casey/boilerplate/pull/79) by [casey](https://github.com/casey))
+
+### Added
+- Add vim syntax highlighting plugin ([#75](https://github.com/casey/boilerplate/pull/75) by [casey](https://github.com/casey))
+
+### Changed
+- Move vim plugin into subdirectory ([#77](https://github.com/casey/boilerplate/pull/77) by [casey](https://github.com/casey))
+
+### Misc
+- Fix changelog links ([#78](https://github.com/casey/boilerplate/pull/78) by [casey](https://github.com/casey))
+- Show syntax highlighted Rust in italic with a background color ([#76](https://github.com/casey/boilerplate/pull/76) by [casey](https://github.com/casey))
+- Bump `boilerplate-macros` and `boilerplate-parser` versions ([#74](https://github.com/casey/boilerplate/pull/74) by [casey](https://github.com/casey))
+
 [1.2.1](https://github.com/casey/boilerplate/releases/tag/1.2.1) - 2026-06-02
 -----------------------------------------------------------------------------
 
