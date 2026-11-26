@@ -1,6 +1,12 @@
 Changelog
 =========
 
+[1.3.0](https://github.com/casey/boilerplate/releases/tag/1.3.0) - 2026-11-25
+-----------------------------------------------------------------------------
+
+### Changed
+- Don't reformat template output ([#81](https://github.com/casey/boilerplate/pull/81) by [casey](https://github.com/casey))
+
 [1.2.2](https://github.com/casey/boilerplate/releases/tag/1.2.2) - 2026-08-02
 -----------------------------------------------------------------------------
 
