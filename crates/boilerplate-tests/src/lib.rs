@@ -8,19 +8,6 @@ struct Context {
 }
 
 #[allow(unused)]
-#[derive(boilerplate::Boilerplate)]
-#[boilerplate(
-  axum = false,
-  text = "<body>
-    {{ self.inner }}
-</body>
-"
-)]
-struct AutoIndentContext {
-  inner: &'static str,
-}
-
-#[allow(unused)]
 fn foo() {
   boilerplate::boilerplate!("Hello!");
 }
@@ -31,35 +18,15 @@ mod tests {
 
   use alloc::string::ToString;
 
-  #[derive(boilerplate::Boilerplate)]
-  #[boilerplate(
-    axum = false,
-    text = "<div>
-  {{ self.0 }}
-</div>
-"
-  )]
-  struct Block(&'static str);
-
-  #[derive(boilerplate::Boilerplate)]
-  #[boilerplate(
-    axum = false,
-    text = "<div>
-  $$ self.0
-</div>
-"
-  )]
-  struct Line(&'static str);
-
   #[test]
-  fn inherent_format_method_does_not_shadow_escaped_interpolation() {
+  fn inherent_escape_method_does_not_shadow_escaped_interpolation() {
     use core::fmt::{self, Display};
 
     struct Foo;
 
     impl Foo {
       #[allow(unused, clippy::unused_self)]
-      fn format(&self, _: &str) {
+      fn escape(&self, _: &str) {
         unreachable!()
       }
     }
@@ -75,20 +42,5 @@ mod tests {
     struct ContextHtml(Foo);
 
     assert_eq!(ContextHtml(Foo).to_string(), "&amp;");
-  }
-
-  #[test]
-  fn block_and_line_are_equivalent() {
-    #[track_caller]
-    fn case(content: &'static str) {
-      assert_eq!(Block(content).to_string(), Line(content).to_string());
-    }
-
-    case("");
-    case("foo");
-    case("foo\n");
-    case("foo\nbar");
-    case("foo\nbar\n");
-    case("foo\nbar\nbaz\n");
   }
 }

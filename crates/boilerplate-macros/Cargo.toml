@@ -5,7 +5,6 @@ description = "Minimal compile-time Rust template engine macros"
 authors.workspace = true
 categories.workspace = true
 edition.workspace = true
-homepage.workspace = true
 license.workspace = true
 repository.workspace = true
 
@@ -23,7 +22,6 @@ syn = { version = "2.0.23", features = ["derive"] }
 
 [dev-dependencies]
 pretty_assertions.workspace = true
-unindent = "0.2.3"
 
 [features]
 axum = []

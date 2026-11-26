@@ -68,10 +68,7 @@ impl<'src> Token<'src> {
           Some(Token::Code { .. } | Token::CodeLine { .. }),
         );
 
-        let current_is_code = matches! {
-          block,
-          Block::Code | Block::CodeLine,
-        };
+        let current_is_code = matches!(block, Block::Code | Block::CodeLine);
 
         tokens.is_empty() || !(previous_is_code && current_is_code)
       } else {

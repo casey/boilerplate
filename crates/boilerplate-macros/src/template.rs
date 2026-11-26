@@ -59,8 +59,6 @@ impl Template {
           boilerplate_text: &[impl ::core::convert::AsRef<str>],
           boilerplate_output: &mut ::core::fmt::Formatter,
         ) -> ::core::fmt::Result {
-          use ::core::fmt::Write;
-          use ::boilerplate::Format;
           #body
           Ok(())
         }
@@ -87,10 +85,9 @@ impl Template {
       impl #impl_generics ::axum::response::IntoResponse for #ident #ty_generics #where_clause {
         fn into_response(self) -> ::axum::response::Response {
           extern crate alloc;
-          use alloc::string::ToString;
           (
             [(::axum::http::header::CONTENT_TYPE, #content_type)],
-            self.to_string(),
+            alloc::string::ToString::to_string(&self),
           ).into_response()
         }
       }
@@ -119,7 +116,9 @@ mod tests {
     };
 
     let body = if cfg!(feature = "reload") {
-      Some(quote!(boilerplate_output.write_str(boilerplate_text[0].as_ref())?;))
+      Some(
+        quote!(::core::fmt::Write::write_str(boilerplate_output, boilerplate_text[0].as_ref())?;),
+      )
     } else {
       None
     };
@@ -148,8 +147,6 @@ mod tests {
               boilerplate_text: &[impl ::core::convert::AsRef<str>],
               boilerplate_output: &mut ::core::fmt::Formatter,
             ) -> ::core::fmt::Result {
-              use ::core::fmt::Write;
-              use ::boilerplate::Format;
               #body
               Ok(())
             }
@@ -193,7 +190,7 @@ mod tests {
       assert_display_body_eq(
         "",
         quote!(
-          boilerplate_output.write_str(boilerplate_text[0].as_ref())?;
+          ::core::fmt::Write::write_str(boilerplate_output, boilerplate_text[0].as_ref())?;
         ),
       );
     } else {
@@ -207,9 +204,9 @@ mod tests {
       assert_display_body_eq(
         "{% (); %}",
         quote!(
-          boilerplate_output.write_str(boilerplate_text[0].as_ref())?;
+          ::core::fmt::Write::write_str(boilerplate_output, boilerplate_text[0].as_ref())?;
           ();
-          boilerplate_output.write_str(boilerplate_text[1].as_ref())?;
+          ::core::fmt::Write::write_str(boilerplate_output, boilerplate_text[1].as_ref())?;
         ),
       );
     } else {
@@ -228,16 +225,16 @@ mod tests {
       assert_display_body_eq(
         "{{ true }}",
         quote!(
-          boilerplate_output.write_str(boilerplate_text[0].as_ref())?;
-          write!(boilerplate_output, "{}", true)?;
-          boilerplate_output.write_str(boilerplate_text[1].as_ref())?;
+          ::core::fmt::Write::write_str(boilerplate_output, boilerplate_text[0].as_ref())?;
+          ::core::fmt::Write::write_fmt(boilerplate_output, ::core::format_args!("{}", true))?;
+          ::core::fmt::Write::write_str(boilerplate_output, boilerplate_text[1].as_ref())?;
         ),
       );
     } else {
       assert_display_body_eq(
         "{{ true }}",
         quote!(
-          write!(boilerplate_output, "{}", true)?;
+          ::core::fmt::Write::write_fmt(boilerplate_output, ::core::format_args!("{}", true))?;
         ),
       );
     }
@@ -249,20 +246,20 @@ mod tests {
       assert_display_body_eq(
         "{% for i in 0..10 { %}{{ i }}{% } %}",
         quote!(
-          boilerplate_output.write_str(boilerplate_text[0].as_ref())?;
+          ::core::fmt::Write::write_str(boilerplate_output, boilerplate_text[0].as_ref())?;
           for i in 0..10 {
-            boilerplate_output.write_str(boilerplate_text[1].as_ref())?;
-            write!(boilerplate_output, "{}", i)?;
-            boilerplate_output.write_str(boilerplate_text[2].as_ref())?;
+            ::core::fmt::Write::write_str(boilerplate_output, boilerplate_text[1].as_ref())?;
+            ::core::fmt::Write::write_fmt(boilerplate_output, ::core::format_args!("{}", i))?;
+            ::core::fmt::Write::write_str(boilerplate_output, boilerplate_text[2].as_ref())?;
           }
-          boilerplate_output.write_str(boilerplate_text[3].as_ref())?;
+          ::core::fmt::Write::write_str(boilerplate_output, boilerplate_text[3].as_ref())?;
         ),
       );
     } else {
       assert_display_body_eq(
         "{% for i in 0..10 { %}{{ i }}{% } %}",
         quote!(for i in 0..10 {
-          write!(boilerplate_output, "{}", i)?;
+          ::core::fmt::Write::write_fmt(boilerplate_output, ::core::format_args!("{}", i))?;
         }),
       );
     }
@@ -274,17 +271,17 @@ mod tests {
       assert_display_body_eq(
         "foo {{ true }}",
         quote!(
-          boilerplate_output.write_str(boilerplate_text[0].as_ref())?;
-          write!(boilerplate_output, "{}", true)?;
-          boilerplate_output.write_str(boilerplate_text[1].as_ref())?;
+          ::core::fmt::Write::write_str(boilerplate_output, boilerplate_text[0].as_ref())?;
+          ::core::fmt::Write::write_fmt(boilerplate_output, ::core::format_args!("{}", true))?;
+          ::core::fmt::Write::write_str(boilerplate_output, boilerplate_text[1].as_ref())?;
         ),
       );
     } else {
       assert_display_body_eq(
         "foo {{ true }}",
         quote!(
-          boilerplate_output.write_str(boilerplate_text[0].as_ref())?;
-          write!(boilerplate_output, "{}", true)?;
+          ::core::fmt::Write::write_str(boilerplate_output, boilerplate_text[0].as_ref())?;
+          ::core::fmt::Write::write_fmt(boilerplate_output, ::core::format_args!("{}", true))?;
         ),
       );
     }
@@ -294,7 +291,7 @@ mod tests {
   fn trailing_text() {
     assert_display_body_eq(
       "foo",
-      quote!(boilerplate_output.write_str(boilerplate_text[0].as_ref())?;),
+      quote!(::core::fmt::Write::write_str(boilerplate_output, boilerplate_text[0].as_ref())?;),
     );
   }
 
@@ -304,124 +301,16 @@ mod tests {
       assert_escape_body_eq(
         "{{ true }}",
         quote!(
-          boilerplate_output.write_str(boilerplate_text[0].as_ref())?;
-          ::boilerplate::Format::format(&(true), boilerplate_output, "", false)?;
-          boilerplate_output.write_str(boilerplate_text[1].as_ref())?;
+          ::core::fmt::Write::write_str(boilerplate_output, boilerplate_text[0].as_ref())?;
+          ::boilerplate::Escape::escape(&(true), boilerplate_output)?;
+          ::core::fmt::Write::write_str(boilerplate_output, boilerplate_text[1].as_ref())?;
         ),
       );
     } else {
       assert_escape_body_eq(
         "{{ true }}",
         quote!(
-          ::boilerplate::Format::format(&(true), boilerplate_output, "", false)?;
-        ),
-      );
-    }
-  }
-
-  #[test]
-  fn escape_interpolation_auto_indent() {
-    if cfg!(feature = "reload") {
-      assert_escape_body_eq(
-        "    {{ true }}",
-        quote!(
-          boilerplate_output.write_str(boilerplate_text[0].as_ref())?;
-          ::boilerplate::Format::format(&(true), boilerplate_output, "    ", false)?;
-          boilerplate_output.write_str(boilerplate_text[1].as_ref())?;
-        ),
-      );
-    } else {
-      assert_escape_body_eq(
-        "    {{ true }}",
-        quote!(
-          boilerplate_output.write_str(boilerplate_text[0].as_ref())?;
-          ::boilerplate::Format::format(&(true), boilerplate_output, "    ", false)?;
-        ),
-      );
-    }
-  }
-
-  #[test]
-  fn no_escape_interpolation_auto_indent() {
-    if cfg!(feature = "reload") {
-      assert_display_body_eq(
-        "    {{ true }}",
-        quote!(
-          boilerplate_output.write_str(boilerplate_text[0].as_ref())?;
-          write!(
-            ::boilerplate::Formatter::new(boilerplate_output, false, "    ", false),
-            "{}",
-            true
-          )?;
-          boilerplate_output.write_str(boilerplate_text[1].as_ref())?;
-        ),
-      );
-    } else {
-      assert_display_body_eq(
-        "    {{ true }}",
-        quote!(
-          boilerplate_output.write_str(boilerplate_text[0].as_ref())?;
-          write!(
-            ::boilerplate::Formatter::new(boilerplate_output, false, "    ", false),
-            "{}",
-            true
-          )?;
-        ),
-      );
-    }
-  }
-
-  #[test]
-  fn no_escape_interpolation_line_auto_indent() {
-    if cfg!(feature = "reload") {
-      assert_display_body_eq(
-        "    $$ true\n",
-        quote!(
-          boilerplate_output.write_str(boilerplate_text[0].as_ref())?;
-          write!(
-            ::boilerplate::Formatter::new(boilerplate_output, false, "    ", true),
-            "{}",
-            true
-          )?;
-          boilerplate_output.write_str("\n")?;
-          boilerplate_output.write_str(boilerplate_text[1].as_ref())?;
-        ),
-      );
-    } else {
-      assert_display_body_eq(
-        "    $$ true\n",
-        quote!(
-          boilerplate_output.write_str(boilerplate_text[0].as_ref())?;
-          write!(
-            ::boilerplate::Formatter::new(boilerplate_output, false, "    ", true),
-            "{}",
-            true
-          )?;
-          boilerplate_output.write_str("\n")?;
-        ),
-      );
-    }
-  }
-
-  #[test]
-  fn escape_interpolation_line_auto_indent() {
-    if cfg!(feature = "reload") {
-      assert_escape_body_eq(
-        "    $$ true\n",
-        quote!(
-          boilerplate_output.write_str(boilerplate_text[0].as_ref())?;
-          ::boilerplate::Format::format(&(true), boilerplate_output, "    ", true)?;
-          boilerplate_output.write_str("\n")?;
-          boilerplate_output.write_str(boilerplate_text[1].as_ref())?;
-        ),
-      );
-    } else {
-      assert_escape_body_eq(
-        "    $$ true\n",
-        quote!(
-          boilerplate_output.write_str(boilerplate_text[0].as_ref())?;
-          ::boilerplate::Format::format(&(true), boilerplate_output, "    ", true)?;
-          boilerplate_output.write_str("\n")?;
+          ::boilerplate::Escape::escape(&(true), boilerplate_output)?;
         ),
       );
     }
@@ -444,11 +333,9 @@ mod tests {
         impl ::axum::response::IntoResponse for Foo {
           fn into_response(self) -> ::axum::response::Response {
             extern crate alloc;
-            use alloc::string::ToString;
-
             (
               [(::axum::http::header::CONTENT_TYPE, "text/plain")],
-              self.to_string(),
+              alloc::string::ToString::to_string(&self),
             ).into_response()
           }
         }

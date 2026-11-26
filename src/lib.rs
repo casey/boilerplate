@@ -330,69 +330,6 @@
 //! assert_eq!(ContextHtml("&").to_string(), "&\n");
 //! ```
 //!
-//! ### Auto-indenting
-//!
-//! When an interpolation appears on a line preceded only by whitespace, that
-//! whitespace is prepended to every line of the interpolated content:
-//!
-//! ```
-//! #[derive(boilerplate::Boilerplate)]
-//! #[boilerplate(text = "<body>
-//!     {{ self.0 }}
-//! </body>")]
-//! struct Page(&'static str);
-//!
-//! assert_eq!(
-//!   Page("line one\nline two\nline three").to_string(),
-//!   "<body>
-//!     line one
-//!     line two
-//!     line three
-//! </body>",
-//! );
-//! ```
-//!
-//! Auto-indent applies to both `{{ ... }}` and `$$ ... \n` interpolations:
-//!
-//! ```
-//! #[derive(boilerplate::Boilerplate)]
-//! #[boilerplate(text = "<body>
-//!     $$ self.0
-//! </body>")]
-//! struct Page(&'static str);
-//!
-//! assert_eq!(
-//!   Page("line one\nline two").to_string(),
-//!   "<body>
-//!     line one
-//!     line two
-//! </body>",
-//! );
-//! ```
-//!
-//! When the `reload` feature is enabled, hot-reloading a template does not
-//! change the indentation applied to interpolations.
-//!
-//! When an interpolation is followed by `\n`, a single trailing `\n` is
-//! stripped from the value, so that a value that already ends with a newline
-//! does not produce a blank line:
-//!
-//! ```
-//! #[derive(boilerplate::Boilerplate)]
-//! #[boilerplate(text = "<body>
-//!     {{ self.0 }}
-//! </body>")]
-//! struct Page(&'static str);
-//!
-//! assert_eq!(
-//!   Page("line one\nline two\n").to_string(),
-//!   "<body>
-//!     line one
-//!     line two
-//! </body>",
-//! );
-//! ```
-//!
 //! ### Generics
 //!
 //! Context types may have lifetimes and generics;
@@ -717,9 +654,7 @@
 //! struct OuterHtml<T: Page>(T);
 //!
 //! #[derive(boilerplate::Boilerplate)]
-//! #[boilerplate(text = "<div>
-//!   {{ self.0 }}
-//! </div>")]
+//! #[boilerplate(text = "<div>{{ self.0 }}</div>")]
 //! struct InnerHtml(&'static str);
 //!
 //! impl Page for InnerHtml {
@@ -736,9 +671,7 @@
 //!     <title>awesome page</title>
 //!   </head>
 //!   <body>
-//!     <div>
-//!       awesome content
-//!     </div>
+//!     <div>awesome content</div>
 //!   </body>
 //! </html>
 //! ");
@@ -761,13 +694,16 @@ pub use {
 };
 
 #[doc(hidden)]
-pub use self::{format::Format, formatter::Formatter};
+pub use self::escape::Escape;
 
-use core::fmt::{self, Display, Write};
+use {
+  self::escaper::Escaper,
+  core::fmt::{self, Display, Write},
+};
 
 mod boilerplate;
-mod format;
-mod formatter;
+mod escape;
+mod escaper;
 mod trusted;
 
 #[cfg(feature = "reload")]
