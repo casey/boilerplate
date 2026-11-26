@@ -27,17 +27,13 @@ pub fn boilerplate(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     {
       extern crate alloc;
 
-      use ::core::fmt::Write;
-
       let boilerplate_text = &[ #(#text),* ];
-      let mut boilerplate_output = alloc::string::String::new();
+      let mut boilerplate_string = alloc::string::String::new();
+      let boilerplate_output = &mut boilerplate_string;
 
-      {
-        let boilerplate_output = &mut boilerplate_output;
-        #body
-      }
+      #body
 
-      boilerplate_output
+      boilerplate_string
     }
   }
   .into()
